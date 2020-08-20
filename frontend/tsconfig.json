@@ -8,13 +8,28 @@
     "jsx": "react",
     "allowJs": true,
     "experimentalDecorators": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "noUnusedLocals": true,
-    "types": ["jest"],
+    "types": [
+      "jest"
+    ],
     "paths": {
-      "protractor": ["integration-tests/protractor.d.ts"]
+      "protractor": [
+        "integration-tests/protractor.d.ts"
+      ]
     }
   },
-  "exclude": [".yarn", "**/node_modules", "public/dist"],
-  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.json"]
+  "exclude": [
+    ".yarn",
+    "**/node_modules",
+    "public/dist"
+  ],
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.json"
+  ]
 }

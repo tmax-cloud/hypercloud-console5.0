@@ -4,9 +4,9 @@ import * as path from 'path';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import * as VirtualModulesPlugin from 'webpack-virtual-modules';
+// import * as VirtualModulesPlugin from 'webpack-virtual-modules';
 
-import { resolvePluginPackages, getActivePluginsModule } from '@console/plugin-sdk/src/codegen';
+// import { resolvePluginPackages, getActivePluginsModule } from '@console/plugin-sdk/src/codegen';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import { CircularDependencyPreset } from './webpack.circular-deps';
 
@@ -43,7 +43,7 @@ const config: Configuration = {
     inline: HOT_RELOAD !== 'false',
   },
   resolve: {
-    extensions: ['.glsl', '.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.glsl', '.ts', '.tsx', '.js', '.jsx', '.json'],
   },
   node: {
     fs: 'empty',
@@ -114,7 +114,8 @@ const config: Configuration = {
       },
       {
         test: /\.css$/,
-        include: path.resolve(__dirname, './node_modules/monaco-editor'),
+        // include: path.resolve(__dirname, './node_modules/monaco-editor'),
+        include: /node_modules\/monaco-editor\/.*/,
         use: ['style-loader', 'css-loader'],
       },
       {
@@ -157,6 +158,7 @@ const config: Configuration = {
     }),
     new MonacoWebpackPlugin({
       languages: ['yaml'],
+      features: ['!gotoSymbol']
     }),
     new webpack.IgnorePlugin(/prettier/),
     extractCSS,
@@ -186,10 +188,10 @@ if (NODE_ENV === 'production') {
 }
 
 /* Console plugin support */
-config.plugins.push(
-  new VirtualModulesPlugin({
-    'node_modules/@console/active-plugins.js': getActivePluginsModule(resolvePluginPackages()),
-  }),
-);
+// config.plugins.push(
+//   new VirtualModulesPlugin({
+//     'node_modules/@console/active-plugins.js': getActivePluginsModule(resolvePluginPackages()),
+//   }),
+// );
 
 export default config;

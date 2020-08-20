@@ -102,7 +102,7 @@ const CloudShellExec: React.FC<CloudShellExecProps> = ({
             const errMsg = `This container doesn't have a /bin/sh shell. Try specifying your command in a terminal with:\r\n\r\n ${usedClient} -n ${namespace} exec ${podname} -ti <command>`;
             currentTerminal && currentTerminal.reset();
             currentTerminal && currentTerminal.onConnectionClosed(errMsg);
-            websocket.destroy();
+            websocket.destroy(true);
             previous = '';
             return;
           }
@@ -125,13 +125,13 @@ const CloudShellExec: React.FC<CloudShellExecProps> = ({
         const currentTerminal = terminal.current;
         const error = evt.reason || 'The terminal connection has closed.';
         currentTerminal && currentTerminal.onConnectionClosed(error);
-        websocket.destroy();
+        websocket.destroy(true);
         if (!unmounted) setWsError(error);
       }) // eslint-disable-next-line no-console
       .onerror((evt) => console.error(`WS error?! ${evt}`));
 
     if (ws.current !== websocket) {
-      ws.current && ws.current.destroy();
+      ws.current && ws.current.destroy(true);
       ws.current = websocket;
       const currentTerminal = terminal.current;
       currentTerminal && currentTerminal.onConnectionClosed(`connecting to ${container}`);
@@ -139,7 +139,7 @@ const CloudShellExec: React.FC<CloudShellExecProps> = ({
 
     return () => {
       unmounted = true;
-      websocket.destroy();
+      websocket.destroy(true);
     };
   }, [tick, container, flags, impersonate, namespace, podname, shcommand]);
 

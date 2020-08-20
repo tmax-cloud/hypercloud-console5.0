@@ -20,7 +20,8 @@ const onResize = (rows, cols) => {
 };
 
 interface WebSocket {
-  destroy(): void;
+  // destroy(): void;
+  destroy(timedout: any): void;
   send(data: any): void;
 }
 
@@ -43,7 +44,7 @@ export const SerialConsoleConnector: React.FC<SerialConsoleConnectorProps> = (pr
         info('Serial console connection closed, reason: ', event.reason);
       }
 
-      ws && ws.destroy && ws.destroy();
+      ws && ws.destroy && ws.destroy(true);
 
       setPassKeys(false);
       setStatus(DISCONNECTED); // will close the terminal window
@@ -76,7 +77,7 @@ export const SerialConsoleConnector: React.FC<SerialConsoleConnectorProps> = (pr
     const { vmi, host, path } = props;
 
     if (ws) {
-      ws.destroy();
+      ws.destroy(true);
       setStatus(LOADING);
     }
 

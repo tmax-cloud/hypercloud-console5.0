@@ -106,7 +106,7 @@ const Logs: React.FC<LogsProps> = ({
     }
     return () => {
       loaded = true;
-      ws && ws.destroy();
+      ws && ws.destroy(true);
     };
   }, [kind, name, resName, resNamespace]);
 
