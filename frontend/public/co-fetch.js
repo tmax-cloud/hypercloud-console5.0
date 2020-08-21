@@ -109,6 +109,13 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
     delete allOptions.headers['X-CSRFToken'];
   }
 
+  if (url.indexOf('nameSpace') < 0 && url.indexOf('nameSpaceClaim') < 0) {
+    allOptions.headers.Authorization = 'Bearer ' + sessionStorage.getItem('accessToken');
+  } else {
+    /* nameSpace 서비스에는 Bearer 제외하고 token 보내야함.*/
+    allOptions.headers.Authorization = sessionStorage.getItem('accessToken');
+  }
+
   const fetchPromise = fetch(url, allOptions).then((response) => validateStatus(response, url));
 
   // return fetch promise directly if timeout <= 0

@@ -22,6 +22,7 @@ import CloudShell from '@console/app/src/components/cloud-shell/CloudShell';
 import CloudShellTab from '@console/app/src/components/cloud-shell/CloudShellTab';
 import '../vendor.scss';
 import '../style.scss';
+import Keycloak from 'keycloak-js';
 
 //PF4 Imports
 import { Page } from '@patternfly/react-core';
@@ -156,24 +157,26 @@ class App extends React.PureComponent {
 
 const startDiscovery = () => store.dispatch(watchAPIServices());
 
-// Load cached API resources from localStorage to speed up page load.
-getCachedResources()
-  .then((resources) => {
-    if (resources) {
-      store.dispatch(receivedResources(resources));
-    }
-    // Still perform discovery to refresh the cache.
-    startDiscovery();
-  })
-  .catch(startDiscovery);
+const startApp = () => {
+  // Load cached API resources from localStorage to speed up page load.
+  getCachedResources()
+    .then((resources) => {
+      if (resources) {
+        store.dispatch(receivedResources(resources));
+      }
+      // Still perform discovery to refresh the cache.
+      startDiscovery();
+    })
+    .catch(startDiscovery);
 
-store.dispatch(detectFeatures());
+  store.dispatch(detectFeatures());
 
-// Global timer to ensure all <Timestamp> components update in sync
-setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
+  // Global timer to ensure all <Timestamp> components update in sync
+  setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
 
-// Fetch swagger on load if it's stale.
-fetchSwagger();
+  // Fetch swagger on load if it's stale.
+  fetchSwagger();
+};
 
 // Used by GUI tests to check for unhandled exceptions
 window.windowError = false;
@@ -211,14 +214,63 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-render(
-  <Provider store={store}>
-    <Router history={history} basename={window.SERVER_FLAGS.basePath}>
-      <Switch>
-        <Route path="/terminal" component={CloudShellTab} />
-        <Route path="/" component={App} />
-      </Switch>
-    </Router>
-  </Provider>,
-  document.getElementById('app'),
-);
+//keycloak init options
+const keycloak = new Keycloak({
+  realm: 'tmax',
+  url: 'https://172.22.6.11/auth',
+  clientId: 'hypercloud4',
+});
+
+keycloak
+  .init()
+  .then((auth) => {
+    if (!auth) {
+      keycloak.login({ redirectUri: document.location.origin });
+      return;
+    }
+
+    sessionStorage.setItem('accessToken', keycloak.idToken);
+
+    startApp();
+
+    render(
+      <Provider store={store}>
+        <Router history={history} basename={window.SERVER_FLAGS.basePath}>
+          <Switch>
+            <Route path="/terminal" component={CloudShellTab} />
+            <Route path="/" component={App} />
+          </Switch>
+        </Router>
+      </Provider>,
+      document.getElementById('app'),
+    );
+  })
+  .catch(function() {
+    render(<div>Failed to initialize Keycloak</div>, document.getElementById('app'));
+  });
+
+keycloak.onReady = function() {
+  console.log('[keycloak] onReady');
+};
+keycloak.onAuthSuccess = function() {
+  console.log('[keycloak] onAuthSuccess');
+};
+keycloak.onAuthError = function() {
+  console.log('[keycloak] onAuthError');
+};
+keycloak.onAuthRefreshSuccess = function() {
+  console.log('[keycloak] onAuthRefreshSuccess');
+};
+keycloak.onAuthRefreshError = function() {
+  console.log('[keycloak] onAuthRefreshError');
+};
+keycloak.onAuthLogout = function() {
+  console.log('[keycloak] onAuthLogout');
+  keycloak.logout();
+};
+keycloak.onTokenExpired = function() {
+  console.log('[keycloak] onTokenExpired ');
+  keycloak.logout();
+};
+
+console.log('keycloak', keycloak);
