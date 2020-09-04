@@ -35,6 +35,7 @@ type SeparatorProps = {
 // Wrap `NavItemSeparator` so we can use `required` without prop type errors.
 const Separator: React.FC<SeparatorProps> = ({ name }) => <NavItemSeparator name={name} />;
 
+const testStartsWith = ['test'];
 const searchStartsWith = ['search'];
 const provisionedServicesStartsWith = ['serviceinstances', 'servicebindings'];
 const brokerManagementStartsWith = ['clusterservicebrokers', 'clusterserviceclasses'];
@@ -101,6 +102,7 @@ const AdminNav = () => (
       <HrefLink href="/search" name="Search" startsWith={searchStartsWith} />
       <HrefLink href="/api-explorer" name="Explore" startsWith={apiExplorerStartsWith} />
       <ResourceNSLink resource="events" name="Events" />
+      <HrefLink href="/test" name="Test" startsWith={testStartsWith} />
     </NavSection>
 
     <NavSection title="Operators" />
