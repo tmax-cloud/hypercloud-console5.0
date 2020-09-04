@@ -1,3 +1,4 @@
+import * as React from 'react';
 export const Section = ({ label, children, isRequired }) => {
     return (
         <div className={'row form-group ' + (isRequired ? 'required' : '')}>
