@@ -26,13 +26,13 @@ const TestPage_ = (props) => {
 
             <div>
                 <h2>Patternfly Component - Alert</h2>
-                <React.Fragment>
-                    <Alert title="Default alert title" />
-                    <Alert variant="info" title="Info alert title" />
-                    <Alert variant="success" title="Success alert title" />
-                    <Alert variant="warning" title="Warning alert title" />
-                    <Alert variant="danger" title="Danger alert title" />
-                </React.Fragment>
+
+                <Alert title="Default alert title" />
+                <Alert variant="info" title="Info alert title" />
+                <Alert variant="success" title="Success alert title" />
+                <Alert variant="warning" title="Warning alert title" />
+                <Alert variant="danger" title="Danger alert title" />
+
             </div>
 
             <div>
