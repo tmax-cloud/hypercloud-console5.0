@@ -14,6 +14,7 @@ import {
 } from './utils';
 
 
+
 const TestPage_ = (props) => {
 
     return (
@@ -49,7 +50,4 @@ const TestPage_ = (props) => {
     );
 };
 
-
-
-export const TestPage = connect(mapStateToProps, mapDispatchToProps)(withStartGuide(TestPage_));
-
+export const TestPage = withStartGuide(TestPage_);
