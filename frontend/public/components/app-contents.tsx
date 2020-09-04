@@ -8,6 +8,7 @@ import { connectToFlags, flagPending, FlagsObject } from '../reducers/features';
 import { GlobalNotifications } from './global-notifications';
 import { NamespaceBar } from './namespace';
 import { SearchPage } from './search';
+import { TestPage } from './test';
 import { ResourceDetailsPage, ResourceListPage } from './resource-list';
 import { AsyncComponent, LoadingBox } from './utils';
 import { namespacedPrefixes } from './utils/link';
@@ -64,13 +65,13 @@ const DefaultPage_: React.FC<DefaultPageProps> = ({ flags, activePerspective }) 
         .properties.getLandingPageURL(flags)}
     />
   ) : (
-    <Redirect
-      to={plugins.registry
-        .getPerspectives()
-        .find((p) => p.properties.id === activePerspective)
-        .properties.getK8sLandingPageURL(flags)}
-    />
-  );
+      <Redirect
+        to={plugins.registry
+          .getPerspectives()
+          .find((p) => p.properties.id === activePerspective)
+          .properties.getK8sLandingPageURL(flags)}
+      />
+    );
 };
 
 const DefaultPage = connect((state: RootState) => ({
@@ -261,7 +262,7 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective, flags }) 
               <Redirect
                 to={`/k8s/ns/${match.params.ns}/${referenceForModel(AlertmanagerModel)}/${
                   match.params.name
-                }`}
+                  }`}
               />
             )}
           />
@@ -287,7 +288,7 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective, flags }) 
           <Route path="/search/all-namespaces" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search/ns/:ns" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search" exact component={NamespaceRedirect} />
-
+          <Route path="/test" exact component={TestPage} />
           <LazyRoute
             path="/k8s/all-namespaces/import"
             exact
