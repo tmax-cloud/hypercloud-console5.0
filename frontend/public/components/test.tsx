@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import { connect, Dispatch } from 'react-redux';
 import { Alert } from '@patternfly/react-core';
 import { Section } from './test-section';
-import SimpleForm from "./test-form";
+// import SimpleForm from "./test-form";
 import { RootState } from '../redux';
 import { getActivePerspective, getPinnedResources } from '../reducers/ui';
 import { setPinnedResources } from '../actions/ui';
