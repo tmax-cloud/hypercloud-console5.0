@@ -6,12 +6,7 @@ import {
     Accordion,
     AccordionContent,
     AccordionItem,
-    AccordionToggle,
-    DataToolbar,
-    DataToolbarChip,
-    DataToolbarContent,
-    DataToolbarFilter,
-    DataToolbarItem,
+    AccordionToggle
 } from '@patternfly/react-core';
 import { PlusCircleIcon, MinusCircleIcon } from '@patternfly/react-icons';
 import { getBadgeFromType } from '@console/shared';
@@ -21,21 +16,17 @@ import { setPinnedResources } from '../actions/ui';
 import { connectToModel } from '../kinds';
 import { DefaultPage } from './default-resource';
 import { requirementFromString } from '../module/k8s/selector-requirement';
-import { ResourceListDropdown } from './resource-dropdown';
 import { resourceListPages } from './resource-pages';
 import { withStartGuide } from './start-guide';
 import { split, selectorFromString } from '../module/k8s/selector';
-import { kindForReference, modelFor, referenceForModel } from '../module/k8s';
+import { modelFor, referenceForModel } from '../module/k8s';
 import {
     LoadingBox,
     MsgBox,
     PageHeading,
-    ResourceIcon,
-    setQueryArgument,
     AsyncComponent,
 } from './utils';
 import confirmNavUnpinModal from './nav/confirmNavUnpinModal';
-import { SearchFilterDropdown, searchFilterValues } from './search-filter-dropdown';
 
 const ResourceList = connectToModel(({ kindObj, mock, namespace, selector, nameFilter }) => {
     if (!kindObj) {
@@ -77,7 +68,6 @@ const TestPage_: React.FC<SearchProps & StateProps & DispatchProps> = (props) =>
     const [selectedItems, setSelectedItems] = React.useState(new Set<string>([]));
     const [collapsedKinds, setCollapsedKinds] = React.useState(new Set<string>([]));
     const [labelFilter, setLabelFilter] = React.useState([]);
-    const [labelFilterInput, setLabelFilterInput] = React.useState('');
     const [typeaheadNameFilter, setTypeaheadNameFilter] = React.useState('');
     const { namespace, noProjectsAvailable, pinnedResources } = props;
 
@@ -102,41 +92,6 @@ const TestPage_: React.FC<SearchProps & StateProps & DispatchProps> = (props) =>
         setTypeaheadNameFilter(name || '');
     }, []);
 
-    const updateSelectedItems = (selection: string) => {
-        const updateItems = selectedItems;
-        updateItems.has(selection) ? updateItems.delete(selection) : updateItems.add(selection);
-        setSelectedItems(updateItems);
-        setQueryArgument('kind', [...updateItems].join(','));
-    };
-
-    const updateNewItems = (filter: string, { key }: DataToolbarChip) => {
-        const updateItems = selectedItems;
-        updateItems.has(key) ? updateItems.delete(key) : updateItems.add(key);
-        setSelectedItems(updateItems);
-        setQueryArgument('kind', [...updateItems].join(','));
-    };
-
-    const clearSelectedItems = () => {
-        setSelectedItems(new Set([]));
-        setQueryArgument('kind', '');
-    };
-
-    const clearNameFilter = () => {
-        setTypeaheadNameFilter('');
-        setQueryArgument('name', '');
-    };
-
-    const clearLabelFilter = () => {
-        setLabelFilter([]);
-        setQueryArgument('q', '');
-    };
-
-    const clearAll = () => {
-        clearSelectedItems();
-        clearNameFilter();
-        clearLabelFilter();
-    };
-
     const pinToggle = (e: React.MouseEvent<HTMLElement>, resource: string) => {
         e.preventDefault();
         e.stopPropagation();
@@ -153,33 +108,6 @@ const TestPage_: React.FC<SearchProps & StateProps & DispatchProps> = (props) =>
         const newCollasped = new Set(collapsedKinds);
         newCollasped.has(kindView) ? newCollasped.delete(kindView) : newCollasped.add(kindView);
         setCollapsedKinds(newCollasped);
-    };
-
-    const updateNameFilter = (value: string) => {
-        setTypeaheadNameFilter(value);
-        setQueryArgument('name', value);
-    };
-
-    const updateLabelFilter = (value: string, endOfString: boolean) => {
-        setLabelFilterInput(value);
-        if (requirementFromString(value) !== undefined && endOfString) {
-            const updatedLabels = _.uniq([...labelFilter, value]);
-            setLabelFilter(updatedLabels);
-            setQueryArgument('q', updatedLabels.join(','));
-            setLabelFilterInput('');
-        }
-    };
-
-    const updateSearchFilter = (type: string, value: string, endOfString: boolean) => {
-        type === searchFilterValues.Label
-            ? updateLabelFilter(value, endOfString)
-            : updateNameFilter(value);
-    };
-
-    const removeLabelFilter = (filter: string, value: string) => {
-        const newLabels = labelFilter.filter((keepItem: string) => keepItem !== value);
-        setLabelFilter(newLabels);
-        setQueryArgument('q', newLabels.join(','));
     };
 
     const getToggleText = (item: string) => {
