@@ -13,6 +13,7 @@ import {
   detailsPage,
   LabelList,
   navFactory,
+  NodesComponent,
   ResourceKebab,
   ResourceLink,
   ResourceSummary,
@@ -103,6 +104,9 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
   );
 };
 
+const ClusterNodes: React.FC<ClusterNodesProps> = (props) => (
+  <NodesComponent {...props} customData={{ showNodes: true }} />
+);
 
 export const ClusterDetailsList: React.FC<ClusterDetailsListProps> = ({ cl }) => (
   <dl className="co-m-pane__details">
@@ -126,7 +130,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => (
 );
 
 
-const { details, editYaml, events } = navFactory;
+const { details, nodes, editYaml, events } = navFactory;
 export const Clusters: React.FC = (props) => (
   <Table
     {...props}
@@ -149,6 +153,7 @@ export const ClustersDetailsPage: React.FC<ClustersDetailsPageProps> = (props) =
     pages={[
       details(detailsPage(ClusterDetails)),
       editYaml(),
+      nodes(ClusterNodes),
       events(ResourceEventStream),
     ]}
   />
@@ -173,3 +178,6 @@ type ClustersDetailsPageProps = {
   match: any;
 };
 
+type ClusterNodesProps = {
+  obj: K8sResourceKind;
+};
