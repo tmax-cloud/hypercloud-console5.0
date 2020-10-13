@@ -1,5 +1,19 @@
 import { K8sKind } from '../module/k8s';
 
+// hypercloud Multicluster
+export const ClusterModel: K8sKind = {
+  kind: 'Cluster',
+  namespaced: true,
+  label: 'Cluster',
+  plural: 'clusters',
+  apiVersion: 'v1alpha3',
+  abbr: 'C',
+  apiGroup: 'cluster.x-k8s.io',
+  labelPlural: 'Clusters',
+  id: 'cluster',
+  crd: false,
+};
+
 export const PrometheusModel: K8sKind = {
   kind: 'Prometheus',
   label: 'Prometheus',

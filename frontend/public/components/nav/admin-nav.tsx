@@ -103,6 +103,10 @@ const AdminNav = () => (
       <ResourceNSLink resource="events" name="Events" />
     </NavSection>
 
+    <NavSection title="Multicluster">
+      <ResourceNSLink resource="clusters" name="Clusters" />
+    </NavSection>
+
     <NavSection title="Operators" />
 
     <NavSection title="Workloads">
