@@ -1,4 +1,5 @@
 import { K8sKind } from '../module/k8s';
+export * from './hypercloud/index';
 
 // hypercloud Multicluster
 export const ClusterModel: K8sKind = {
