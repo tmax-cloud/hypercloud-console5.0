@@ -15,21 +15,21 @@ import {
 export const WithCommonForm = (SubForm, params, modal?: boolean) => {
   const FormComponent: React.FC<CommonFormProps_> = props => {
     const methods = useForm();
+
     const kind = pluralToKind(params.plural);
     const title = `${props.titleVerb} ${params.type === 'form' ? '' : params.type} ${kind}`;
 
     const [inProgress] = React.useState(false); // onSubmit이나 나중에 Error관련 메서드에서 inProgress를 false로 변경해줘야함.
 
-    const onSubmit = methods.handleSubmit((data) => {
+    const onClick = methods.handleSubmit((data) => {
       let inDo = _.defaultsDeep(props.fixed, data);
       inDo = props.onSubmitCallback(inDo);
-      console.log(methods.watch());
       k8sCreate(modelFor(kind), inDo)
       history.push(resourceObjPath(inDo, referenceFor(modelFor(kind))));
     })
     return (
       <FormProvider {...methods} >
-        <div className="co-m-pane__body" onSubmit={onSubmit}>
+        <div className="co-m-pane__body">
           <Helmet>
             <title>{title}</title>
           </Helmet>
@@ -40,7 +40,7 @@ export const WithCommonForm = (SubForm, params, modal?: boolean) => {
             <fieldset>
               <div className="form-group">
                 <label className="control-label co-required" htmlFor="name">Name</label>
-                <input className="pf-c-form-control" name='metadata.name' ref={methods.register} />
+                <input className="pf-c-form-control" id='name' name='metadata.name' ref={methods.register} />
               </div>
             </fieldset>
             <SubForm isCreate={props.isCreate} />
@@ -50,7 +50,7 @@ export const WithCommonForm = (SubForm, params, modal?: boolean) => {
                   type="button"
                   variant="primary"
                   id="save-changes"
-                  onClick={onSubmit}
+                  onClick={onClick}
                 >
                   {props.saveButtonText || 'Create'}
                 </Button>
