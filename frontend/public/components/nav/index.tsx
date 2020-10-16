@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Nav, NavProps, NavList, PageSidebar } from '@patternfly/react-core';
-import PerspectiveNav from './perspective-nav';
-import NavHeader from './nav-header';
+// import PerspectiveNav from './perspective-nav';
+// import NavHeader from './nav-header';
+import MulticlusterNav from '../hypercloud/nav/multicluster-nav'
 
 type NavigationProps = {
   onNavSelect: NavProps['onSelect'];
@@ -14,9 +15,9 @@ export const Navigation: React.FC<NavigationProps> = React.memo(
     <PageSidebar
       nav={
         <Nav aria-label="Nav" onSelect={onNavSelect} theme="dark">
-          <NavHeader onPerspectiveSelected={onPerspectiveSelected} />
+          {/* <NavHeader onPerspectiveSelected={onPerspectiveSelected} /> */}
           <NavList>
-            <PerspectiveNav />
+            <MulticlusterNav />
           </NavList>
         </Nav>
       }
