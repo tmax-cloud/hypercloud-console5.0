@@ -1,16 +1,8 @@
 import * as React from 'react';
-
-import { Status, PodRingController } from '@console/shared';
-import PodRingSet from '@console/shared/src/components/pod/PodRingSet';
-import { AddHealthChecks, EditHealthChecks } from '@console/app/src/actions/modify-health-checks';
 import { ApprovalModel } from '../../models';
-import { ApprovalKind, K8sKind, K8sResourceKindReference } from '../../module/k8s';
-import { configureUpdateStrategyModal, errorModal } from '../modals';
-import { Conditions } from '../conditions';
-import { ResourceEventStream } from '../events';
-import { VolumesTable } from '../volumes-table';
+import { ApprovalKind,  K8sResourceKindReference } from '../../module/k8s';
 import { DetailsPage, ListPage, Table, RowFunction } from '../factory';
-import { AsyncComponent, DetailsItem, Kebab, KebabAction, ContainerTable, navFactory, pluralize, ResourceSummary, SectionHeading, togglePaused, WorkloadPausedAlert, LoadingInline } from '../utils';
+import {  Kebab,  navFactory, ResourceSummary, SectionHeading, } from '../utils';
 import { WorkloadTableRow, WorkloadTableHeader } from '../workload-table';
 
 const approvalsReference: K8sResourceKindReference = 'Approval';
@@ -78,22 +70,7 @@ const ApprovalDetails: React.FC<ApprovalDetailsProps> = ({ obj: approval }) => {
 };
 ApprovalDetails.displayName = 'ApprovalDetails';
 
-const EnvironmentPage = props => <AsyncComponent loader={() => import('../environment.jsx').then(c => c.EnvironmentPage)} {...props} />;
-
-const envPath = ['spec', 'template', 'spec', 'containers'];
-const environmentComponent = props => <EnvironmentPage obj={props.obj} rawEnvData={props.obj.spec.template.spec} envPath={envPath} readOnly={false} />;
-
-// const ReplicaSetsTab: React.FC<ReplicaSetsTabProps> = ({ obj }) => {
-//   const {
-//     metadata: { namespace },
-//     spec: { selector },
-//   } = obj;
-
-//   // Hide the create button to avoid confusion when showing replica sets for an object.
-//   return <ReplicaSetsPage showTitle={false} namespace={namespace} selector={selector} canCreate={false} />;
-// };
-
-const { details, editYaml, pods, envEditor, events } = navFactory;
+const { details, editYaml,} = navFactory;
 export const ApprovalsDetailsPage: React.FC<ApprovalsDetailsPageProps> = props => (
   <DetailsPage
     {...props}
