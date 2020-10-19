@@ -2,13 +2,13 @@ import * as React from 'react';
 // import { NavItemSeparator } from '@patternfly/react-core';
 // import { referenceForModel } from '../../module/k8s';
 // import { ExternalLink, HrefLink, ResourceNSLink, ResourceClusterLink } from './items';
-import { ResourceNSLink } from '../../nav/items';
+import { ResourceNSLink, ResourceClusterLink } from '../../nav/items';
 import { NavSection } from '../../nav/section';
 
 const MulticlusterNav = () => (
   <>
-    <ResourceNSLink resource="clusters" name="Clusters" />
-    <ResourceNSLink resource="clustergroups" name="Cluster Groups" />
+    <ResourceClusterLink resource="hyperclusterresources" name="Clusters" />
+    <ResourceClusterLink resource="clustergroups" name="Cluster Groups" />
     <NavSection title="Federated Resources">
       <h3 style={{ paddingLeft: '28px' }}>Workloads</h3>
       <ResourceNSLink resource="pods" name="Pods" />

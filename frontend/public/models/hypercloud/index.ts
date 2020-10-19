@@ -12,3 +12,15 @@ export const ApprovalModel: K8sKind = {
   id: 'approval',
   namespaced: true,
 };
+
+export const ClusterModel: K8sKind = {
+  label: 'Cluster',
+  labelPlural: 'Clusters',
+  apiVersion: 'v1',
+  apiGroup: 'hyper.multi.tmax.io',
+  plural: 'hyperclusterresources',
+  abbr: 'C',
+  kind: 'HyperClusterResources',
+  id: 'cluster',
+  namespaced: false,
+};

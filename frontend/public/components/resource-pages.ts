@@ -13,7 +13,6 @@ import {
   ClusterServicePlanModel,
   ClusterVersionModel,
   ConfigMapModel,
-  ClusterModel,
   ContainerModel,
   CronJobModel,
   ClusterResourceQuotaModel,
@@ -81,11 +80,6 @@ type ResourceMapKey = GroupVersionKind | string;
 type ResourceMapValue = () => Promise<React.ComponentType<any>>;
 
 export const baseDetailsPages = ImmutableMap<ResourceMapKey, ResourceMapValue>()
-  .set(referenceForModel(ClusterModel), () =>
-    import('./cluster' /* webpackChunkName: "cluster" */).then(
-      (m) => m.ClustersDetailsPage,
-    ),
-  )
   .set(referenceForModel(ClusterServiceClassModel), () =>
     import('./cluster-service-class' /* webpackChunkName: "cluster-service-class" */).then(
       (m) => m.ClusterServiceClassDetailsPage,
@@ -335,11 +329,6 @@ export const resourceDetailsPages = ImmutableMap<ResourceMapKey, ResourceMapValu
   });
 
 export const baseListPages = ImmutableMap<ResourceMapKey, ResourceMapValue>()
-  .set(referenceForModel(ClusterModel), () =>
-    import('./cluster' /* webpackChunkName: "cluster-service-class" */).then(
-      (m) => m.ClustersPage,
-    ),
-  )
   .set(referenceForModel(ClusterServiceClassModel), () =>
     import('./cluster-service-class' /* webpackChunkName: "cluster-service-class" */).then(
       (m) => m.ClusterServiceClassPage,

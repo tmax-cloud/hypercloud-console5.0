@@ -3,25 +3,26 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import { sortable } from '@patternfly/react-table';
 
-import { K8sResourceKind } from '../module/k8s';
-import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from './factory';
+import { K8sResourceKind } from '../../module/k8s';
+import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from './../factory';
 import {
   // AsyncComponent,
   // DetailsItem,
   Kebab,
   KebabAction,
   detailsPage,
-  LabelList,
+  // LabelList,
   navFactory,
   NodesComponent,
   ResourceKebab,
   ResourceLink,
   ResourceSummary,
   SectionHeading,
-  Selector,
-} from './utils';
-import { ResourceEventStream } from './events';
-import { ClusterModel } from '../models';
+  // Selector,
+} from '../utils';
+import { ResourceEventStream } from './../events';
+import { ClusterModel } from '../../models';
+// import { SpecCapability } from '@console/operator-lifecycle-manager/src/components/descriptors/types';
 
 export const menuActions: KebabAction[] = [
   ...Kebab.getExtensionsActionsForKind(ClusterModel),
@@ -36,6 +37,7 @@ const tableColumnClasses = [
   classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'),
   classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
   classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
+  classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
   Kebab.columnClass,
 ];
 
@@ -48,26 +50,38 @@ const ClusterTableHeader = () => {
       props: { className: tableColumnClasses[0] },
     },
     {
-      title: 'Namespace',
-      sortField: 'metadata.namespace',
+      title: 'Provider',
+      sortField: 'spec.provider',
       transforms: [sortable],
       props: { className: tableColumnClasses[1] },
     },
     {
-      title: 'Labels',
-      sortField: 'metadata.labels',
+      title: 'Type',
+      sortField: 'spec.provider',
+      transforms: [sortable],
+      props: { className: tableColumnClasses[2] },
+    },
+    {
+      title: 'Status',
+      sortField: 'status.ready',
       transforms: [sortable],
       props: { className: tableColumnClasses[3] },
     },
     {
-      title: 'Pod Selector',
-      sortField: 'spec.selector',
+      title: 'Version',
+      sortField: 'spec.version',
       transforms: [sortable],
       props: { className: tableColumnClasses[4] },
     },
     {
-      title: '',
+      title: 'Node',
+      sortField: 'spec.masterNum',
+      transforms: [sortable],
       props: { className: tableColumnClasses[5] },
+    },
+    {
+      title: '',
+      props: { className: tableColumnClasses[6] },
     },
   ];
 };
@@ -84,20 +98,22 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
           title={cluster.metadata.uid}
         />
       </TableData>
-      <TableData className={classNames(tableColumnClasses[1], 'co-break-word')}>
-        <ResourceLink
-          kind="Namespace"
-          name={cluster.metadata.namespace}
-          title={cluster.metadata.namespace}
-        />
+      <TableData className={classNames(tableColumnClasses[1])}>
+        {cluster.spec.provider}
+      </TableData>
+      <TableData className={classNames(tableColumnClasses[2])}>
+        {cluster.spec.provider ? 'Create' : 'Enroll'}
       </TableData>
       <TableData className={tableColumnClasses[3]}>
-        <LabelList kind={kind} labels={cluster.metadata.labels} />
+        {cluster.status?.ready}
       </TableData>
       <TableData className={tableColumnClasses[4]}>
-        <Selector selector={cluster.spec.selector} namespace={cluster.metadata.namespace} />
+        {cluster.spec.version}
       </TableData>
       <TableData className={tableColumnClasses[5]}>
+        {cluster.spec.masterNum}
+      </TableData>
+      <TableData className={tableColumnClasses[6]}>
         <ResourceKebab actions={menuActions} kind={kind} resource={cluster} />
       </TableData>
     </TableRow>
