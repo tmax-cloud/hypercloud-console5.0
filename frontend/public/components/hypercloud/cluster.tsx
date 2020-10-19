@@ -4,7 +4,7 @@ import * as classNames from 'classnames';
 import { sortable } from '@patternfly/react-table';
 
 import { K8sResourceKind } from '../../module/k8s';
-import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from './../factory';
+import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from '../factory';
 import {
   // AsyncComponent,
   // DetailsItem,
@@ -20,16 +20,16 @@ import {
   SectionHeading,
   // Selector,
 } from '../utils';
-import { ResourceEventStream } from './../events';
-import { ClusterModel } from '../../models';
+import { ResourceEventStream } from '../events';
+import { HyperClusterResourceModel } from '../../models';
 // import { SpecCapability } from '@console/operator-lifecycle-manager/src/components/descriptors/types';
 
 export const menuActions: KebabAction[] = [
-  ...Kebab.getExtensionsActionsForKind(ClusterModel),
+  ...Kebab.getExtensionsActionsForKind(HyperClusterResourceModel),
   ...Kebab.factory.common,
 ];
 
-const kind = 'Cluster';
+const kind = HyperClusterResourceModel.kind;
 
 const tableColumnClasses = [
   '',
@@ -111,7 +111,8 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
         {cluster.spec.version}
       </TableData>
       <TableData className={tableColumnClasses[5]}>
-        {cluster.spec.masterNum}
+        {ClusterNodesInfo(cluster)}
+        {/* {`M: ${cluster.status?.masterRun} / ${cluster.spec?.masterNum}, W: ${cluster.status?.workerRun} / ${cluster.spec?.workerNum}`} */}
       </TableData>
       <TableData className={tableColumnClasses[6]}>
         <ResourceKebab actions={menuActions} kind={kind} resource={cluster} />
@@ -119,6 +120,14 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
     </TableRow>
   );
 };
+
+const ClusterNodesInfo = (cluster) => {
+  if(cluster.status?.masterRun && cluster.status?.workerRun) {
+    return `M: ${cluster.status?.masterRun} / ${cluster.spec?.masterNum}, W: ${cluster.status?.workerRun} / ${cluster.spec?.workerNum}`;
+  } else {
+    return '';
+  }
+}
 
 const ClusterNodes: React.FC<ClusterNodesProps> = (props) => (
   <NodesComponent {...props} customData={{ showNodes: true }} />
