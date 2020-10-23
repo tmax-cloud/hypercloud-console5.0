@@ -24,22 +24,11 @@ import { ResourceEventStream } from '../events';
 import { HyperClusterResourceModel } from '../../models';
 // import { SpecCapability } from '@console/operator-lifecycle-manager/src/components/descriptors/types';
 
-export const menuActions: KebabAction[] = [
-  ...Kebab.getExtensionsActionsForKind(HyperClusterResourceModel),
-  ...Kebab.factory.common,
-];
+export const menuActions: KebabAction[] = [...Kebab.getExtensionsActionsForKind(HyperClusterResourceModel), ...Kebab.factory.common];
 
 const kind = HyperClusterResourceModel.kind;
 
-const tableColumnClasses = [
-  '',
-  '',
-  classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
-  classNames('pf-m-hidden', 'pf-m-visible-on-lg'),
-  Kebab.columnClass,
-];
+const tableColumnClasses = ['', '', classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), Kebab.columnClass];
 
 const ClusterTableHeader = () => {
   return [
@@ -91,25 +80,12 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
   return (
     <TableRow id={cluster.metadata.uid} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>
-        <ResourceLink
-          kind={kind}
-          name={cluster.metadata.name}
-          namespace={cluster.metadata.namespace}
-          title={cluster.metadata.uid}
-        />
+        <ResourceLink kind={kind} name={cluster.metadata.name} namespace={cluster.metadata.namespace} title={cluster.metadata.uid} />
       </TableData>
-      <TableData className={classNames(tableColumnClasses[1])}>
-        {cluster.spec.provider}
-      </TableData>
-      <TableData className={classNames(tableColumnClasses[2])}>
-        {cluster.spec.provider ? 'Create' : 'Enroll'}
-      </TableData>
-      <TableData className={tableColumnClasses[3]}>
-        {cluster.status?.ready}
-      </TableData>
-      <TableData className={tableColumnClasses[4]}>
-        {cluster.spec.version}
-      </TableData>
+      <TableData className={classNames(tableColumnClasses[1])}>{cluster.spec.provider}</TableData>
+      <TableData className={classNames(tableColumnClasses[2])}>{cluster.spec.provider ? 'Create' : 'Enroll'}</TableData>
+      <TableData className={tableColumnClasses[3]}>{cluster.status?.ready ? 'Ready' : 'Not Ready'}</TableData>
+      <TableData className={tableColumnClasses[4]}>{cluster.spec.version}</TableData>
       <TableData className={tableColumnClasses[5]}>
         {ClusterNodesInfo(cluster)}
         {/* {`M: ${cluster.status?.masterRun} / ${cluster.spec?.masterNum}, W: ${cluster.status?.workerRun} / ${cluster.spec?.workerNum}`} */}
@@ -121,22 +97,17 @@ const ClusterTableRow: RowFunction<K8sResourceKind> = ({ obj: cluster, index, ke
   );
 };
 
-const ClusterNodesInfo = (cluster) => {
-  if(cluster.status?.masterRun && cluster.status?.workerRun) {
+const ClusterNodesInfo = cluster => {
+  if (cluster.status?.masterRun && cluster.status?.workerRun) {
     return `M: ${cluster.status?.masterRun} / ${cluster.spec?.masterNum}, W: ${cluster.status?.workerRun} / ${cluster.spec?.workerNum}`;
   } else {
     return '';
   }
-}
+};
 
-const ClusterNodes: React.FC<ClusterNodesProps> = (props) => (
-  <NodesComponent {...props} customData={{ showNodes: true }} />
-);
+const ClusterNodes: React.FC<ClusterNodesProps> = props => <NodesComponent {...props} customData={{ showNodes: true }} />;
 
-export const ClusterDetailsList: React.FC<ClusterDetailsListProps> = ({ cl }) => (
-  <dl className="co-m-pane__details">
-  </dl>
-);
+export const ClusterDetailsList: React.FC<ClusterDetailsListProps> = ({ cl }) => <dl className="co-m-pane__details"></dl>;
 
 const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => (
   <>
@@ -154,40 +125,16 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => (
   </>
 );
 
-
 const { details, nodes, editYaml, events } = navFactory;
-export const Clusters: React.FC = (props) => (
-  <Table
-    {...props}
-    aria-label="Clusters"
-    Header={ClusterTableHeader}
-    Row={ClusterTableRow}
-    virtualize
-  />
-);
+export const Clusters: React.FC = props => <Table {...props} aria-label="Clusters" Header={ClusterTableHeader} Row={ClusterTableRow} virtualize />;
 
-export const ClustersPage: React.FC<ClustersPageProps> = (props) => (
-  <ListPage canCreate={true} ListComponent={Clusters} kind={kind} {...props} />
-);
+export const ClustersPage: React.FC<ClustersPageProps> = props => <ListPage canCreate={true} ListComponent={Clusters} kind={kind} {...props} />;
 
-export const ClustersDetailsPage: React.FC<ClustersDetailsPageProps> = (props) => (
-  <DetailsPage
-    {...props}
-    kind={kind}
-    menuActions={menuActions}
-    pages={[
-      details(detailsPage(ClusterDetails)),
-      editYaml(),
-      nodes(ClusterNodes),
-      events(ResourceEventStream),
-    ]}
-  />
-);
+export const ClustersDetailsPage: React.FC<ClustersDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={menuActions} pages={[details(detailsPage(ClusterDetails)), editYaml(), nodes(ClusterNodes), events(ResourceEventStream)]} />;
 
 type ClusterDetailsListProps = {
   cl: K8sResourceKind;
 };
-
 
 type ClusterDetailsProps = {
   obj: K8sResourceKind;
