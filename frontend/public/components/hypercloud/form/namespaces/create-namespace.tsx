@@ -1,12 +1,8 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
 import { match as RMatch } from 'react-router';
-<<<<<<< HEAD
-import { useFormContext, Controller } from "react-hook-form"
-=======
-
->>>>>>> a5629e728... Merge pull request #2 from tmax-cloud/feature/create-form
-import { WithCommonForm } from '../create-form'
+import { useFormContext, Controller } from 'react-hook-form';
+import { WithCommonForm } from '../create-form';
 import { SelectorInput } from '../../../utils';
 
 // const allow = 'allow';
@@ -19,28 +15,25 @@ import { SelectorInput } from '../../../utils';
 //     podSelector: null,
 //   },
 // };
-
-
-
-const namespaceFormFactory = (params) => {
-  return WithCommonForm(CreateNamespaceComponent, params);
+const defaultValues = {
+  metadata: {
+    name: 'example-name',
+  },
 };
 
-const CreateNamespaceComponent: React.FC<NamespaceFormProps> = (props) => {
+const namespaceFormFactory = params => {
+  return WithCommonForm(CreateNamespaceComponent, params, defaultValues);
+};
+
+const CreateNamespaceComponent: React.FC<NamespaceFormProps> = props => {
   const { control } = useFormContext();
   return (
     <div className="form-group">
       <label htmlFor="tags-input" className="control-label">
         Labels
-        </label>
+      </label>
       <div className="modal-body__field">
-        <Controller
-          name="metadata.labels"
-          labelClassName="co-text-namespace"
-          as={SelectorInput}
-          control={control}
-          tags={[]}
-        />
+        <Controller name="metadata.labels" labelClassName="co-text-namespace" as={SelectorInput} control={control} tags={[]} />
       </div>
     </div>
     /* <div className="form-group">
@@ -57,29 +50,21 @@ const CreateNamespaceComponent: React.FC<NamespaceFormProps> = (props) => {
         />
       </div>
     </div> */
-  )
-}
+  );
+};
 
-export const CreateNamespace: React.FC<CreateNamespaceProps> = (props) => {
+export const CreateNamespace: React.FC<CreateNamespaceProps> = props => {
   const formComponent = namespaceFormFactory(props.match.params);
   const NamespaceFormComponent = formComponent;
-  return (
-    <NamespaceFormComponent
-      fixed={{}}
-      explanation={''}
-      titleVerb="Create"
-      onSubmitCallback={onSubmitCallback}
-      isCreate={true}
-    />
-  )
-}
+  return <NamespaceFormComponent fixed={{}} explanation={''} titleVerb="Create" onSubmitCallback={onSubmitCallback} isCreate={true} />;
+};
 
-export const onSubmitCallback = (data) => {
+export const onSubmitCallback = data => {
   let labels = SelectorInput.objectify(data.metadata.labels);
   delete data.metadata.labels;
   data = _.defaultsDeep(data, { metadata: { labels: labels } });
   return data;
-}
+};
 
 type CreateNamespaceProps = {
   match: RMatch<{
@@ -90,12 +75,12 @@ type CreateNamespaceProps = {
   titleVerb: string;
   saveButtonText?: string;
   isCreate: boolean;
-}
+};
 
 type NamespaceFormProps = {
   onChange: Function;
   stringData: {
-    [key: string]: string
-  }
+    [key: string]: string;
+  };
   isCreate: boolean;
-}
+};
