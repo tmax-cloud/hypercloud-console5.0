@@ -128,8 +128,18 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => (
 const { details, nodes, editYaml, events } = navFactory;
 export const Clusters: React.FC = props => <Table {...props} aria-label="Clusters" Header={ClusterTableHeader} Row={ClusterTableRow} virtualize />;
 
-export const ClustersPage: React.FC<ClustersPageProps> = props => <ListPage canCreate={true} ListComponent={Clusters} kind={kind} {...props} />;
-
+export const ClustersPage: React.FC<ClustersPageProps> = props => {
+  const createItems = {
+    default: 'From FORM (Create)',
+    enroll: 'From FORM (Enroll)',
+    yaml: 'From YAML',
+  };
+  const createProps = {
+    items: createItems,
+    createLink: type => `/k8s/cluster/hyperclusterresources/~new/${type !== 'yaml' ? type : ''}`,
+  };
+  return <ListPage canCreate={true} createProps={createProps} ListComponent={Clusters} kind={kind} {...props} />;
+};
 export const ClustersDetailsPage: React.FC<ClustersDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={menuActions} pages={[details(detailsPage(ClusterDetails)), editYaml(), nodes(ClusterNodes), events(ResourceEventStream)]} />;
 
 type ClusterDetailsListProps = {
