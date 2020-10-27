@@ -3,6 +3,7 @@ import * as React from 'react';
 import { match as RMatch } from 'react-router';
 import { useFormContext, Controller } from 'react-hook-form';
 import { WithCommonForm } from '../create-form';
+import { Section } from '../../utils/section';
 import { SelectorInput } from '../../../utils';
 
 // const allow = 'allow';
@@ -28,14 +29,9 @@ const namespaceFormFactory = params => {
 const CreateNamespaceComponent: React.FC<NamespaceFormProps> = props => {
   const { control } = useFormContext();
   return (
-    <div className="form-group">
-      <label htmlFor="tags-input" className="control-label">
-        Labels
-      </label>
-      <div className="modal-body__field">
-        <Controller name="metadata.labels" labelClassName="co-text-namespace" as={SelectorInput} control={control} tags={[]} />
-      </div>
-    </div>
+    <Section label="Labels" id="label" description="이것은 Label입니다.">
+      <Controller name="metadata.labels" id="label" labelClassName="co-text-sample" as={SelectorInput} control={control} tags={[]} />
+    </Section>
     /* <div className="form-group">
       <label htmlFor="network-policy" className="control-label">
         Default Network Policy
