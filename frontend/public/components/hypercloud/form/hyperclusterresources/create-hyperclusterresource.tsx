@@ -41,7 +41,7 @@ export const onSubmitCallback = data => {
 
 type CreateHyperClusterResourceProps = {
   match: RMatch<{
-    params?: string;
+    type?: string;
   }>;
   fixed: object;
   explanation: string;
