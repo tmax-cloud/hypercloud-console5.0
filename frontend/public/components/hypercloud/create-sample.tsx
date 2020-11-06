@@ -7,6 +7,7 @@ import { SelectorInput } from '../utils';
 import { RadioGroup } from './utils/radio';
 import { Section } from './utils/section';
 import { InputSelectBox } from './utils/inputSelectBox';
+import { ChipsLabel } from './utils/chips-label';
 
 const defaultValues = {
   // requestDo에 넣어줄 형식으로 defaultValues 작성
@@ -75,6 +76,10 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
             inline={false} // inline속성 먹일거면 true, 아니면 빼면 됨 (선택)
           />
         </Section>
+      </Section>
+      <Section id="chipslabel" label="Chips Label">
+        <ChipsLabel name="chipslabel1" labelPlaceholder="Enter tag text" />
+        <ChipsLabel name="chipslabel2" tags={["preset", "tags"]} />
       </Section>
     </div>
   );

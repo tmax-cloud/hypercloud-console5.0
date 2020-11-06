@@ -96,7 +96,7 @@ export class SelectorInput extends React.Component {
       autoFocus: this.props.autoFocus,
       className: classNames('input', { 'invalid-tag': !isInputValid }),
       onChange: this.handleInputChange.bind(this),
-      placeholder: _.isEmpty(tags) ? 'app=frontend' : '',
+      placeholder: _.isEmpty(tags) ? (this.props.labelPlaceholder ? this.props.labelPlaceholder : 'app=frontend') : '',
       spellCheck: 'false',
       value: inputValue,
       id: 'tags-input',
