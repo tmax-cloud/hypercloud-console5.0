@@ -78,8 +78,8 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
         </Section>
       </Section>
       <Section id="chipslabel" label="Chips Label">
-        <ChipsLabel name="chipslabel1" labelPlaceholder="Enter tag text" />
-        <ChipsLabel name="chipslabel2" tags={["preset", "tags"]} />
+        <ChipsLabel name="metadata.chipslabel1" labelPlaceholder="Enter tag text" />
+        <ChipsLabel name="metadata.chipslabel2" tags={['preset', 'tags']} />
       </Section>
     </div>
   );
