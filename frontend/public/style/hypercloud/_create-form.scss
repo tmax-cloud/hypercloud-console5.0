@@ -1,0 +1,11 @@
+/* create-form styles */
+.form-group {
+    .pf-c-form-control:invalid {
+        border: 1px solid #C70C03;
+        outline: none;
+    }
+    .error-message {
+        color: blue;
+        width: 500px;
+    }
+}

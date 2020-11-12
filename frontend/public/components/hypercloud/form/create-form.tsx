@@ -9,8 +9,10 @@ import { k8sCreate, referenceFor, K8sResourceKind, modelFor } from '../../../mod
 import { pluralToKind } from './';
 import { ButtonBar, history, resourceObjPath } from '../../utils';
 import { Section } from '../utils/section';
+import { useTranslation } from 'react-i18next';
 
 export const WithCommonForm = (SubForm, params, defaultValues, modal?: boolean) => {
+  const { t } = useTranslation();
   const FormComponent: React.FC<CommonFormProps_> = props => {
     const methods = useForm({ defaultValues: defaultValues });
 
@@ -22,19 +24,33 @@ export const WithCommonForm = (SubForm, params, defaultValues, modal?: boolean) 
     const namespaced = model?.namespaced;
     const plural = model?.plural;
 
-    const onClick = methods.handleSubmit(data => {
-      let inDo = _.defaultsDeep(props.fixed, data);
-      inDo = props.onSubmitCallback(inDo);
-      k8sCreate(model, inDo);
-      history.push(resourceObjPath(inDo, referenceFor(model)));
-    });
+    const onSubmit = (data, event) => {
+      event.preventDefault();
+      let sendingData = _.defaultsDeep(props.fixed, data);
+      sendingData = props.onSubmitCallback(sendingData);
+      k8sCreate(model, sendingData);
+      history.push(resourceObjPath(sendingData, referenceFor(model)));
+    }
+
+    const validateName = e => {
+      const validityState_object = e.target.validity;
+      if (validityState_object.valueMissing)
+      {
+        e.target.setCustomValidity(`${t('COMMON:MSG_COMMON_ERROR_MESSAGE_30')}`);
+        e.target.reportValidity();
+      } else {
+        e.target.setCustomValidity('');
+        e.target.reportValidity();
+      }
+    }
+
     return (
       <FormProvider {...methods}>
         <div className="co-m-pane__body">
           <Helmet>
             <title>{title}</title>
           </Helmet>
-          <form className="co-m-pane__body-group co-m-pane__form">
+          <form className="co-m-pane__body-group co-m-pane__form" onSubmit={methods.handleSubmit(onSubmit)}>
             <h1 className="co-m-pane__heading co-m-pane__heading--baseline">
               <div className="co-m-pane__name">{title}</div>
               <div className="co-m-pane__heading-link">
@@ -46,13 +62,13 @@ export const WithCommonForm = (SubForm, params, defaultValues, modal?: boolean) 
             <p className="co-m-pane__explanation">{props.explanation}</p>
             <fieldset>
               <Section label="Name" id="name" isRequired={true}>
-                <input className="pf-c-form-control" id="name" name="metadata.name" ref={methods.register} />
+                <input className="pf-c-form-control" id="name" name="metadata.name" ref={methods.register} onBlur={validateName} required />
               </Section>
             </fieldset>
             <SubForm isCreate={props.isCreate} />
             <ButtonBar inProgress={inProgress}>
               <ActionGroup className="pf-c-form">
-                <Button type="button" variant="primary" id="save-changes" onClick={onClick}>
+                <Button type="submit" variant="primary" id="save-changes">
                   {props.saveButtonText || 'Create'}
                 </Button>
                 <Button type="button" variant="secondary" id="cancel" onClick={history.goBack}>
