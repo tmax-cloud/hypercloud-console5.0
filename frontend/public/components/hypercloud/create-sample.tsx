@@ -8,14 +8,43 @@ import { RadioGroup } from './utils/radio';
 import { Section } from './utils/section';
 import { InputSelectBox } from './utils/inputSelectBox';
 import { NumberSpinner } from './utils/number-spinner';
-
+import { ListView } from './utils/list-view';
+import { Button } from '@patternfly/react-core';
 const defaultValues = {
   // requestDo에 넣어줄 형식으로 defaultValues 작성
   metadata: {
     name: 'test-name',
-  },
-  spec: {
-    resources: 'cpu',
+    spec: {
+      resources: 'cpu',
+    },
+    keyValueList: [
+      {
+        key: 'AAA',
+        value: 'aaa',
+      },
+      {
+        key: 'BBB',
+        value: 'bbb',
+      },
+      {
+        key: 'CCC',
+        value: 'ccc',
+      },
+      {
+        key: 'DDD',
+        value: 'ddd',
+      },
+    ],
+    numList: [
+      {
+        name: 'Item1',
+        number: 3,
+      },
+      {
+        name: 'Item2',
+        number: 5,
+      },
+    ],
   },
 };
 
@@ -45,6 +74,38 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
     Gi: 'GiB',
     Ti: 'TiB',
   };
+
+  const listHeaderFragment = (
+    <div className="row pairs-list__heading">
+      <div className="col-xs-4 text-uppercase">NAME</div>
+      <div className="col-xs-4 text-secondary text-uppercase">NUM</div>
+      <div className="col-xs-1 co-empty__header" />
+    </div>
+  );
+
+  const listItemRenderer = (register, item, index, ListActions, ListDefaultIcons) => (
+    <div className="row" key={item.id}>
+      <div className="col-xs-4 pairs-list__name-field">
+        <input ref={register()} className="pf-c-form-control" name={`metadata.numList[${index}].name`} defaultValue={item.name}></input>
+      </div>
+      <div className="col-xs-4 pairs-list__value-field">
+        <NumberSpinner initialValue={item.number} min={-15} max={15} name={`metadata.numList[${index}].number`} />
+      </div>
+      <div className="col-xs-1 pairs-list__action">
+        <Button
+          type="button"
+          data-test-id="pairs-list__delete-btn"
+          className="pairs-list__span-btns"
+          onClick={() => {
+            ListActions.remove(index);
+          }}
+          variant="plain"
+        >
+          {ListDefaultIcons.deleteIcon}
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -84,6 +145,12 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           max={5}
           name="spinner1" // 한 페이지에 spinner 여러 개 만들 경우 name에 unique한 값을 넣어줘야 됨 (한개만 만들 땐 name이 필수 아님)
         />
+      </Section>
+      <Section id="listviewsection" label="List View">
+        <ListView name="metadata.keyValueList" addButtonText="Add Key/Value" />
+      </Section>
+      <Section id="listviewsection" label="List View">
+        <ListView name="metadata.numList" addButtonText="Add Name/Num" headerFragment={listHeaderFragment} itemRenderer={listItemRenderer} defaultItem={{ name: '', number: 0 }} />
       </Section>
     </div>
   );
