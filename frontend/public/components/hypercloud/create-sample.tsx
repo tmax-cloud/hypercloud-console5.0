@@ -146,10 +146,10 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           name="spinner1" // 한 페이지에 spinner 여러 개 만들 경우 name에 unique한 값을 넣어줘야 됨 (한개만 만들 땐 name이 필수 아님)
         />
       </Section>
-      <Section id="listviewsection" label="List View">
+      <Section id="listviewsection1" label="Default Key/Value List View">
         <ListView name="metadata.keyValueList" addButtonText="Add Key/Value" />
       </Section>
-      <Section id="listviewsection" label="List View">
+      <Section id="listviewsection2" label="Customized List View">
         <ListView name="metadata.numList" addButtonText="Add Name/Num" headerFragment={listHeaderFragment} itemRenderer={listItemRenderer} defaultItem={{ name: '', number: 0 }} />
       </Section>
     </div>
