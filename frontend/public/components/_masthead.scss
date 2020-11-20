@@ -8,13 +8,13 @@
   overflow-x: hidden;
   padding: 0 8px; // so sizing is consistent with .pf-c-dropdown__toggle
   text-overflow: ellipsis;
-  @media(min-width: 855px) {
+  @media (min-width: 855px) {
     max-width: 225px !important;
   }
-  @media(min-width: $screen-md-min) {
+  @media (min-width: $screen-md-min) {
     max-width: 275px !important;
   }
-  @media(min-width: $screen-lg-min) {
+  @media (min-width: $screen-lg-min) {
     max-width: 300px !important;
   }
 }
