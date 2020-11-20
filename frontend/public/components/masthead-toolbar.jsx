@@ -252,11 +252,11 @@ class MastheadToolbarContents_ extends React.Component {
               },
             ]
           : []),
-        {
-          label: 'About',
-          callback: this._onAboutModal,
-          component: 'button',
-        },
+        // {
+        //   label: 'About',
+        //   callback: this._onAboutModal,
+        //   component: 'button',
+        // },
       ],
     });
 
@@ -427,7 +427,7 @@ class MastheadToolbarContents_ extends React.Component {
                 </NotificationBadge>
               </ToolbarItem>
             )}
-            <ToolbarItem>
+            <ToolbarItem className="hidden">
               <Tooltip content="Import YAML" position={TooltipPosition.bottom}>
                 <Link to={this._getImportYAMLPath()} className="pf-c-button pf-m-plain" aria-label="Import YAML">
                   <PlusCircleIcon className="co-masthead-icon" />
