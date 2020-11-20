@@ -347,13 +347,13 @@ class MastheadToolbarContents_ extends React.Component {
     }
 
     userActions.push({
-      label: 'My Account',
+      label: 'Manage Account',
       callback: createAccount,
       component: 'button',
     });
 
     userActions.push({
-      label: 'Sign Out',
+      label: 'Log Out',
       callback: logout,
       component: 'button',
     });
@@ -427,14 +427,15 @@ class MastheadToolbarContents_ extends React.Component {
                 </NotificationBadge>
               </ToolbarItem>
             )}
-            <ToolbarItem className="hidden">
+            {/* MultiCluster에선 불필요한 버튼 임시 제거 */
+            /* <ToolbarItem>
               <Tooltip content="Import YAML" position={TooltipPosition.bottom}>
                 <Link to={this._getImportYAMLPath()} className="pf-c-button pf-m-plain" aria-label="Import YAML">
                   <PlusCircleIcon className="co-masthead-icon" />
                 </Link>
               </Tooltip>
             </ToolbarItem>
-            <CloudShellMastheadButton />
+            <CloudShellMastheadButton /> */}
             <ToolbarItem>
               <ApplicationLauncher aria-label="Help menu" className="co-app-launcher" data-test="help-dropdown-toggle" onSelect={this._onHelpDropdownSelect} onToggle={this._onHelpDropdownToggle} isOpen={isHelpDropdownOpen} items={this._renderApplicationItems(this._helpActions(this._getAdditionalActions(this._getAdditionalLinks(consoleLinks, 'HelpMenu'))))} position="right" toggleIcon={<QuestionCircleIcon />} isGrouped />
             </ToolbarItem>
