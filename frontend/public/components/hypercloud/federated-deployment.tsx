@@ -93,7 +93,7 @@ export const FederatedDeploymentDetailsList: React.FC<FederatedDeploymentDetails
 const FederatedDeploymentDetails: React.FC<FederatedDeploymentDetailsProps> = ({ obj: deployment }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Deployment Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={deployment} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedDeploymentDetails: React.FC<FederatedDeploymentDetailsProps> = ({
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedDeployments: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedDeploymentTableHeader} Row={FederatedDeploymentTableRow} virtualize />;
+export const FederatedDeployments: React.FC = props => <Table {...props} aria-label="Federated Deployments" Header={FederatedDeploymentTableHeader} Row={FederatedDeploymentTableRow} virtualize />;
 
 export const FederatedDeploymentsPage: React.FC<FederatedDeploymentsPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedDeployments} kind={kind} {...props} />;
 

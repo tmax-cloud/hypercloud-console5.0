@@ -93,7 +93,7 @@ export const FederatedServiceDetailsList: React.FC<FederatedServiceDetailsListPr
 const FederatedServiceDetails: React.FC<FederatedServiceDetailsProps> = ({ obj: service }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Service Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={service} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedServiceDetails: React.FC<FederatedServiceDetailsProps> = ({ obj: 
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedServices: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedServiceTableHeader} Row={FederatedServiceTableRow} virtualize />;
+export const FederatedServices: React.FC = props => <Table {...props} aria-label="Federated Services" Header={FederatedServiceTableHeader} Row={FederatedServiceTableRow} virtualize />;
 
 export const FederatedServicesPage: React.FC<FederatedServicesPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedServices} kind={kind} {...props} />;
 

@@ -93,7 +93,7 @@ export const FederatedReplicaSetDetailsList: React.FC<FederatedReplicaSetDetails
 const FederatedReplicaSetDetails: React.FC<FederatedReplicaSetDetailsProps> = ({ obj: replicaset }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Replica Set Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={replicaset} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedReplicaSetDetails: React.FC<FederatedReplicaSetDetailsProps> = ({
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedReplicaSets: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedReplicaSetTableHeader} Row={FederatedReplicaSetTableRow} virtualize />;
+export const FederatedReplicaSets: React.FC = props => <Table {...props} aria-label="Federated Replica Sets" Header={FederatedReplicaSetTableHeader} Row={FederatedReplicaSetTableRow} virtualize />;
 
 export const FederatedReplicaSetsPage: React.FC<FederatedReplicaSetsPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedReplicaSets} kind={kind} {...props} />;
 

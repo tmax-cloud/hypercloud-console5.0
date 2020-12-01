@@ -93,7 +93,7 @@ export const FederatedSecretDetailsList: React.FC<FederatedSecretDetailsListProp
 const FederatedSecretDetails: React.FC<FederatedSecretDetailsProps> = ({ obj: secret }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Secret Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={secret} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedSecretDetails: React.FC<FederatedSecretDetailsProps> = ({ obj: se
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedSecrets: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedSecretTableHeader} Row={FederatedSecretTableRow} virtualize />;
+export const FederatedSecrets: React.FC = props => <Table {...props} aria-label="Federated Secrets" Header={FederatedSecretTableHeader} Row={FederatedSecretTableRow} virtualize />;
 
 export const FederatedSecretsPage: React.FC<FederatedSecretsPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedSecrets} kind={kind} {...props} />;
 
