@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { NoticeExpirationModal_ } from './modals/notice-expiration-modal';
 let timerID = 0;
 let expTime = 0;
 
@@ -46,6 +47,7 @@ export class ExpTimer extends React.Component {
       expTime -= 1;
     }
     if (Math.floor(expTime) === 60) {
+      NoticeExpirationModal_({ logout: this.props.logout, tokenRefresh: this.props.tokenRefresh, time: expTime });
     }
     this.expFormat();
   }
