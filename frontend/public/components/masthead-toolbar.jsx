@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as _ from 'lodash-es';
 import { connect } from 'react-redux';
 import { BellIcon, EllipsisVIcon, PlusCircleIcon, QuestionCircleIcon, ClockIcon, GlobeAmericasIcon, AngleDownIcon } from '@patternfly/react-icons';
-import { ApplicationLauncher, ApplicationLauncherGroup, ApplicationLauncherItem, ApplicationLauncherSeparator, NotificationBadge, Toolbar, ToolbarGroup, ToolbarItem, TooltipPosition, Tooltip, Button } from '@patternfly/react-core';
+import { ApplicationLauncher, ApplicationLauncherGroup, ApplicationLauncherItem, ApplicationLauncherSeparator, NotificationBadge, Toolbar, ToolbarGroup, ToolbarItem, TooltipPosition, Tooltip, Button, Badge } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { FLAGS, YellowExclamationTriangleIcon } from '@console/shared';
 import { formatNamespacedRouteForResource } from '@console/shared/src/utils';
@@ -536,15 +536,22 @@ class MastheadToolbarContents_ extends React.Component {
               />
             </ToolbarItem>
             <ToolbarItem>
-              <Button
+              <Badge
+                key={1}
                 onClick={() => {
                   this._tokenRefresh();
                 }}
               >
                 Extend
-              </Button>
+              </Badge>
+            </ToolbarItem>
+            <ToolbarItem>
+              <div className="co-masthead__line"></div>
             </ToolbarItem>
             <ToolbarItem className="hidden-xs">{this._renderLanguageMenu(false)}</ToolbarItem>
+            <ToolbarItem>
+              <div className="co-masthead__line"></div>
+            </ToolbarItem>
             {/* desktop -- (system status button) */}
             <SystemStatusButton statuspageData={statuspageData} />
             {/* desktop -- (application launcher dropdown), import yaml, help dropdown [documentation, about] */}
