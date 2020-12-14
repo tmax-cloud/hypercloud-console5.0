@@ -93,7 +93,7 @@ export const FederatedConfigMapDetailsList: React.FC<FederatedConfigMapDetailsLi
 const FederatedConfigMapDetails: React.FC<FederatedConfigMapDetailsProps> = ({ obj: configmap }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Config Map Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={configmap} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedConfigMapDetails: React.FC<FederatedConfigMapDetailsProps> = ({ o
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedConfigMaps: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedConfigMapTableHeader} Row={FederatedConfigMapTableRow} virtualize />;
+export const FederatedConfigMaps: React.FC = props => <Table {...props} aria-label="Federated Config Maps" Header={FederatedConfigMapTableHeader} Row={FederatedConfigMapTableRow} virtualize />;
 
 export const FederatedConfigMapsPage: React.FC<FederatedConfigMapsPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedConfigMaps} kind={kind} {...props} />;
 

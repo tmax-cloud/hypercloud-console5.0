@@ -93,7 +93,7 @@ export const FederatedNamespaceDetailsList: React.FC<FederatedNamespaceDetailsLi
 const FederatedNamespaceDetails: React.FC<FederatedNamespaceDetailsProps> = ({ obj: namespace }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Namespace Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={namespace} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedNamespaceDetails: React.FC<FederatedNamespaceDetailsProps> = ({ o
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedNamespaces: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedNamespaceTableHeader} Row={FederatedNamespaceTableRow} virtualize />;
+export const FederatedNamespaces: React.FC = props => <Table {...props} aria-label="Federated Namespaces" Header={FederatedNamespaceTableHeader} Row={FederatedNamespaceTableRow} virtualize />;
 
 export const FederatedNamespacesPage: React.FC<FederatedNamespacesPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedNamespaces} kind={kind} {...props} />;
 

@@ -93,7 +93,7 @@ export const FederatedIngressDetailsList: React.FC<FederatedIngressDetailsListPr
 const FederatedIngressDetails: React.FC<FederatedIngressDetailsProps> = ({ obj: ingress }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Ingress Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={ingress} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedIngressDetails: React.FC<FederatedIngressDetailsProps> = ({ obj: 
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedIngresses: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedIngressTableHeader} Row={FederatedIngressTableRow} virtualize />;
+export const FederatedIngresses: React.FC = props => <Table {...props} aria-label="Federated Ingresses" Header={FederatedIngressTableHeader} Row={FederatedIngressTableRow} virtualize />;
 
 export const FederatedIngressesPage: React.FC<FederatedIngressesPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedIngresses} kind={kind} {...props} />;
 

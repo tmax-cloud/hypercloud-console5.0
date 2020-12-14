@@ -93,7 +93,7 @@ export const FederatedJobDetailsList: React.FC<FederatedJobDetailsListProps> = (
 const FederatedJobDetails: React.FC<FederatedJobDetailsProps> = ({ obj: job }) => (
   <>
     <div className="co-m-pane__body">
-      <SectionHeading text="Daemon Set Details" />
+      <SectionHeading text="Federated Job Details" />
       <div className="row">
         <div className="col-lg-6">
           <ResourceSummary resource={job} showPodSelector showNodeSelector showTolerations />
@@ -110,7 +110,7 @@ const FederatedJobDetails: React.FC<FederatedJobDetailsProps> = ({ obj: job }) =
 );
 
 const { details, editYaml, events } = navFactory;
-export const FederatedJobs: React.FC = props => <Table {...props} aria-label="Daemon Sets" Header={FederatedJobTableHeader} Row={FederatedJobTableRow} virtualize />;
+export const FederatedJobs: React.FC = props => <Table {...props} aria-label="Federated Jobs" Header={FederatedJobTableHeader} Row={FederatedJobTableRow} virtualize />;
 
 export const FederatedJobsPage: React.FC<FederatedJobsPageProps> = props => <ListPage canCreate={true} ListComponent={FederatedJobs} kind={kind} {...props} />;
 
