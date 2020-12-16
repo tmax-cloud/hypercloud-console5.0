@@ -4,7 +4,7 @@ import { Brand, PageHeader } from '@patternfly/react-core';
 
 import { MastheadToolbar } from './masthead-toolbar';
 import { history } from './utils';
-import okdLogoImg from '../imgs/okd-logo.svg';
+import hcLogoImg from '../imgs/logo_symbol_text.svg';
 import openshiftLogoImg from '../imgs/openshift-logo.svg';
 import ocpLogoImg from '../imgs/openshift-platform-logo.svg';
 import onlineLogoImg from '../imgs/openshift-online-logo.svg';
@@ -35,8 +35,8 @@ export const getBrandingDetails = () => {
       productName = 'Azure Red Hat OpenShift';
       break;
     default:
-      logoImg = okdLogoImg;
-      productName = 'OKD';
+      logoImg = hcLogoImg;
+      productName = 'HyperCloud';
   }
   if (window.SERVER_FLAGS.customLogoURL) {
     logoImg = window.SERVER_FLAGS.customLogoURL;
