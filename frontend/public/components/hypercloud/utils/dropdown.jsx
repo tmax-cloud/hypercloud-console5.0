@@ -151,6 +151,8 @@ const Dropdown_ = (props) => {
     const newKey = keys[index];
     setKeyboardHoverKey(newKey);
     e.stopPropagation();
+    e.preventDefault();
+    
   }
 
   React.useEffect(() => {
