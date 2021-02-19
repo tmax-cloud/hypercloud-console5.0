@@ -45,6 +45,7 @@ const SearchPage_: React.FC<SearchProps & StateProps & DispatchProps> = props =>
   const [collapsedKinds, setCollapsedKinds] = React.useState(new Set<string>([]));
   const [labelFilter, setLabelFilter] = React.useState([]);
   const [labelFilterInput, setLabelFilterInput] = React.useState('');
+  const [nameFilterInput, setNameFilterInput] = React.useState('');
   const [typeaheadNameFilter, setTypeaheadNameFilter] = React.useState('');
   const { namespace, noProjectsAvailable } = props;
 
@@ -89,6 +90,7 @@ const SearchPage_: React.FC<SearchProps & StateProps & DispatchProps> = props =>
   };
 
   const clearNameFilter = () => {
+    setNameFilterInput('');
     setTypeaheadNameFilter('');
     setQueryArgument('name', '');
   };
@@ -111,6 +113,12 @@ const SearchPage_: React.FC<SearchProps & StateProps & DispatchProps> = props =>
   };
 
   const updateNameFilter = (value: string) => {
+    setNameFilterInput(value);
+    // setTypeaheadNameFilter(value);
+    // setQueryArgument('name', value);
+  };
+
+  const updateNameFilterAndQuery = (value: string) => {
     setTypeaheadNameFilter(value);
     setQueryArgument('name', value);
   };
@@ -127,6 +135,10 @@ const SearchPage_: React.FC<SearchProps & StateProps & DispatchProps> = props =>
 
   const updateSearchFilter = (type: string, value: string, endOfString: boolean) => {
     type === searchFilterValues.Label ? updateLabelFilter(value, endOfString) : updateNameFilter(value);
+  };
+
+  const onEnterKeyDown = (type: string, value: string, endOfString: boolean) => {
+    type === searchFilterValues.Label ? updateLabelFilter(value, endOfString) : updateNameFilterAndQuery(value);
   };
 
   const removeLabelFilter = (filter: string, value: string) => {
@@ -181,7 +193,7 @@ const SearchPage_: React.FC<SearchProps & StateProps & DispatchProps> = props =>
             <DataToolbarItem className="co-search-group__filter">
               <DataToolbarFilter deleteChipGroup={clearLabelFilter} chips={[...labelFilter]} deleteChip={removeLabelFilter} categoryName="Label">
                 <DataToolbarFilter chips={typeaheadNameFilter.length > 0 ? [typeaheadNameFilter] : []} deleteChip={clearNameFilter} categoryName="Name">
-                  <SearchFilterDropdown onChange={updateSearchFilter} nameFilterInput={typeaheadNameFilter} labelFilterInput={labelFilterInput} />
+                  <SearchFilterDropdown onChange={updateSearchFilter} onEnterKeyDown={onEnterKeyDown} nameFilterInput={nameFilterInput} labelFilterInput={labelFilterInput} />
                 </DataToolbarFilter>
               </DataToolbarFilter>
             </DataToolbarItem>

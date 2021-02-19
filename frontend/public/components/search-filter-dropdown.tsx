@@ -8,11 +8,11 @@ export enum searchFilterValues {
   Name = 'Name',
 }
 
-export const SearchFilterDropdown: React.SFC<SearchFilterDropdownProps> = (props) => {
+export const SearchFilterDropdown: React.SFC<SearchFilterDropdownProps> = props => {
   const [isOpen, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState(searchFilterValues.Label);
 
-  const { onChange, nameFilterInput, labelFilterInput } = props;
+  const { onChange, onEnterKeyDown, nameFilterInput, labelFilterInput } = props;
 
   const onToggle = (open: boolean) => setOpen(open);
   const onSelect = (event: React.SyntheticEvent) => {
@@ -30,7 +30,7 @@ export const SearchFilterDropdown: React.SFC<SearchFilterDropdownProps> = (props
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       const { value } = e.target as HTMLInputElement;
-      onChange(selected, value, true);
+      onEnterKeyDown(selected, value, true);
     }
   };
 
@@ -52,16 +52,7 @@ export const SearchFilterDropdown: React.SFC<SearchFilterDropdownProps> = (props
         isOpen={isOpen}
         dropdownItems={dropdownItems}
       />
-      <TextFilter
-        parentClassName="co-search__filter-input"
-        onChange={handleInputValue}
-        placeholder={selected === searchFilterValues.Label ? 'app=frontend' : 'my-resource'}
-        name="search-filter-input"
-        id="search-filter-input"
-        value={selected === searchFilterValues.Label ? labelFilterInput : nameFilterInput}
-        onKeyDown={handleKeyDown}
-        aria-labelledby="toggle-id"
-      />
+      <TextFilter parentClassName="co-search__filter-input" onChange={handleInputValue} placeholder={selected === searchFilterValues.Label ? 'app=frontend' : 'my-resource'} name="search-filter-input" id="search-filter-input" value={selected === searchFilterValues.Label ? labelFilterInput : nameFilterInput} onKeyDown={handleKeyDown} aria-labelledby="toggle-id" />
     </div>
   );
 };
@@ -70,4 +61,5 @@ export type SearchFilterDropdownProps = {
   onChange: (type: string, value: string, endOfString: boolean) => void;
   nameFilterInput: string;
   labelFilterInput: string;
+  onEnterKeyDown?: (type: string, value: string, endOfString: boolean) => void;
 };

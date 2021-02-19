@@ -30,6 +30,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = (props) => {
     showSuggestions,
     data,
     className,
+    onKeyDown,
   } = props;
 
   const onSelect = (value: string) => {
@@ -74,6 +75,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = (props) => {
           onChange={handleInput}
           placeholder={placeholder}
           onFocus={activate}
+          onKeyDown={onKeyDown}
         />
       </div>
       {showSuggestions && (
@@ -106,6 +108,7 @@ type AutocompleteInputProps = {
   setTextValue: React.Dispatch<React.SetStateAction<String>>;
   className?: string;
   data?: any;
+  onKeyDown?: any;
 };
 
 const SuggestionLine: React.FC<SuggestionLineProps> = ({ suggestion, onClick, className }) => {
