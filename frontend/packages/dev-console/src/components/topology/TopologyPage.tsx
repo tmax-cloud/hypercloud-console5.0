@@ -141,7 +141,7 @@ export const TopologyPage: React.FC<TopologyPageProps> = ({ match }) => {
           </>
         }
       >
-        <Firehose resources={[{ kind: 'Project', prop: 'projects', isList: true }]}>
+        <Firehose resources={[{ kind: 'Namespace', prop: 'projects', isList: true }]}>
           <ProjectsExistWrapper title="Topology">
             {namespace ? (
               showListView ? (

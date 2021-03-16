@@ -428,6 +428,16 @@ export const Catalog = connectToFlags<CatalogProps>(
           },
         ]
       : []),
+    ...(
+      [
+        {
+          isList: true,
+          kind: 'Template',
+          namespaced: true,
+          prop: 'Template',
+        },
+      ]
+    ),
     ...plugins.registry
       .getDevCatalogModels()
       .filter(({ properties }) => !properties.flag || flags[properties.flag])

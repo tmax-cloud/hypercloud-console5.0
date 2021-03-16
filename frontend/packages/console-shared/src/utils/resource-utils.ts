@@ -7,7 +7,7 @@ import {
   PodTemplate,
   RouteKind,
   apiVersionForModel,
-  referenceForModel,
+  // referenceForModel,
   K8sKind,
   ObjectMetadata,
 } from '@console/internal/module/k8s';
@@ -44,19 +44,118 @@ import {
 import { resourceStatus, podStatus } from './ResourceStatus';
 import { isKnativeServing, isIdled } from './pod-utils';
 import {
-  ClusterServiceVersionModel,
+  // ClusterServiceVersionModel,
   ClusterServiceVersionKind,
 } from '@console/operator-lifecycle-manager';
 
+// export const getResourceList = (namespace: string, resList?: any) => {
+//   let resources: FirehoseResource[] = [
+//     {
+//       isList: true,
+//       kind: 'DeploymentConfig',
+//       namespace,
+//       prop: 'deploymentConfigs',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Deployment',
+//       namespace,
+//       prop: 'deployments',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'DaemonSet',
+//       namespace,
+//       prop: 'daemonSets',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Pod',
+//       namespace,
+//       prop: 'pods',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'ReplicationController',
+//       namespace,
+//       prop: 'replicationControllers',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Route',
+//       namespace,
+//       prop: 'routes',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Service',
+//       namespace,
+//       prop: 'services',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'ReplicaSet',
+//       namespace,
+//       prop: 'replicaSets',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'BuildConfig',
+//       namespace,
+//       prop: 'buildConfigs',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Build',
+//       namespace,
+//       prop: 'builds',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'StatefulSet',
+//       namespace,
+//       prop: 'statefulSets',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: 'Secret',
+//       namespace,
+//       prop: 'secrets',
+//       optional: true,
+//     },
+//     {
+//       isList: true,
+//       kind: referenceForModel(ClusterServiceVersionModel),
+//       namespace,
+//       prop: 'clusterServiceVersions',
+//       optional: true,
+//     },
+//   ];
+
+//   let utils = [];
+//   if (resList) {
+//     resList.forEach((resource) => {
+//       resources = [...resources, ...resource.properties.resources(namespace)];
+//       utils = [...utils, resource.properties.utils];
+//     });
+//   }
+
+//   return { resources, utils };
+// };
+
 export const getResourceList = (namespace: string, resList?: any) => {
   let resources: FirehoseResource[] = [
-    {
-      isList: true,
-      kind: 'DeploymentConfig',
-      namespace,
-      prop: 'deploymentConfigs',
-      optional: true,
-    },
     {
       isList: true,
       kind: 'Deployment',
@@ -80,20 +179,6 @@ export const getResourceList = (namespace: string, resList?: any) => {
     },
     {
       isList: true,
-      kind: 'ReplicationController',
-      namespace,
-      prop: 'replicationControllers',
-      optional: true,
-    },
-    {
-      isList: true,
-      kind: 'Route',
-      namespace,
-      prop: 'routes',
-      optional: true,
-    },
-    {
-      isList: true,
       kind: 'Service',
       namespace,
       prop: 'services',
@@ -108,20 +193,6 @@ export const getResourceList = (namespace: string, resList?: any) => {
     },
     {
       isList: true,
-      kind: 'BuildConfig',
-      namespace,
-      prop: 'buildConfigs',
-      optional: true,
-    },
-    {
-      isList: true,
-      kind: 'Build',
-      namespace,
-      prop: 'builds',
-      optional: true,
-    },
-    {
-      isList: true,
       kind: 'StatefulSet',
       namespace,
       prop: 'statefulSets',
@@ -132,13 +203,6 @@ export const getResourceList = (namespace: string, resList?: any) => {
       kind: 'Secret',
       namespace,
       prop: 'secrets',
-      optional: true,
-    },
-    {
-      isList: true,
-      kind: referenceForModel(ClusterServiceVersionModel),
-      namespace,
-      prop: 'clusterServiceVersions',
       optional: true,
     },
   ];
@@ -356,7 +420,7 @@ const getPodAlerts = (pod: K8sResourceKind): OverviewItemAlerts => {
     const { type, status, reason, message } = condition;
     if (type === 'PodScheduled' && status === 'False' && reason === 'Unschedulable') {
       // eslint-disable-next-line
-      const key = podAlertKey(reason, pod, name);
+      const key = podAlertKey(reason, pod);
       alerts[key] = {
         severity: 'error',
         message: `${reason}: ${message}`,
@@ -504,7 +568,7 @@ export const isOperatorBackedService = (
 
 export const getPodsForResource = (resource: K8sResourceKind, resources: any): PodKind[] => {
   const { pods } = resources;
-  return getOwnedResources(resource, pods.data);
+  return getOwnedResources(resource, pods?.data);
 };
 
 export const toReplicationControllerItem = (
@@ -540,7 +604,7 @@ export const getReplicationControllersForResource = (
   visibleReplicationControllers: PodControllerOverviewItem[];
 } => {
   const { replicationControllers } = resources;
-  const ownedRC = getOwnedResources(resource, replicationControllers.data);
+  const ownedRC = getOwnedResources(resource, replicationControllers?.data);
   const sortedRCs = sortReplicationControllersByRevision(ownedRC);
   // get the most recent RCs included failed or canceled to show warnings
   const [mostRecentRC] = sortedRCs;
@@ -598,7 +662,7 @@ export const getActiveReplicaSets = (
 ): K8sResourceKind[] => {
   const { replicaSets } = resources;
   const currentRevision = getDeploymentRevision(deployment);
-  const ownedRS = getOwnedResources(deployment, replicaSets.data);
+  const ownedRS = getOwnedResources(deployment, replicaSets?.data);
   return _.filter(
     ownedRS,
     (rs) => _.get(rs, 'status.replicas') || getDeploymentRevision(rs) === currentRevision,
@@ -620,7 +684,7 @@ export const getBuildsForResource = (
   resources: any,
 ): K8sResourceKind[] => {
   const { builds } = resources;
-  return getOwnedResources(buildConfig, builds.data);
+  return getOwnedResources(buildConfig, builds?.data);
 };
 
 export const getBuildConfigsForResource = (
@@ -692,7 +756,7 @@ export const getPodTemplate = (resource: K8sResourceKind): PodTemplate => {
 
 export const getRoutesForServices = (services: K8sResourceKind[], resources: any): RouteKind[] => {
   const { routes } = resources;
-  return _.filter(routes.data, (route) => {
+  return _.filter(routes?.data, (route) => {
     const name = _.get(route, 'spec.to.name');
     return _.some(services, { metadata: { name } });
   });
@@ -704,7 +768,7 @@ export const getServicesForResource = (
 ): K8sResourceKind[] => {
   const { services } = resources;
   const template: PodTemplate = getPodTemplate(resource);
-  return _.filter(services.data, (service: K8sResourceKind) => {
+  return _.filter(services?.data, (service: K8sResourceKind) => {
     const selector = new LabelSelector(_.get(service, 'spec.selector', {}));
     return selector.matches(template);
   });
@@ -904,7 +968,7 @@ export const createStatefulSetItems = (
 export const createPodItems = (resources: any): OverviewItem[] => {
   const { pods } = resources;
   return _.reduce(
-    pods.data,
+    pods?.data,
     (acc, pod) => {
       const obj: PodKind = {
         ...pod,

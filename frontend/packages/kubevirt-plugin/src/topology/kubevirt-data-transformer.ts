@@ -50,7 +50,7 @@ export const createVMOverviewItem = (vm: VMKind, vmi: VMIKind, resources: any): 
   const buildConfigs = getBuildConfigsForResource(obj, resources);
   const services = getServicesForResource(obj, resources);
   const routes = getRoutesForServices(services, resources);
-  const laucherPod = findVMIPod(vmi, resources.pods.data);
+  const laucherPod = findVMIPod(vmi, resources.pods?.data);
   const pods = laucherPod ? [laucherPod] : [];
   return {
     buildConfigs,
@@ -70,9 +70,9 @@ export const createVMOverviewItems = (resources: any): OverviewItem[] => {
     return [];
   }
 
-  return resources.virtualmachines.data.map((vm: any) => {
+  return resources.virtualmachines?.data.map((vm: any) => {
     const { name } = vm.metadata;
-    const vmis = resources.virtualmachineinstances.data;
+    const vmis = resources.virtualmachineinstances?.data;
     const vmi = vmis.find((instance) => instance.metadata.name === name) as VMIKind;
 
     return createVMOverviewItem(vm, vmi, resources);
@@ -112,7 +112,7 @@ const createTopologyVMNodeData = (
       kind: referenceFor(vm),
       vmi,
       vmStatusBundle,
-      osImage: getOperatingSystemImage(vm as VMKind, resources.virtualmachinetemplates.data),
+      osImage: getOperatingSystemImage(vm as VMKind, resources.virtualmachinetemplates?.data),
     },
   };
 };

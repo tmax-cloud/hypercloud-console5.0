@@ -10,9 +10,9 @@ type ComponentProps = {
 };
 
 export const withEditReviewAccess = (verb: K8sVerb) => (WrappedComponent: React.ComponentType) => {
-  const Component: React.FC<ComponentProps> = (props) => {
+  const Component: React.FC<ComponentProps> = props => {
     const resourceObj = getTopologyResourceObject(props.element.getData());
-    const resourceModel = modelFor(referenceFor(resourceObj));
+    const resourceModel = !!modelFor(referenceFor(resourceObj)) ? modelFor(referenceFor(resourceObj)) : { abbr: '', kind: '', label: '', labelPlural: '', plural: '', apiGroup: "" };
     const editAccess = useAccessReview({
       group: resourceModel.apiGroup,
       verb,

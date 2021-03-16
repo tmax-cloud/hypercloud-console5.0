@@ -6,9 +6,9 @@ import {
   apiVersionForReference,
 } from '@console/internal/module/k8s';
 import { getImageForIconClass } from '@console/internal/components/catalog/catalog-item-icon';
-import { getKnativeTopologyDataModel } from '@console/knative-plugin/src/topology/data-transformer';
+// import { getKnativeTopologyDataModel } from '@console/knative-plugin/src/topology/data-transformer';
 import {
-  getKubevirtTopologyDataModel,
+  // getKubevirtTopologyDataModel,
   kubevirtAllowedResources,
 } from '@console/kubevirt-plugin/src/topology/kubevirt-data-transformer';
 import {
@@ -30,8 +30,8 @@ import {
   getTopologyNodeItem,
   mergeGroup,
 } from './transform-utils';
-import { getOperatorTopologyDataModel } from '../operators/operators-data-transformer';
-import { getHelmTopologyDataModel } from '../helm/helm-data-transformer';
+// import { getOperatorTopologyDataModel } from '../operators/operators-data-transformer';
+// import { getHelmTopologyDataModel } from '../helm/helm-data-transformer';
 
 export const getFilteredTrafficWorkload = (nodes: KialiNode[]): KialiNode[] =>
   nodes.filter(({ data }) => data.nodeType === TYPE_WORKLOAD);
@@ -43,10 +43,10 @@ export const getTrafficConnectors = (
   const filteredWorkload = getFilteredTrafficWorkload(trafficData.nodes);
   return trafficData.edges.reduce((acc, { data }) => {
     const { data: sourceTrafficNode } = filteredWorkload.find(
-      (wrkld) => wrkld.data.id === data.source,
+      (wrkld) => wrkld?.data?.id === data.source,
     );
     const { data: targetTrafficNode } = filteredWorkload.find(
-      (wrkld) => wrkld.data.id === data.target,
+      (wrkld) => wrkld?.data?.id === data.target,
     );
     const sourceResourceNode = resources.find((res) => {
       return res.metadata.name === sourceTrafficNode[sourceTrafficNode.nodeType];
@@ -84,13 +84,13 @@ const getBaseTopologyDataModel = (
   const transformResourceData = createInstanceForResource(resources, utils, installedOperators);
 
   _.forEach(transformBy, (key) => {
-    if (!_.isEmpty(resources[key].data)) {
+    if (!_.isEmpty(resources[key]?.data)) {
       const typedDataModel: TopologyDataModel = {
         graph: { nodes: [], edges: [], groups: [] },
         topology: {},
       };
 
-      transformResourceData[key](resources[key].data).forEach((item) => {
+      transformResourceData[key](resources[key]?.data).forEach((item) => {
         const { obj: deploymentConfig } = item;
         const uid = _.get(deploymentConfig, ['metadata', 'uid']);
         typedDataModel.topology[uid] = createTopologyNodeData(
@@ -131,7 +131,7 @@ export const transformTopologyData = (
   const allResourcesList = _.flatten(
     allResourceTypes.map((resourceKind) => {
       return resources[resourceKind]
-        ? resources[resourceKind].data.map((res) => {
+        ? resources[resourceKind]?.data.map((res) => {
             const resKind = resources[resourceKind].kind;
             let kind = resKind;
             let apiVersion;
@@ -156,50 +156,50 @@ export const transformTopologyData = (
   const dataResources: TopologyDataResources = Object.keys(resources).reduce((obj, key) => {
     obj[key] = {
       ...resources[key],
-      data: [...resources[key].data],
+      data: [...resources[key]?.data],
     };
     return obj;
   }, {} as TopologyDataResources);
 
   // TODO: plugins
-  const knativeModel = getKnativeTopologyDataModel(
-    dataResources,
-    allResourcesList,
-    installedOperators,
-    utils,
-  );
-  addToTopologyDataModel(knativeModel, topologyGraphAndNodeData);
+  // const knativeModel = getKnativeTopologyDataModel(
+  //   dataResources,
+  //   allResourcesList,
+  //   installedOperators,
+  //   utils,
+  // );
+  // addToTopologyDataModel(knativeModel, topologyGraphAndNodeData);
 
-  const operatorsModel = getOperatorTopologyDataModel(
-    dataResources,
-    allResourcesList,
-    installedOperators,
-    utils,
-    transformBy,
-    serviceBindingRequests,
-  );
-  addToTopologyDataModel(operatorsModel, topologyGraphAndNodeData);
+  // const operatorsModel = getOperatorTopologyDataModel(
+  //   dataResources,
+  //   allResourcesList,
+  //   installedOperators,
+  //   utils,
+  //   transformBy,
+  //   serviceBindingRequests,
+  // );
+  // addToTopologyDataModel(operatorsModel, topologyGraphAndNodeData);
 
-  const helmModel = getHelmTopologyDataModel(
-    dataResources,
-    allResourcesList,
-    installedOperators,
-    utils,
-    transformBy,
-    serviceBindingRequests,
-    helmResourcesMap,
-  );
-  addToTopologyDataModel(helmModel, topologyGraphAndNodeData);
+  // const helmModel = getHelmTopologyDataModel(
+  //   dataResources,
+  //   allResourcesList,
+  //   installedOperators,
+  //   utils,
+  //   transformBy,
+  //   serviceBindingRequests,
+  //   helmResourcesMap,
+  // );
+  // addToTopologyDataModel(helmModel, topologyGraphAndNodeData);
 
-  const vmsModel = getKubevirtTopologyDataModel(
-    dataResources,
-    allResourcesList,
-    installedOperators,
-    utils,
-    transformBy,
-    serviceBindingRequests,
-  );
-  addToTopologyDataModel(vmsModel, topologyGraphAndNodeData);
+  // const vmsModel = getKubevirtTopologyDataModel(
+  //   dataResources,
+  //   allResourcesList,
+  //   installedOperators,
+  //   utils,
+  //   transformBy,
+  //   serviceBindingRequests,
+  // );
+  // addToTopologyDataModel(vmsModel, topologyGraphAndNodeData);
 
   const baseModel = getBaseTopologyDataModel(
     dataResources,

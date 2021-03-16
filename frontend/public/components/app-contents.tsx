@@ -18,7 +18,6 @@ import { RootState } from '../redux';
 import { pluralToKind } from './hypercloud/form';
 import { getPerspectives } from '../hypercloud/perspectives';
 import { GrafanaPage } from './hypercloud/grafana';
-
 //PF4 Imports
 import { PageSection, PageSectionVariants } from '@patternfly/react-core';
 import WelcomePage from './hypercloud/login/welcome';
@@ -153,6 +152,9 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective }) => (
           <Route path="/search/all-namespaces" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search/ns/:ns" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search" exact component={NamespaceRedirect} />
+          <LazyRoute path="/topology/all-namespaces" exact loader={() => import('../../packages/dev-console/src/components/topology/TopologyPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.TopologyPage))} />
+          <LazyRoute path="/topology/ns/:ns" exact loader={() => import('../../packages/dev-console/src/components/topology/TopologyPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.TopologyPage))} />
+          <Route path="/topology" exact component={NamespaceRedirect} />
           <Route path="/welcome" exact component={WelcomePage} />
 
           <LazyRoute path="/kiali/all-namespaces" exact loader={() => import('./hypercloud/kiali' /* webpackChunkName: "kiali" */).then(m => NamespaceFromURL(m.KialiPage))} />
