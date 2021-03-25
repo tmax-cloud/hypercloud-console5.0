@@ -34,7 +34,7 @@ import {
   getServiceClassImage,
   getTemplateIcon,
 } from './catalog-item-icon';
-import { ClusterServiceClassModel, TemplateModel } from '../../models';
+import { ClusterServiceClassModel, TemplateModel, ServiceClassModel } from '../../models';
 import * as plugins from '../../plugins';
 import { coFetch, coFetchJSON } from '../../co-fetch';
 
@@ -48,6 +48,7 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
 
   componentDidUpdate(prevProps) {
     const {
+      serviceClasses,
       clusterServiceClasses,
       templateMetadata,
       projectTemplateMetadata,
@@ -59,6 +60,7 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
     if (
       (!prevProps.loaded && loaded) ||
       !_.isEqual(namespace, prevProps.namespace) ||
+      !_.isEqual(serviceClasses, prevProps.serviceClasses) ||
       !_.isEqual(clusterServiceClasses, prevProps.clusterServiceClasses) ||
       !_.isEqual(templateMetadata, prevProps.templateMetadata) ||
       !_.isEqual(projectTemplateMetadata, prevProps.projectTemplateMetadata) ||
@@ -81,6 +83,7 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
     ) as Item[];
 
     const {
+      serviceClasses,
       clusterServiceClasses,
       imageStreams,
       templateMetadata,
@@ -88,6 +91,7 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
       helmCharts,
       loaded,
     } = this.props;
+    let serviceClassItems: Item[] = [];
     let clusterServiceClassItems: Item[] = [];
     let imageStreamItems: Item[] = [];
     let templateItems: Item[] = [];
@@ -96,6 +100,10 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
 
     if (!loaded) {
       return [];
+    }
+
+    if (serviceClasses) {
+      serviceClassItems = this.normalizeServiceClasses(serviceClasses.data);
     }
 
     if (clusterServiceClasses) {
@@ -121,6 +129,7 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
     }
 
     const items: Item[] = [
+      ...serviceClassItems,
       ...clusterServiceClassItems,
       ...imageStreamItems,
       ...templateItems,
@@ -137,13 +146,6 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
     return _.reduce(
       serviceClasses,
       (acc, serviceClass) => {
-        // Prefer native templates to template-service-broker service classes.
-        if (
-          serviceClass.status.removedFromBrokerCatalog ||
-          serviceClass.spec.clusterServiceBrokerName === 'template-service-broker'
-        ) {
-          return acc;
-        }
 
         const iconClass = getServiceClassIcon(serviceClass);
         const tileImgUrl = getServiceClassImage(serviceClass);
@@ -195,6 +197,37 @@ export class CatalogListPage extends React.Component<CatalogListPageProps, Catal
           supportUrl: annotations[ANNOTATIONS.supportURL],
           href: `/catalog/instantiate-template?template=${name}&template-ns=${namespace}&preselected-ns=${this
             .props.namespace || ''}`,
+        });
+        return acc;
+      },
+      [] as Item[],
+    );
+  }
+
+  normalizeServiceClasses(serviceClasses: K8sResourceKind[]) {
+    const { namespace = '' } = this.props;
+    return _.reduce(
+      serviceClasses,
+      (acc, serviceClass) => {
+
+        const iconClass = getServiceClassIcon(serviceClass);
+        const tileImgUrl = getServiceClassImage(serviceClass);
+
+        acc.push({
+          obj: serviceClass,
+          kind: 'ServiceClass',
+          tileName: serviceClassDisplayName(serviceClass),
+          tileIconClass: tileImgUrl ? null : iconClass,
+          tileImgUrl,
+          tileDescription: serviceClass.spec.description,
+          tileProvider: _.get(serviceClass, 'spec.externalMetadata.providerDisplayName'),
+          tags: serviceClass.spec.tags,
+          createLabel: 'Create Service Instance',
+          // href: `/catalog/create-service-instance?service-class=${serviceClass.metadata.name}&preselected-ns=${namespace}`,
+          href: `/k8s/ns/${namespace}/serviceinstances/~new`,
+          supportUrl: _.get(serviceClass, 'spec.externalMetadata.supportUrl'),
+          longDescription: _.get(serviceClass, 'spec.externalMetadata.longDescription'),
+          documentationUrl: _.get(serviceClass, 'spec.externalMetadata.urlDescription'),
         });
         return acc;
       },
@@ -432,6 +465,16 @@ export const Catalog = connectToFlags<CatalogProps>(
       [
         {
           isList: true,
+          kind: referenceForModel(ServiceClassModel),
+          namespaced: true,
+          prop: 'serviceClasses',
+        },
+      ]
+    ),
+    ...(
+      [
+        {
+          isList: true,
           kind: 'Template',
           namespaced: true,
           prop: 'Template',
@@ -488,6 +531,7 @@ export const CatalogPage = withStartGuide(({ match, noProjectsAvailable }) => {
 });
 
 export type CatalogListPageProps = {
+  serviceClasses?: FirehoseResult<K8sResourceKind[]>;
   clusterServiceClasses?: FirehoseResult<K8sResourceKind[]>;
   imageStreams?: FirehoseResult<K8sResourceKind[]>;
   templateMetadata?: PartialObjectMetadata[];

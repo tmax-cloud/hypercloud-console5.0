@@ -26,6 +26,7 @@ const MasterNav = () => (
           <ResourceNSLink resource="events" name={t('COMMON:MSG_LNB_MENU_6')} />
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_98')} type="grafana" />
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_99')} type="kibana" />
+          <HrefLink href="/add" name="Add" />
           <HrefLink href="/topology" name="Topology" />
         </NavSection>
         {/* <NavSection title="Operators" /> */}

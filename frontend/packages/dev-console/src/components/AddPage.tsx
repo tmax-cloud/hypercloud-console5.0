@@ -116,7 +116,7 @@ const RenderEmptyState = ({ namespace }) => {
   );
 };
 
-const AddPage: React.FC<AddPageProps> = ({ match }) => {
+export const AddPage: React.FC<AddPageProps> = ({ match }) => {
   const namespace = match.params.ns;
 
   return (
@@ -125,7 +125,7 @@ const AddPage: React.FC<AddPageProps> = ({ match }) => {
         <title>+Add</title>
       </Helmet>
       <NamespacedPage>
-        <Firehose resources={[{ kind: 'Project', prop: 'projects', isList: true }]}>
+        <Firehose resources={[{ kind: 'Namespace', prop: 'projects', isList: true }]}>
           <ProjectsExistWrapper title="Add">
             {namespace ? (
               <RenderEmptyState namespace={namespace} />

@@ -52,6 +52,7 @@ export const createInstanceForResource = (
     deploymentConfigs: transformResourceData.createDeploymentConfigItems,
     daemonSets: transformResourceData.createDaemonSetItems,
     statefulSets: transformResourceData.createStatefulSetItems,
+    secrets: transformResourceData.createSecretItems
   };
 };
 

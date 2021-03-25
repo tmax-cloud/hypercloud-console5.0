@@ -20,7 +20,7 @@ export const k8sBasePath = `${window.SERVER_FLAGS.basePath}api/kubernetes`;
 export const referenceForGroupVersionKind = (group: string) => (version: string) => (
   kind: string,
 ) => {
-  if (kind === 'PipelineResource' || kind === 'ClusterTask' || kind === 'Task' || kind === 'Pipeline' || kind === 'Service' || kind === 'ClusterServiceVersion' || kind === 'PipelineRun' ) {
+  if (kind === 'PipelineResource' || kind === 'ClusterTask' || kind === 'Task' || kind === 'Pipeline' || kind === 'Service' || kind === 'ClusterServiceVersion' || kind === 'PipelineRun' || kind === 'ServiceClass' || kind === 'ClusterServiceClass' ) {
     return kind;
   }
   return [group, version, kind].join('~')
