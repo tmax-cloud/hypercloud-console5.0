@@ -153,6 +153,9 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective }) => (
           <Route path="/search/all-namespaces" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search/ns/:ns" exact component={NamespaceFromURL(SearchPage)} />
           <Route path="/search" exact component={NamespaceRedirect} />
+          <LazyRoute path="/topology/all-namespaces" exact loader={() => import('../../packages/dev-console/src/components/topology/TopologyPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.TopologyPage))} />
+          <LazyRoute path="/topology/ns/:ns" exact loader={() => import('../../packages/dev-console/src/components/topology/TopologyPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.TopologyPage))} />
+          <Route path="/topology" exact component={NamespaceRedirect} />
           <LazyRoute path="/add/all-namespaces" exact loader={() => import('../../packages/dev-console/src/components/AddPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.AddPage))} />
           <LazyRoute path="/add/ns/:ns" exact loader={() => import('../../packages/dev-console/src/components/AddPage' /* webpackChunkName: "import-yaml" */).then(m => NamespaceFromURL(m.AddPage))} />
           <Route path="/add" exact component={NamespaceRedirect} />

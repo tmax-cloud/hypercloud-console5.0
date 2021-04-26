@@ -1,15 +1,15 @@
 import * as _ from 'lodash';
 import { K8sResourceKind, isGroupVersionKind, kindForReference, apiVersionForReference } from '@console/internal/module/k8s';
 import { getImageForIconClass } from '@console/internal/components/catalog/catalog-item-icon';
-import { getKnativeTopologyDataModel } from '@console/knative-plugin/src/topology/data-transformer';
-import { getKubevirtTopologyDataModel, kubevirtAllowedResources } from '@console/kubevirt-plugin/src/topology/kubevirt-data-transformer';
+// import { getKnativeTopologyDataModel } from '@console/knative-plugin/src/topology/data-transformer';
+// import { getKubevirtTopologyDataModel, kubevirtAllowedResources } from '@console/kubevirt-plugin/src/topology/kubevirt-data-transformer';
 import { TopologyDataModel, TopologyDataResources, Edge, TrafficData, KialiNode } from '../topology-types';
 import { TYPE_TRAFFIC_CONNECTOR, TYPE_WORKLOAD } from '../components/const';
 import { HelmReleaseResourcesMap } from '../../helm/helm-types';
 import { allowedResources } from '../topology-utils';
 import { addToTopologyDataModel, createInstanceForResource, createTopologyNodeData, getTopologyEdgeItems, getTopologyGroupItems, getTopologyNodeItem, mergeGroup } from './transform-utils';
-import { getOperatorTopologyDataModel } from '../operators/operators-data-transformer';
-import { getHelmTopologyDataModel } from '../helm/helm-data-transformer';
+// import { getOperatorTopologyDataModel } from '../operators/operators-data-transformer';
+// import { getHelmTopologyDataModel } from '../helm/helm-data-transformer';
 
 export const getFilteredTrafficWorkload = (nodes: KialiNode[]): KialiNode[] => nodes.filter(({ data }) => data.nodeType === TYPE_WORKLOAD);
 
@@ -45,13 +45,13 @@ const getBaseTopologyDataModel = (resources: TopologyDataResources, allResources
   const transformResourceData = createInstanceForResource(resources, utils, installedOperators);
 
   _.forEach(transformBy, key => {
-    if (!_.isEmpty(resources[key].data)) {
+    if (!_.isEmpty(resources[key]?.data)) {
       const typedDataModel: TopologyDataModel = {
         graph: { nodes: [], edges: [], groups: [] },
         topology: {},
       };
 
-      transformResourceData[key](resources[key].data).forEach(item => {
+      transformResourceData[key](resources[key]?.data).forEach(item => {
         const { obj: deploymentConfig } = item;
         const uid = _.get(deploymentConfig, ['metadata', 'uid']);
         typedDataModel.topology[uid] = createTopologyNodeData(item, TYPE_WORKLOAD, getImageForIconClass(`icon-openshift`));
@@ -76,7 +76,7 @@ export const transformTopologyData = (resources: TopologyDataResources, transfor
     topology: {},
   };
   // TODO: plugin
-  const allResourceTypes = [...allowedResources, ...kubevirtAllowedResources];
+  const allResourceTypes = [...allowedResources ];
   const allResourcesList = _.flatten(
     allResourceTypes.map(resourceKind => {
       return resources[resourceKind]
@@ -111,17 +111,17 @@ export const transformTopologyData = (resources: TopologyDataResources, transfor
   }, {} as TopologyDataResources);
 
   // TODO: plugins
-  const knativeModel = getKnativeTopologyDataModel(dataResources, allResourcesList, installedOperators, utils);
-  addToTopologyDataModel(knativeModel, topologyGraphAndNodeData);
+  // const knativeModel = getKnativeTopologyDataModel(dataResources, allResourcesList, installedOperators, utils);
+  // addToTopologyDataModel(knativeModel, topologyGraphAndNodeData);
 
-  const operatorsModel = getOperatorTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests);
-  addToTopologyDataModel(operatorsModel, topologyGraphAndNodeData);
+  // const operatorsModel = getOperatorTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests);
+  // addToTopologyDataModel(operatorsModel, topologyGraphAndNodeData);
 
-  const helmModel = getHelmTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests, helmResourcesMap);
-  addToTopologyDataModel(helmModel, topologyGraphAndNodeData);
+  // const helmModel = getHelmTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests, helmResourcesMap);
+  // addToTopologyDataModel(helmModel, topologyGraphAndNodeData);
 
-  const vmsModel = getKubevirtTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests);
-  addToTopologyDataModel(vmsModel, topologyGraphAndNodeData);
+  // const vmsModel = getKubevirtTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests);
+  // addToTopologyDataModel(vmsModel, topologyGraphAndNodeData);
 
   const baseModel = getBaseTopologyDataModel(dataResources, allResourcesList, installedOperators, utils, transformBy, serviceBindingRequests);
   addToTopologyDataModel(baseModel, topologyGraphAndNodeData);

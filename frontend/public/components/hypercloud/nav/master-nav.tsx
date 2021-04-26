@@ -31,6 +31,7 @@ const MasterNav = () => (
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_98')} type="grafana" />
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_99')} type="kibana" />
           <NewTabLink name="Managed GitLab" type="git" />
+          <HrefLink href="/topology" name="Topology" />
         </NavSection>
         <NavSection title="Operators" />
         <NavSection title={t('COMMON:MSG_LNB_MENU_22')}>

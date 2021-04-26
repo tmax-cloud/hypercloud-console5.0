@@ -9,12 +9,12 @@ import { Visualization, VisualizationSurface, isNode, isEdge, BaseEdge, Model, S
 import { RootState } from '@console/internal/redux';
 import { getActiveApplication } from '@console/internal/reducers/ui';
 import { selectOverviewDetailsTab } from '@console/internal/actions/ui';
-import { getEventSourceStatus } from '@console/knative-plugin/src/topology/knative-topology-utils';
+// import { getEventSourceStatus } from '@console/knative-plugin/src/topology/knative-topology-utils';
 import { getQueryArgument, setQueryArgument, removeQueryArgument } from '@console/internal/components/utils';
-import KnativeComponentFactory from '@console/knative-plugin/src/topology/components/knativeComponentFactory';
-import { KubevirtComponentFactory } from '@console/kubevirt-plugin/src/topology/components/kubevirtComponentFactory';
-import { TYPE_VIRTUAL_MACHINE } from '@console/kubevirt-plugin/src/topology/components/const';
-import TopologyVmPanel from '@console/kubevirt-plugin/src/topology/TopologyVmPanel';
+// import KnativeComponentFactory from '@console/knative-plugin/src/topology/components/knativeComponentFactory';
+// import { KubevirtComponentFactory } from '@console/kubevirt-plugin/src/topology/components/kubevirtComponentFactory';
+// import { TYPE_VIRTUAL_MACHINE } from '@console/kubevirt-plugin/src/topology/components/const';
+// import TopologyVmPanel from '@console/kubevirt-plugin/src/topology/TopologyVmPanel';
 import { useAddToProjectAccess } from '../../utils/useAddToProjectAccess';
 import TopologySideBar from './TopologySideBar';
 import { GraphData, TopologyDataModel, TopologyDataObject, SHOW_GROUPING_HINT_EVENT, ShowGroupingHintEventListener } from './topology-types';
@@ -65,10 +65,10 @@ const Topology: React.FC<ComponentProps> = ({ data, filters, application, namesp
   const visRef = React.useRef<Visualization | null>(null);
   const applicationRef = React.useRef<string>(null);
   const componentFactoryRef = React.useRef<ComponentFactory | null>(null);
-  const knativeComponentFactoryRef = React.useRef<KnativeComponentFactory | null>(null);
+  // const knativeComponentFactoryRef = React.useRef<KnativeComponentFactory | null>(null);
   const helmComponentFactoryRef = React.useRef<HelmComponentFactory | null>(null);
   const operatorsComponentFactoryRef = React.useRef<OperatorsComponentFactory | null>(null);
-  const vmsComponentFactoryRef = React.useRef<KubevirtComponentFactory | null>(null);
+  // const vmsComponentFactoryRef = React.useRef<KubevirtComponentFactory | null>(null);
   const [layout, setLayout] = React.useState<string>(graphModel.graph.layout);
   const [model, setModel] = React.useState<Model>();
   const [graphData, setGraphData] = React.useState<GraphData>();
@@ -79,28 +79,28 @@ const Topology: React.FC<ComponentProps> = ({ data, filters, application, namesp
   if (!componentFactoryRef.current) {
     componentFactoryRef.current = new ComponentFactory(serviceBinding);
   }
-  if (!knativeComponentFactoryRef.current) {
-    knativeComponentFactoryRef.current = new KnativeComponentFactory(serviceBinding);
-  }
+  // if (!knativeComponentFactoryRef.current) {
+  //   knativeComponentFactoryRef.current = new KnativeComponentFactory(serviceBinding);
+  // }
   if (!helmComponentFactoryRef.current) {
     helmComponentFactoryRef.current = new HelmComponentFactory(serviceBinding);
   }
   if (!operatorsComponentFactoryRef.current) {
     operatorsComponentFactoryRef.current = new OperatorsComponentFactory(serviceBinding);
   }
-  if (!vmsComponentFactoryRef.current) {
-    vmsComponentFactoryRef.current = new KubevirtComponentFactory(serviceBinding);
-  }
+  // if (!vmsComponentFactoryRef.current) {
+  //   vmsComponentFactoryRef.current = new KubevirtComponentFactory(serviceBinding);
+  // }
 
   if (!visRef.current) {
     visRef.current = new Visualization();
     visRef.current.registerLayoutFactory(layoutFactory);
     visRef.current.registerComponentFactory(componentFactoryRef.current.getFactory());
     // TODO: Use Plugins
-    visRef.current.registerComponentFactory(knativeComponentFactoryRef.current.getFactory());
+    // visRef.current.registerComponentFactory(knativeComponentFactoryRef.current.getFactory());
     visRef.current.registerComponentFactory(helmComponentFactoryRef.current.getFactory());
     visRef.current.registerComponentFactory(operatorsComponentFactoryRef.current.getFactory());
-    visRef.current.registerComponentFactory(vmsComponentFactoryRef.current.getFactory());
+    // visRef.current.registerComponentFactory(vmsComponentFactoryRef.current.getFactory());
     visRef.current.addEventListener<SelectionEventListener>(SELECTION_EVENT, (ids: string[]) => {
       // set empty selection when selecting the graph
       if (ids.length > 0 && ids[0] === graphModel.graph.id) {
@@ -285,9 +285,9 @@ const Topology: React.FC<ComponentProps> = ({ data, filters, application, namesp
       if (selectedEntity.getType() === TYPE_OPERATOR_BACKED_SERVICE) {
         return null;
       }
-      if (selectedEntity.getType() === TYPE_VIRTUAL_MACHINE) {
-        return <TopologyVmPanel vmNode={selectedEntity} />;
-      }
+      // if (selectedEntity.getType() === TYPE_VIRTUAL_MACHINE) {
+      //   return <TopologyVmPanel vmNode={selectedEntity} />;
+      // }
       return <TopologyResourcePanel item={selectedEntity.getData() as TopologyDataObject} />;
     }
 
@@ -330,7 +330,7 @@ const TopologyStateToProps = (state: RootState): StateProps => {
     filters: getTopologyFilters(state),
     application: getActiveApplication(state),
     serviceBinding: getServiceBindingStatus(state),
-    eventSourceEnabled: getEventSourceStatus(state),
+    eventSourceEnabled: false,
   };
 };
 

@@ -31,6 +31,7 @@ export const createInstanceForResource = (resources: TopologyDataResources, util
     deploymentConfigs: transformResourceData.createDeploymentConfigItems,
     daemonSets: transformResourceData.createDaemonSetItems,
     statefulSets: transformResourceData.createStatefulSetItems,
+    pods: transformResourceData.createPodItems,
   };
 };
 

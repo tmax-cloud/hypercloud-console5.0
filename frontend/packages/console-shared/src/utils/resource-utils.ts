@@ -50,13 +50,13 @@ import {
 
 export const getResourceList = (namespace: string, resList?: any) => {
   let resources: FirehoseResource[] = [
-    {
-      isList: true,
-      kind: 'DeploymentConfig',
-      namespace,
-      prop: 'deploymentConfigs',
-      optional: true,
-    },
+    // {
+    //   isList: true,
+    //   kind: 'DeploymentConfig',
+    //   namespace,
+    //   prop: 'deploymentConfigs',
+    //   optional: true,
+    // },
     {
       isList: true,
       kind: 'Deployment',
@@ -78,20 +78,20 @@ export const getResourceList = (namespace: string, resList?: any) => {
       prop: 'pods',
       optional: true,
     },
-    {
-      isList: true,
-      kind: 'ReplicationController',
-      namespace,
-      prop: 'replicationControllers',
-      optional: true,
-    },
-    {
-      isList: true,
-      kind: 'Route',
-      namespace,
-      prop: 'routes',
-      optional: true,
-    },
+    // {
+    //   isList: true,
+    //   kind: 'ReplicationController',
+    //   namespace,
+    //   prop: 'replicationControllers',
+    //   optional: true,
+    // },
+    // {
+    //   isList: true,
+    //   kind: 'Route',
+    //   namespace,
+    //   prop: 'routes',
+    //   optional: true,
+    // },
     {
       isList: true,
       kind: 'Service',
@@ -106,13 +106,13 @@ export const getResourceList = (namespace: string, resList?: any) => {
       prop: 'replicaSets',
       optional: true,
     },
-    {
-      isList: true,
-      kind: 'BuildConfig',
-      namespace,
-      prop: 'buildConfigs',
-      optional: true,
-    },
+    // {
+    //   isList: true,
+    //   kind: 'BuildConfig',
+    //   namespace,
+    //   prop: 'buildConfigs',
+    //   optional: true,
+    // },
     {
       isList: true,
       kind: 'Build',
@@ -692,7 +692,7 @@ export const getPodTemplate = (resource: K8sResourceKind): PodTemplate => {
 
 export const getRoutesForServices = (services: K8sResourceKind[], resources: any): RouteKind[] => {
   const { routes } = resources;
-  return _.filter(routes.data, (route) => {
+  return _.filter(routes?.data, (route) => {
     const name = _.get(route, 'spec.to.name');
     return _.some(services, { metadata: { name } });
   });
@@ -704,7 +704,7 @@ export const getServicesForResource = (
 ): K8sResourceKind[] => {
   const { services } = resources;
   const template: PodTemplate = getPodTemplate(resource);
-  return _.filter(services.data, (service: K8sResourceKind) => {
+  return _.filter(services?.data, (service: K8sResourceKind) => {
     const selector = new LabelSelector(_.get(service, 'spec.selector', {}));
     return selector.matches(template);
   });
@@ -913,9 +913,9 @@ export const createPodItems = (resources: any): OverviewItem[] => {
       };
       const owners = _.get(obj, 'metadata.ownerReferences');
       const phase = _.get(obj, 'status.phase');
-      if (!_.isEmpty(owners) || phase === 'Succeeded' || phase === 'Failed') {
-        return acc;
-      }
+      // if (!_.isEmpty(owners) || phase === 'Succeeded' || phase === 'Failed') {
+      //   return acc;
+      // }
 
       const alerts = getPodAlerts(obj);
       const services = getServicesForResource(obj, resources);

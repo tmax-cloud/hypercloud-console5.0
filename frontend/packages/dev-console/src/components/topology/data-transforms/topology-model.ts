@@ -1,9 +1,9 @@
 import { EdgeModel, Model, NodeModel, createAggregateEdges } from '@console/topology';
 import { ALL_APPLICATIONS_KEY } from '@console/shared/src';
-import { getKnativeNodeModel, getKnativeGroupModel, getKnativeEdgeModel } from '@console/knative-plugin/src/topology/knative-topology-model';
-import { getKubevirtGroupModel, getKubevirtNodeModel, getKubevirtEdgeModel } from '@console/kubevirt-plugin/src/topology/kubevirt-topology-model';
-import { getHelmEdgeModel, getHelmGroupModel, getHelmNodeModel } from '../helm/helm-topology-model';
-import { getOperatorEdgeModel, getOperatorGroupModel, getOperatorNodeModel } from '../operators/operators-topology-model';
+// import { getKnativeNodeModel, getKnativeGroupModel, getKnativeEdgeModel } from '@console/knative-plugin/src/topology/knative-topology-model';
+// import { getKubevirtGroupModel, getKubevirtNodeModel, getKubevirtEdgeModel } from '@console/kubevirt-plugin/src/topology/kubevirt-topology-model';
+// import { getHelmEdgeModel, getHelmGroupModel, getHelmNodeModel } from '../helm/helm-topology-model';
+// import { getOperatorEdgeModel, getOperatorGroupModel, getOperatorNodeModel } from '../operators/operators-topology-model';
 import { TopologyFilters } from '../filters';
 import { TopologyDataModel, TopologyDataObject, Node } from '../topology-types';
 import { TYPE_APPLICATION_GROUP, TYPE_AGGREGATE_EDGE, NODE_WIDTH, NODE_HEIGHT, NODE_PADDING, GROUP_WIDTH, GROUP_HEIGHT, GROUP_PADDING } from '../components/const';
@@ -23,22 +23,22 @@ const getApplicationGroupForNode = (node: Node, groups: NodeModel[]): NodeModel 
 export const topologyModelFromDataModel = (dataModel: TopologyDataModel, application: string = ALL_APPLICATIONS_KEY, filters?: TopologyFilters): Model => {
   const groupNodes: NodeModel[] = dataModel.graph.groups.map(d => {
     // TODO: Change to use plugins
-    let node = getKnativeGroupModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getKubevirtGroupModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getHelmGroupModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getOperatorGroupModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
+    // let node = getKnativeGroupModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getKubevirtGroupModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getHelmGroupModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getOperatorGroupModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
     const data: TopologyDataObject = dataModel.topology[d.id] || dataObjectFromModel(d);
     data.groupResources = d.nodes.map(id => dataModel.topology[id]);
 
@@ -61,22 +61,22 @@ export const topologyModelFromDataModel = (dataModel: TopologyDataModel, applica
 
   const nodes: NodeModel[] = dataModel.graph.nodes.map(d => {
     // TODO: Change to use plugins
-    let node = getKnativeNodeModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getKubevirtNodeModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getHelmNodeModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
-    node = getOperatorNodeModel(d, dataModel, filters);
-    if (node) {
-      return node;
-    }
+    // let node = getKnativeNodeModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getKubevirtNodeModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getHelmNodeModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
+    // node = getOperatorNodeModel(d, dataModel, filters);
+    // if (node) {
+    //   return node;
+    // }
 
     return {
       width: NODE_WIDTH,
@@ -114,22 +114,22 @@ export const topologyModelFromDataModel = (dataModel: TopologyDataModel, applica
     .map(
       (d): EdgeModel => {
         // TODO: Change to use plugins
-        let edge = getKnativeEdgeModel(d, dataModel, filters);
-        if (edge) {
-          return edge;
-        }
-        edge = getKubevirtEdgeModel(d, dataModel, filters);
-        if (edge) {
-          return edge;
-        }
-        edge = getHelmEdgeModel(d, dataModel, filters);
-        if (edge) {
-          return edge;
-        }
-        edge = getOperatorEdgeModel(d, dataModel, filters);
-        if (edge) {
-          return edge;
-        }
+        // let edge = getKnativeEdgeModel(d, dataModel, filters);
+        // if (edge) {
+        //   return edge;
+        // }
+        // edge = getKubevirtEdgeModel(d, dataModel, filters);
+        // if (edge) {
+        //   return edge;
+        // }
+        // edge = getHelmEdgeModel(d, dataModel, filters);
+        // if (edge) {
+        //   return edge;
+        // }
+        // edge = getOperatorEdgeModel(d, dataModel, filters);
+        // if (edge) {
+        //   return edge;
+        // }
 
         return {
           data: d,

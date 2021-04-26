@@ -1,0 +1,1 @@
+export const allowedHyperCloudResources = ['deployments', 'daemonSets', 'statefulSets'];
