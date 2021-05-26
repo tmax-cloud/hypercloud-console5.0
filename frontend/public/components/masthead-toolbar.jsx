@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash-es';
 import { connect } from 'react-redux';
-import { BellIcon, EllipsisVIcon, PlusCircleIcon, QuestionCircleIcon, ClockIcon, GlobeAmericasIcon, AngleDownIcon,UserIcon } from '@patternfly/react-icons';
+import { BellIcon, EllipsisVIcon, PlusCircleIcon, QuestionCircleIcon, ClockIcon, GlobeAmericasIcon, AngleDownIcon, UserIcon } from '@patternfly/react-icons';
 import { ApplicationLauncher, ApplicationLauncherGroup, ApplicationLauncherItem, ApplicationLauncherSeparator, NotificationBadge, Toolbar, ToolbarGroup, ToolbarItem, TooltipPosition, Tooltip, Button, Badge } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { FLAGS, YellowExclamationTriangleIcon } from '@console/shared';
@@ -340,7 +340,7 @@ class MastheadToolbarContents_ extends React.Component {
       //   ],
       // });
 
-      return <ApplicationLauncher aria-label="Utility menu" className="co-app-launcher" onSelect={this._onKebabDropdownSelect} onToggle={this._onKebabDropdownToggle} isOpen={isKebabDropdownOpen} items={this._renderApplicationItems(actions)} position="right" toggleIcon={<EllipsisVIcon color="white"/>} isGrouped />;
+      return <ApplicationLauncher aria-label="Utility menu" className="co-app-launcher" onSelect={this._onKebabDropdownSelect} onToggle={this._onKebabDropdownToggle} isOpen={isKebabDropdownOpen} items={this._renderApplicationItems(actions)} position="right" toggleIcon={<EllipsisVIcon color="white" />} isGrouped />;
     }
 
     if (_.isEmpty(actions)) {
@@ -349,9 +349,9 @@ class MastheadToolbarContents_ extends React.Component {
 
     const userToggle = (
       <span className="pf-c-dropdown__toggle">
-        <UserIcon color="white"/>
+        <UserIcon color="white" />
         <span className="co-username">{username}</span>
-        <AngleDownIcon className="pf-c-dropdown__toggle-icon" color="#757575"/>
+        <AngleDownIcon className="pf-c-dropdown__toggle-icon" color="#757575" />
       </span>
     );
 
@@ -410,9 +410,9 @@ class MastheadToolbarContents_ extends React.Component {
     const languageToggle = (
       <span className="pf-c-dropdown__toggle">
         {/* i18n 키값 요청 후 적용하기 - 현재 선택된 언어를 표현하는 키값 - 한국어, 영어 */}
-        <GlobeAmericasIcon color="white"/>
+        <GlobeAmericasIcon color="white" />
         <span className="co-username">Language</span>
-        <AngleDownIcon className="pf-c-dropdown__toggle-icon" color="#757575"/>
+        <AngleDownIcon className="pf-c-dropdown__toggle-icon" color="#757575" />
       </span>
     );
 
@@ -477,13 +477,10 @@ class MastheadToolbarContents_ extends React.Component {
               </Badge>
             </ToolbarItem>
             <SystemStatusButton statuspageData={statuspageData} />
-
             <ToolbarItem className="hidden-xs">{this._renderLanguageMenu(false)}</ToolbarItem>
-            
             <ToolbarItem>
               <div className="co-masthead__line"></div>
             </ToolbarItem>{' '}
-
             {alertAccess && (
               <ToolbarItem>
                 <NotificationBadge aria-label="Notification Drawer" onClick={drawerToggle} isRead={notificationsRead}>
@@ -491,7 +488,6 @@ class MastheadToolbarContents_ extends React.Component {
                 </NotificationBadge>
               </ToolbarItem>
             )}
-
             <ToolbarItem>
               <Tooltip content="Import YAML" position={TooltipPosition.bottom}>
                 <Link to={this._getImportYAMLPath()} className="pf-c-button pf-m-plain" aria-label="Import YAML">
@@ -499,13 +495,13 @@ class MastheadToolbarContents_ extends React.Component {
                 </Link>
               </Tooltip>
             </ToolbarItem>
-
             <CloudShellMastheadButton />
             {/* TODO: 매뉴얼 5.0버전으로 바꿔야함 */}
             <ToolbarItem className="co-masthead-icon__button">
               <Tooltip content="Manual" position={TooltipPosition.bottom}>
                 <a href="https://technet.tmaxsoft.com/upload/download/online/hypercloud/pver-20200918-000001/4.1-ko/welcome/overview_sub/index.html" target="_blank">
-                <QuestionCircleIcon className="co-masthead-icon" color="white"/></a>
+                  <QuestionCircleIcon className="co-masthead-icon" color="white" />
+                </a>
               </Tooltip>
             </ToolbarItem>
           </ToolbarGroup>
