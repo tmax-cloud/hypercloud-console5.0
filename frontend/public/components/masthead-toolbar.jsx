@@ -454,6 +454,19 @@ class MastheadToolbarContents_ extends React.Component {
         <Toolbar>
           <ToolbarGroup className="hidden-xs">
             <ToolbarItem>
+              <div
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  window.open('https://www.naver.com');
+                }}
+              >
+                Hyosung
+              </div>
+            </ToolbarItem>
+            <ToolbarItem>
+              <div className="co-masthead__line"></div>
+            </ToolbarItem>
+            <ToolbarItem>
               <ClockIcon />
             </ToolbarItem>
             <ToolbarItem>
