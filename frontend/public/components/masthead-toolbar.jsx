@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash-es';
 import { connect } from 'react-redux';
-import { BellIcon, EllipsisVIcon, PlusCircleIcon, QuestionCircleIcon, ClockIcon, GlobeAmericasIcon, AngleDownIcon, UserIcon } from '@patternfly/react-icons';
+import { BellIcon, EllipsisVIcon, PlusCircleIcon, QuestionCircleIcon, ClockIcon, GlobeAmericasIcon, AngleDownIcon, UserIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 import { ApplicationLauncher, ApplicationLauncherGroup, ApplicationLauncherItem, ApplicationLauncherSeparator, NotificationBadge, Toolbar, ToolbarGroup, ToolbarItem, TooltipPosition, Tooltip, Button, Badge } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { FLAGS, YellowExclamationTriangleIcon } from '@console/shared';
@@ -457,11 +457,19 @@ class MastheadToolbarContents_ extends React.Component {
               <div
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  window.open('https://www.naver.com');
+                  window.open('https://172.25.1.2');
                 }}
               >
-                Hyosung
+                vCenter
               </div>
+            </ToolbarItem>
+            <ToolbarItem className="co-masthead-icon__button">
+              <ExternalLinkAltIcon
+                style={{ cursor: 'pointer', marginTop: '5px' }}
+                onClick={() => {
+                  window.open('https://172.25.1.2');
+                }}
+              />
             </ToolbarItem>
             <ToolbarItem>
               <div className="co-masthead__line"></div>
