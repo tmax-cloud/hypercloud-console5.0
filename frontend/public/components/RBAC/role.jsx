@@ -207,6 +207,7 @@ export const BindingsForRolePage = props => {
       filterLabel="by role or subject"
       namespace={ns}
       flatten={bindingsFlatten}
+      isClusterScope
     />
   );
 };
@@ -226,7 +227,7 @@ export const RolesDetailsPage = props => {
     Kebab.factory.Edit,
     Kebab.factory.Delete,
   ];
-  return <DetailsPage {...props} pages={[navFactory.details(withTranslation()(Details)), navFactory.editYaml(), { href: 'bindings', name: t('COMMON:MSG_DETAILS_TAB_14'), component: BindingsForRolePage }]} menuActions={menuActions} />;
+  return <DetailsPage {...props} pages={[navFactory.details(withTranslation()(Details)), navFactory.editResource(), { href: 'bindings', name: t('COMMON:MSG_DETAILS_TAB_14'), component: BindingsForRolePage }]} menuActions={menuActions} />;
 };
 
 export const ClusterRolesDetailsPage = RolesDetailsPage;
@@ -271,7 +272,7 @@ export const RolesPage = ({ namespace, mock, showTitle }) => {
       ]}
       rowFilters={[
         {
-          filterGroupName: 'Role',
+          filterGroupName: t('COMMON:MSG_COMMON_FILTER_14'),
           type: 'role-kind',
           reducer: roleType,
           items: [

@@ -29,6 +29,12 @@ import { getNamespaceDashboardConsoleLinks, ProjectDashboard } from './dashboard
 import { removeQueryArgument } from './utils/router';
 import { useTranslation, withTranslation } from 'react-i18next';
 
+import NamespaceOverview from './namespace-overview';
+import { RoleBindingClaimsPage } from './hypercloud/role-binding-claim';
+
+import * as classNames from 'classnames';
+import './namespace-details.scss';
+
 const getModel = useProjects => (useProjects ? ProjectModel : NamespaceModel);
 const getDisplayName = obj => _.get(obj, ['metadata', 'annotations', 'openshift.io/display-name']);
 const CREATE_NEW_RESOURCE = '#CREATE_RESOURCE_ACTION#';
@@ -477,21 +483,6 @@ const NamespaceDetails_ = ({ obj: ns, consoleLinks, customData }) => {
         {!customData?.hideHeading && <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: t('COMMON:MSG_LNB_MENU_3') })} />}
         <NamespaceSummary ns={ns} />
       </div>
-      {ns.kind === 'Namespace' && <ResourceUsage ns={ns} />}
-      {!_.isEmpty(links) && (
-        <div className="co-m-pane__body">
-          <SectionHeading text="Launcher" />
-          <ul className="list-unstyled">
-            {_.map(_.sortBy(links, 'spec.text'), link => {
-              return (
-                <li key={link.metadata.uid}>
-                  <ExternalLink href={link.spec.href} text={link.spec.text} />
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
     </div>
   );
 };
@@ -502,7 +493,16 @@ const DetailsStateToProps = ({ UI }) => ({
 
 export const NamespaceDetails = connect(DetailsStateToProps)(NamespaceDetails_);
 
-const RolesPage = ({ obj: { metadata } }) => <RoleBindingsPage createPath={`/k8s/ns/${metadata.name}/rolebindings/~new?rolekind=Role`} namespace={metadata.name} showTitle={false} />;
+const RolesPage = ({ obj: { metadata } }) => {
+  const rolebindingspage = <RoleBindingsPage createPath={`/k8s/ns/${metadata.name}/rolebindings/~new?rolekind=Role`} namespace={metadata.name} showTitle={false} />;
+  const rolebindingclaimspage = <RoleBindingClaimsPage createPath={`/k8s/ns/${metadata.name}/rolebindings/~new?rolekind=Role`} namespace={metadata.name} showTitle={false} />;
+  return (
+    <>
+      <div className={classNames('namespace-details_role-binding')}>{rolebindingspage}</div>
+      <div className={classNames('namespace-details_role-binding')}>{rolebindingclaimspage}</div>
+    </>
+  );
+};
 
 const autocompleteFilter = (text, item) => fuzzy(text, item);
 
@@ -634,7 +634,26 @@ const namespaceBarStateToProps = ({ k8s }) => {
 /** @type {React.FC<{children?: ReactNode, disabled?: boolean, onNamespaceChange?: Function}>} */
 export const NamespaceBar = connect(namespaceBarStateToProps)(NamespaceBar_);
 
-export const NamespacesDetailsPage = props => <DetailsPage {...props} menuActions={nsMenuActions} pages={[navFactory.details(NamespaceDetails), navFactory.editResource(), navFactory.roles(RolesPage)]} />;
+export const NamespacesDetailsPage = props => (
+  <DetailsPage
+    {...props}
+    menuActions={nsMenuActions}
+    pages={[
+      {
+        href: '',
+        name: 'COMMON:MSG_DETAILS_TABOVERVIEW_1',
+        component: NamespaceOverview,
+      },
+      {
+        href: 'details',
+        name: 'COMMON:MSG_DETAILS_TAB_1',
+        component: NamespaceDetails,
+      },
+      navFactory.editResource(),
+      navFactory.roles(RolesPage),
+    ]}
+  />
+);
 
 export const ProjectsDetailsPage = props => (
   <DetailsPage

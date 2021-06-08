@@ -7,7 +7,9 @@ import { SelectorInput } from '../utils';
 import { RadioGroup } from './utils/radio';
 import { Section } from './utils/section';
 import { InputSelectBox } from './utils/inputSelectBox';
-import { Dropdown, ContainerDropdown } from './utils/dropdown';
+import { Dropdown } from './utils/dropdown';
+import { DropdownWithRef, DropdownFirehose } from './utils/dropdown-new';
+import { MultiSelectDropdownWithRef, MultiSelectDropdownFirehose } from './utils/multi-dropdown-new';
 import { ResourceDropdown } from './utils/resource-dropdown';
 import { ResourceListDropdown, ResourceListDropdownWithDataToolbar } from './utils/resource-list-dropdown';
 import { KeyValueListEditor } from './utils/key-value-list-editor';
@@ -123,8 +125,21 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
     Gi: 'GiB',
     Ti: 'TiB',
   };
-  const containers = { test: { name: 'test', order: 0 }, sidecar: { name: 'sidecar' }, sidecar2: { name: 'sidecar2' } };
-  const initContainers = { initupload: { name: 'initupload', order: 0 }, ['place-entrypoint']: { name: 'place-entrypoint' }, ['place-entrypoint2']: { name: 'place-entrypoint2' } };
+
+  const newDropdownItemList = [
+    {
+      label: 'AAA',
+      value: 'aaa',
+    },
+    {
+      label: 'BBB',
+      value: 'bbb',
+    },
+    {
+      label: 'CCC',
+      value: 'ccc',
+    },
+  ];
 
   const listHeaderFragment = (
     <div className="row pairs-list__heading">
@@ -134,10 +149,10 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
     </div>
   );
 
-  const listItemRenderer = (register, name, item, index, ListActions, ListDefaultIcons) => (
+  const listItemRenderer = (methods, name, item, index, ListActions, ListDefaultIcons) => (
     <div className="row" key={item.id}>
       <div className="col-xs-4 pairs-list__name-field">
-        <input ref={register()} className="pf-c-form-control" name={`metadata.spinnerNumList[${index}].name`} defaultValue={item.name}></input>
+        <input ref={methods.register()} className="pf-c-form-control" name={`metadata.spinnerNumList[${index}].name`} defaultValue={item.name}></input>
       </div>
       <div className="col-xs-4 pairs-list__value-field">
         <NumberSpinner initialValue={item.number} min={-15} max={15} name={`metadata.spinnerNumList[${index}].number`} />
@@ -198,11 +213,6 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           buttonClassName="dropdown-btn" // 선택된 아이템 보여주는 button (title) 부분 className
           itemClassName="dropdown-item" // 드롭다운 아이템 리스트 전체의 className - 각 row를 의미하는 것은 아님
         />
-        <ContainerDropdown
-          name="containerDropdown1"
-          containers={containers} // (필수)
-          initContainers={initContainers}
-        />
       </Section>
       <Section id="resourcedropdown" label="Resource Dropdown">
         <ResourceDropdown
@@ -217,6 +227,7 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           ]}
           type="single"
           useHookForm
+          idFunc={resource => `${resource.metadata.uid}`} // selected 값을 custom하게 사용해야하는 경우 사용 default: metadata.name
         />
         <ResourceDropdown
           name="RD-multiple"
@@ -248,6 +259,7 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           autocompletePlaceholder="search by name"
           type="multiple" // 필수 type: single / multiple
           useHookForm
+          idFunc={resource => `${resource.kind}~~${resource.metadata.name}`} // selected 값을 custom하게 사용해야하는 경우 사용 default: metadata.name
         />
         <ResourceListDropdownWithDataToolbar // react hook form 사용하지 않는 예시
           resourceList={ClusterResourceList} // 필수
@@ -308,6 +320,113 @@ const CreateSampleComponent: React.FC<SampleFormProps> = props => {
           ]}
         />
       </Section>
+      <Section id="new-multi-dropdown-section" label="<< New Dropdown >>">
+        <Section id="new-dropdown-section-1" label="DropdownFirehose (Firehose)">
+          <Controller
+            as={
+              <DropdownFirehose
+                name="newdropdown-firehose"
+                resourcesConfig={[
+                  {
+                    kind: 'Namespace',
+                    prop: 'namespace',
+                    isList: true,
+                  },
+                ]}
+                kind="Namespace"
+                width="250px"
+              />
+            }
+            control={methods.control}
+            name="newdropdown-firehose"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+          />
+        </Section>
+        <Section id="new-dropdown-section-2" label="DropdownWithRef (useResourceItemsFormatter=true)">
+          <Controller
+            as={<DropdownWithRef name="newdropdown-formatter" useResourceItemsFormatter={true} items={ClusterResourceList} />}
+            control={methods.control}
+            name="newdropdown-formatter"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+          />
+        </Section>
+        <Section id="new-dropdown-section-1" label="DropdownWithRef (plain item list)">
+          <Controller
+            as={<DropdownWithRef name="newdropdown-plain" defaultValue={{ label: 'default', value: 'default' }} width="100px" useResourceItemsFormatter={false} items={newDropdownItemList} />}
+            control={methods.control}
+            name="newdropdown-plain"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+            defaultValue={{ label: 'default', value: 'default' }}
+          />
+        </Section>
+      </Section>
+      <Section id="new-multi-dropdown-section" label="<< New MultiDropdown >>">
+        <Section id="new-multi-dropdown-section-1" label="MultiSelectDropdownFirehose (Firehose 사용)">
+          <Controller
+            as={
+              <MultiSelectDropdownFirehose
+                name="newmultidropdown-firehose"
+                resourcesConfig={[
+                  {
+                    kind: 'Namespace',
+                    prop: 'namespace',
+                    isList: true,
+                  },
+                ]}
+                kind="Namespace"
+                menuWidth="200px"
+                placeholder="Select Namespace"
+              />
+            }
+            control={methods.control}
+            name="newmultidropdown-firehose"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+          />
+        </Section>
+        <Section id="new-multi-dropdown-section-2" label="MultiSelectDropdownWithRef (useResourceItemsFormatter=true)">
+          <Controller
+            as={<MultiSelectDropdownWithRef name="newmultidropdown-useformatter" useResourceItemsFormatter={true} items={ClusterResourceList} menuWidth="250px" buttonWidth="250px" placeholder="Select Cluster And ClusterClaim" />}
+            control={methods.control}
+            name="newmultidropdown-useformatter"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+          />
+        </Section>
+        <Section id="new-multi-dropdown-section-3" label="MultiSelectDropdownWithRef (plain items)">
+          <Controller
+            as={
+              <MultiSelectDropdownWithRef
+                name="newmultidropdown-plain"
+                useResourceItemsFormatter={false}
+                defaultValues={[{ label: 'BBB', value: 'bbb' }]}
+                items={[
+                  { label: 'AAA', value: 'aaa' },
+                  { label: 'BBB', value: 'bbb' },
+                  { label: 'CCC', value: 'ccc' },
+                ]}
+                menuWidth="250px"
+                buttonWidth="200px"
+                chipsGroupTitle="ABC"
+              />
+            }
+            control={methods.control}
+            name="newmultidropdown-plain"
+            onChange={([selected]) => {
+              return { value: selected };
+            }}
+            defaultValue={[{ label: 'BBB', value: 'bbb' }]}
+          />
+        </Section>
+      </Section>
     </div>
   );
 };
@@ -322,7 +441,7 @@ export const onSubmitCallback = data => {
   // submit하기 전에 data를 가공해야 할 경우
   let labels = SelectorInput.objectify(data.metadata.labels);
   delete data.metadata.labels;
-  data = _.defaultsDeep(data, { metadata: { labels: labels } });
+  data = _.defaultsDeep({ metadata: { labels: labels } }, data);
   return data;
 };
 

@@ -62,7 +62,7 @@ export const ResourceStringKeyMap = {
     labelPlural: 'COMMON:MSG_LNB_MENU_18',
     label: 'COMMON:MSG_LNB_MENU_112',
   },
-  CatalogServiceClaim: {
+  ClusterTemplateClaim: {
     labelPlural: 'COMMON:MSG_LNB_MENU_19',
     label: 'COMMON:MSG_LNB_MENU_113',
   },
@@ -225,6 +225,10 @@ export const ResourceStringKeyMap = {
   Registry: {
     labelPlural: 'COMMON:MSG_LNB_MENU_187',
     label: 'COMMON:MSG_LNB_MENU_188',
+  },
+  Repository: {
+    labelPlural: 'Repositories',
+    label: 'Repository',
   },
   ExternalRegistry: {
     labelPlural: 'COMMON:MSG_LNB_MENU_189',

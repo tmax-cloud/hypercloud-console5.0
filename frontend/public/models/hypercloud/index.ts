@@ -726,15 +726,15 @@ export const ServiceBindingModel: K8sKind = {
   namespaced: true,
 };
 
-export const CatalogServiceClaimModel: K8sKind = {
-  label: 'CatalogServiceClaim',
-  labelPlural: 'Catalog Service Claim',
+export const ClusterTemplateClaimModel: K8sKind = {
+  label: 'ClusterTemplateClaim',
+  labelPlural: 'Cluster Template Claim',
   apiVersion: 'v1',
   apiGroup: 'tmax.io',
-  plural: 'catalogserviceclaims',
-  abbr: 'CSC',
-  kind: 'CatalogServiceClaim',
-  id: 'catalogserviceclaim',
+  plural: 'clustertemplateclaims',
+  abbr: 'CTC',
+  kind: 'ClusterTemplateClaim',
+  id: 'clustertemplateclaim',
   namespaced: true,
 };
 
@@ -848,6 +848,19 @@ export const InferenceServiceModel: K8sKind = {
   namespaced: true,
   kind: 'InferenceService',
   id: 'inferenceservice',
+  crd: false,
+};
+
+export const TrainedModelModel: K8sKind = {
+  label: 'Trained Model',
+  labelPlural: 'Trained Models',
+  apiVersion: 'v1alpha1',
+  apiGroup: 'serving.kubeflow.org',
+  plural: 'trainedmodels',
+  abbr: 'TM',
+  namespaced: true,
+  kind: 'TrainedModel',
+  id: 'trainedmodel',
   crd: false,
 };
 

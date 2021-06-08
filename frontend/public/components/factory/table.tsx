@@ -108,6 +108,7 @@ const sorts = {
   nodeFS: (node: NodeKind): number => nodeFS(node),
   machinePhase: (machine: MachineKind): string => getMachinePhase(machine),
   nodePods: (node: NodeKind): number => nodePods(node),
+  numSecrets: sa => sa.secrets? sa.secrets.length : 0,
 };
 
 const stateToProps = ({ UI }, { customSorts = {}, data = [], defaultSortField = 'metadata.name', defaultSortFunc = undefined, defaultSortOrder = SortByDirection.asc, filters = {}, loaded = false, reduxID = null, reduxIDs = null, staticFilters = [{}], rowFilters = [] }) => {
@@ -123,7 +124,12 @@ const stateToProps = ({ UI }, { customSorts = {}, data = [], defaultSortField = 
   if (loaded) {
     let sortBy: string | Function = 'metadata.name';
     if (currentSortField) {
-      sortBy = resource => sorts.string(_.get(resource, currentSortField, ''));
+      sortBy = resource => {
+        if (currentSortField === 'status.phase' && !!resource.metadata.deletionTimestamp) {
+          return 'Terminating';
+        }
+        return sorts.string(_.get(resource, currentSortField, ''));
+      };
     } else if (currentSortFunc && customSorts[currentSortFunc]) {
       // Sort resources by a function in the 'customSorts' prop
       sortBy = customSorts[currentSortFunc];

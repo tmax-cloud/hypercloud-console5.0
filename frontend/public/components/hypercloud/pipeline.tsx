@@ -10,15 +10,15 @@ import { PipelineModel, TaskModel, ClusterTaskModel } from '../../models';
 import PipelineVisualization from '../../../packages/dev-console/src/components/pipelines/detail-page-tabs/pipeline-details/PipelineVisualization';
 import DynamicResourceLinkList from '../../../packages/dev-console/src/components/pipelines/resource-overview/DynamicResourceLinkList';
 import { Pipeline } from '../../../packages/dev-console/src/utils/pipeline-augment';
+import { getPipelineKebabActions } from '../../../packages/dev-console/src/utils/pipeline-actions';
 import { PipelineForm, PipelineParametersForm, PipelineResourcesForm, parametersValidationSchema, resourcesValidationSchema } from '../../../packages/dev-console/src/components/pipelines/detail-page-tabs';
-import { addTrigger } from '../../../packages/dev-console/src/utils/pipeline-actions';
 import { PipelineRunsPage } from './pipeline-run';
 import PipelineRowKebabActions from '../../../packages/dev-console/src/components/pipelines/list-page/PipelineRowKebabActions';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { ResourceLabel } from '../../models/hypercloud/resource-plural';
+import { ResourceLabel, ResourceLabelPlural } from '../../models/hypercloud/resource-plural';
 
-export const menuActions: KebabAction[] = [addTrigger, ...Kebab.getExtensionsActionsForKind(PipelineModel), ...Kebab.factory.common];
+export const menuActions: KebabAction[] = getPipelineKebabActions();
 
 const kind = PipelineModel.kind;
 
@@ -88,9 +88,10 @@ export const PipelineDetailsList: React.FC<PipelineDetailsListProps> = ({ ds: pi
       displayName: task.name,
     }));
 
+  const { t } = useTranslation();
   return (
     <dl className="co-m-pane__details">
-      <DynamicResourceLinkList namespace={pipeline.metadata.namespace} links={taskLinks} title="Tasks" />
+      <DynamicResourceLinkList namespace={pipeline.metadata.namespace} links={taskLinks} title={ResourceLabelPlural(TaskModel, t)} />
     </dl>
   );
 };
@@ -116,7 +117,7 @@ const PipelineDetails: React.FC<PipelineDetailsProps> = ({ obj: pipeline }) => {
   );
 }
 
-const { details, editYaml } = navFactory;
+const { details, editResource } = navFactory;
 
 export const Pipelines: React.FC = props => {
   const { t } = useTranslation();
@@ -143,7 +144,7 @@ export const PipelinesDetailsPage: React.FC<PipelinesDetailsPageProps> = props =
     menuActions={menuActions}
     pages={[
       details(detailsPage(PipelineDetails)),
-      editYaml(),
+      editResource(),
       {
         href: 'runs',
         name: 'Pipeline Runs',

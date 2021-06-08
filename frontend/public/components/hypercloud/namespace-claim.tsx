@@ -3,6 +3,7 @@ import * as classNames from 'classnames';
 
 import { sortable } from '@patternfly/react-table';
 import { fromNow } from '@console/internal/components/utils/datetime';
+import { Status } from '@console/shared';
 import { K8sResourceKind, K8sClaimResourceKind, modelFor } from '../../module/k8s';
 import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from '../factory';
 import { Kebab, navFactory, ResourceSummary, SectionHeading, ResourceLink, ResourceKebab } from '../utils';
@@ -13,8 +14,6 @@ import { TFunction } from 'i18next';
 const { common } = Kebab.factory;
 
 const tableColumnClasses = ['', '', classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), Kebab.columnClass];
-
-export const menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common, Kebab.factory.ModifyStatus];
 
 const kind = 'NamespaceClaim';
 
@@ -27,14 +26,14 @@ const NamespaceClaimTableHeader = (t?: TFunction) => {
       props: { className: tableColumnClasses[0] },
     },
     {
-      title: t('COMMON:MSG_MAIN_TABLEHEADER_2'),
+      title: t('COMMON:MSG_MAIN_TABLEHEADER_98'),
       sortField: 'resourceName',
       transforms: [sortable],
       props: { className: tableColumnClasses[1] },
     },
     {
       title: t('COMMON:MSG_MAIN_TABLEHEADER_3'),
-      sortFunc: 'status.status',
+      sortField: 'status.status',
       transforms: [sortable],
       props: { className: tableColumnClasses[2] },
     },
@@ -58,16 +57,28 @@ const NamespaceClaimTableHeader = (t?: TFunction) => {
 };
 NamespaceClaimTableHeader.displayName = 'NamespaceClaimTableHeader';
 
+const unmodifiableStatus = new Set(['Approved', 'Namespace Deleted']);
+const isUnmodifiable = (status: string) => unmodifiableStatus.has(status);
 const NamespaceClaimTableRow: RowFunction<K8sClaimResourceKind> = ({ obj: namespaceclaims, index, key, style }) => {
+  let menuActions: any[];
+
+  if (isUnmodifiable(namespaceclaims?.status?.status)) {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common];
+  } else {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common, Kebab.factory.ModifyStatus];
+  }
+
   return (
     <TableRow id={namespaceclaims.metadata.uid} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>
         <ResourceLink kind={kind} name={namespaceclaims.metadata.name} namespace={namespaceclaims.metadata.namespace} title={namespaceclaims.metadata.uid} />
       </TableData>
       <TableData className={classNames(tableColumnClasses[1], 'co-break-word')}>
-        <ResourceLink kind="Namespace" name={namespaceclaims?.resourceName} title={namespaceclaims?.resourceName} />
+        <ResourceLink kind="Namespace" name={namespaceclaims?.resourceName} title={namespaceclaims?.resourceName} linkTo={namespaceclaims.status?.status === 'Approved'} />
       </TableData>
-      <TableData className={tableColumnClasses[2]}>{namespaceclaims?.status?.status}</TableData>
+      <TableData className={tableColumnClasses[2]}>
+        <Status status={namespaceclaims?.status?.status} />
+      </TableData>
       <TableData className={tableColumnClasses[3]}>{namespaceclaims.metadata?.annotations?.owner}</TableData>
       <TableData className={tableColumnClasses[4]}>{fromNow(namespaceclaims?.metadata?.creationTimestamp)}</TableData>
       <TableData className={tableColumnClasses[5]}>
@@ -110,12 +121,12 @@ export const NamespaceClaimsPage: React.FC<NamespaceClaimsPageProps> = props => 
       name: t('SINGLE:MSG_NAMESPACES_MAIN_TABNAMESPACES_1'),
     },
     {
-      href: 'namespaceclaims?rowFilter-namespace-claim-status=Awaiting',
-      path: 'namespaceclaims',
+      href: 'namespaceclaims',
+      // path: 'namespaceclaims',
       name: t('SINGLE:MSG_NAMESPACES_MAIN_TABNAMESPACECLAIMS_1'),
     },
   ];
-  return <ListPage kind={'NamespaceClaim'} canCreate={true} ListComponent={NamespaceClaimsList} {...props} title={t('COMMON:MSG_LNB_MENU_3')} multiNavPages={pages} rowFilters={filters.bind(null, t)()} />;
+  return <ListPage kind={'NamespaceClaim'} canCreate={true} ListComponent={NamespaceClaimsList} {...props} title={t('COMMON:MSG_LNB_MENU_3')} multiNavPages={pages} rowFilters={filters.bind(null, t)()} defaultSelectedRows={['Awaiting']} />;
 };
 NamespaceClaimsPage.displayName = 'NamespaceClaimsPage';
 const NamespaceClaimsDetails: React.FC<NamespaceClaimDetailsProps> = ({ obj: namespaceclaims }) => {
@@ -133,16 +144,24 @@ const NamespaceClaimsDetails: React.FC<NamespaceClaimDetailsProps> = ({ obj: nam
             </div>
             <div className="col-md-6">
               <dl className="co-m-pane__details">
+                <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_118')}</dt>
+                <dd>{namespaceclaims.resourceName}</dd>
                 <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_45')}</dt>
-                <dd>{namespaceclaims?.status?.status}</dd>
-                <dt>{t('SINGLE:MSG_NAMESPACECLAIMS_NAMESPACEDETAILS_TABDETAILS_1')}</dt>
-                <dd>{namespaceclaims?.status?.reason}</dd>
-                <dt>{t('SINGLE:MSG_NAMESPACECLAIMS_NAMESPACEDETAILS_TABDETAILS_2')}</dt>
-                <dd>{namespaceclaims?.specLimit?.limitCpu}</dd>
+                {/* <dd>{namespaceclaims.status?.status}</dd> */}
+                <dd>
+                  <Status status={namespaceclaims.status?.status} />
+                </dd>
+                {namespaceclaims.status?.status === 'Rejected' && (
+                  <>
+                    <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_20')}</dt>
+                    <dd>{namespaceclaims.status?.reason}</dd>
+                  </>
+                )}
+
+                {/* <dt>{t('SINGLE:MSG_NAMESPACECLAIMS_NAMESPACEDETAILS_TABDETAILS_2')}</dt>
+                <dd>{namespaceclaims.spec?.hard?.['limits.cpu']}</dd>
                 <dt>{t('SINGLE:MSG_NAMESPACECLAIMS_NAMESPACEDETAILS_TABDETAILS_3')}</dt>
-                <dd>{namespaceclaims?.specLimit?.limitMemory}</dd>
-                <dt>{t('SINGLE:MSG_NAMESPACECLAIMS_NAMESPACEDETAILS_TABDETAILS_4')}</dt>
-                <dd>{namespaceclaims?.resourceName}</dd>
+                <dd>{namespaceclaims.spec?.hard?.['limits.memory']}</dd> */}
               </dl>
             </div>
           </div>
@@ -154,7 +173,17 @@ const NamespaceClaimsDetails: React.FC<NamespaceClaimDetailsProps> = ({ obj: nam
 NamespaceClaimsDetails.displayName = 'NamespaceClaimsDetails';
 
 const { details, editResource } = navFactory;
-export const NamespaceClaimsDetailsPage: React.FC<NamespaceClaimsDetailsPageProps> = props => <DetailsPage {...props} kind={'NamespaceClaim'} menuActions={menuActions} pages={[details(NamespaceClaimsDetails), editResource()]} />;
+export const NamespaceClaimsDetailsPage: React.FC<NamespaceClaimsDetailsPageProps> = props => {
+  let menuActions: any[];
+  const [status, setStatus] = React.useState();
+
+  if (isUnmodifiable(status)) {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common];
+  } else {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common, Kebab.factory.ModifyStatus];
+  }
+  return <DetailsPage {...props} kind={'NamespaceClaim'} menuActions={menuActions} setStatus4MenuActions={setStatus} pages={[details(NamespaceClaimsDetails), editResource()]} />;
+};
 NamespaceClaimsDetailsPage.displayName = 'NamespaceClaimsDetailsPage';
 
 type NamespaceClaimDetailsProps = {

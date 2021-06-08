@@ -109,7 +109,7 @@ const ServiceAccountTableHeader = t => {
     },
     {
       title: t('COMMON:MSG_MAIN_TABLEHEADER_34'),
-      sortField: 'secrets',
+      sortFunc: 'numSecrets',
       transforms: [sortable],
       props: { className: tableColumnClasses[2] },
     },
@@ -177,7 +177,7 @@ const Details = ({ obj: serviceaccount }) => {
 const ServiceAccountsDetailsPage = props => {
   const { t } = useTranslation();
   const menuActions = [KubeConfigify.bind(null, t), ...Kebab.getExtensionsActionsForKind(ServiceAccountModel), ...common];
-  return <DetailsPage {...props} menuActions={menuActions} pages={[navFactory.details(Details), navFactory.editYaml()]} />;
+  return <DetailsPage {...props} menuActions={menuActions} pages={[navFactory.details(Details), navFactory.editResource()]} />;
 };
 const ServiceAccountsList = props => {
   const { t } = useTranslation();

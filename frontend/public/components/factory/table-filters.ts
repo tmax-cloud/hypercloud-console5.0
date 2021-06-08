@@ -16,20 +16,14 @@ import {
   // getTemplateInstanceStatus,
 } from '../../module/k8s';
 
-import {
-  alertingRuleIsActive,
-  alertDescription,
-  alertState,
-  silenceState,
-} from '../../reducers/monitoring';
+import { alertingRuleIsActive, alertDescription, alertState, silenceState } from '../../reducers/monitoring';
 import { pipelineRunFilterReducer } from '../../../packages/dev-console/src/utils/pipeline-filter-reducer';
 
-export const fuzzyCaseInsensitive = (a: string, b: string): boolean =>
-  fuzzy(_.toLower(a), _.toLower(b));
+export const fuzzyCaseInsensitive = (a: string, b: string): boolean => fuzzy(_.toLower(a), _.toLower(b));
 
 const registryStatusReducer = (registry: any): string => {
   return registry.status.phase;
-}
+};
 
 const serviceBrokerStatusReducer = (serviceBroker: any): string => {
   let phase = '';
@@ -45,35 +39,46 @@ const serviceBrokerStatusReducer = (serviceBroker: any): string => {
     });
     return phase;
   }
-}
+};
 
 const serviceInstanceStatusReducer = (serviceInstance: any): string => {
   return serviceInstance.status.lastConditionState;
-}
+};
 
 const pipelineApprovalStatusReducer = (pipelineApproval: any): string => {
   return pipelineApproval.status.result;
-}
+};
 
 // TODO: Table filters are undocumented, stringly-typed, and non-obvious. We can change that.
 export const tableFilters: TableFilterMap = {
   name: (filter, obj) => fuzzyCaseInsensitive(filter, obj.metadata.name),
 
+  externalName: (filter, obj) => fuzzyCaseInsensitive(filter, obj.spec?.externalName),
+
   'catalog-source-name': (filter, obj) => fuzzyCaseInsensitive(filter, obj.name),
 
   'namespace-claim-status': (results, nameSpaceClaim) => {
-    if(!results || !results.selected || !results.selected.size) {
+    if (!results || !results.selected || !results.selected.size) {
       return true;
     }
     const result = nameSpaceClaim?.status?.status;
     return results.selected.has(result) || !_.includes(results.all, result);
   },
   'resource-quota-claim-status': (results, resourceQuotaClaim) => {
-    if(!results || !results.selected || !results.selected.size) {
+    if (!results || !results.selected || !results.selected.size) {
       return true;
     }
     const result = resourceQuotaClaim?.status?.status;
     return results.selected.has(result) || !_.includes(results.all, result);
+  },
+  'cluster-template-claim-status': (results, clusterTemplateClaim) => {
+    if (!results || !results.selected || !results.selected.size) {
+      return true;
+    }
+    let result = clusterTemplateClaim?.status?.status;
+    result = result === 'Approve' ? 'Approved' : result;
+    result = result === 'Reject' ? 'Rejected' : result;
+    return results.selected.has(result);
   },
   'alert-list-text': (filter, alert) => {
     if (fuzzyCaseInsensitive(filter, alert.labels?.alertname)) {
@@ -103,12 +108,11 @@ export const tableFilters: TableFilterMap = {
   'role-kind': (filter, role) => filter.selected.has(roleType(role)) || filter.selected.size === 0,
 
   // Filter role bindings by role kind
-  'role-binding-kind': (filter, binding) =>
-    filter.selected.has(bindingType(binding)) || filter.selected.size === 0,
+  'role-binding-kind': (filter, binding) => filter.selected.has(bindingType(binding)) || filter.selected.size === 0,
 
   // Filter role bindings by text match
   'role-binding': (str, { metadata, roleRef, subject }) => {
-    const isMatch = (val) => fuzzyCaseInsensitive(str, val);
+    const isMatch = val => fuzzyCaseInsensitive(str, val);
     return [metadata.name, roleRef.name, subject.kind, subject.name].some(isMatch);
   },
 
@@ -133,6 +137,28 @@ export const tableFilters: TableFilterMap = {
       apiGroup: 'rbac.authorization.k8s.io',
       name: groupName,
     }),
+  
+  // Filter Integration Config by Status
+  'integrationConfig-status' : (filter, binding) => {
+    let phase = '';
+    if (binding.status) {
+      binding.status.conditions.forEach(cur => {
+        if (cur.type === 'ready') {
+          if (cur.status === 'True') {
+            phase = 'Ready';
+          } else {
+            phase = 'UnReady';
+          }
+        }
+      });
+      return filter.selected.has(phase) || filter.selected.size === 0;
+    }
+
+  },
+  // Filter Integration Config by Status
+  'roleBindingClaim-status' : (filter, binding) => {
+    return filter.selected.has(binding.status.status) || filter.selected.size === 0;    
+  },  
 
   selector: (selector, obj) => {
     if (!selector || !selector.values || !selector.values.size) {
@@ -146,7 +172,22 @@ export const tableFilters: TableFilterMap = {
     if (!values.all) {
       return true;
     }
-    return !!values.all.every((v) => labels.includes(v));
+    return !!values.all.every(v => labels.includes(v));
+  },
+
+  'pvc-status': (phases, pvc) => {
+    if (!phases || !phases.selected || !phases.selected.size) {
+      return true;
+    }
+
+    const phaseFunc = (pvc) => {
+      if (pvc?.metadata?.deletionTimestamp) {
+        return 'Terminating';
+      }
+      return pvc.status.phase
+    }
+    const phase = phaseFunc(pvc);
+    return phases.selected.has(phase) || !_.includes(phases.all, phase);
   },
 
   'pod-status': (phases, pod) => {
@@ -227,14 +268,7 @@ export const tableFilters: TableFilterMap = {
     return filters.selected.has(resource.kind);
   },
 
-  'packagemanifest-name': (filter, pkg) =>
-    fuzzyCaseInsensitive(
-      filter,
-      (pkg.status.defaultChannel
-        ? pkg.status.channels.find((ch) => ch.name === pkg.status.defaultChannel)
-        : pkg.status.channels[0]
-      ).currentCSVDesc.displayName,
-    ),
+  'packagemanifest-name': (filter, pkg) => fuzzyCaseInsensitive(filter, (pkg.status.defaultChannel ? pkg.status.channels.find(ch => ch.name === pkg.status.defaultChannel) : pkg.status.channels[0]).currentCSVDesc.displayName),
 
   'build-status': (phases, build) => {
     if (!phases || !phases.selected || !phases.selected.size) {
@@ -282,19 +316,9 @@ export const tableFilters: TableFilterMap = {
 
   'project-name': (str: string, project: K8sResourceKind) => {
     const displayName = _.get(project, ['metadata', 'annotations', 'openshift.io/display-name']);
-    return (
-      fuzzyCaseInsensitive(str, project.metadata.name) || fuzzyCaseInsensitive(str, displayName)
-    );
+    return fuzzyCaseInsensitive(str, project.metadata.name) || fuzzyCaseInsensitive(str, displayName);
   },
 
-  'pvc-status': (phases, pvc) => {
-    if (!phases || !phases.selected || !phases.selected.size) {
-      return true;
-    }
-
-    const phase = pvc.status.phase;
-    return phases.selected.has(phase) || !_.includes(phases.all, phase);
-  },
 
   // Filter service classes by text match
   'service-class': (str, serviceClass) => {
@@ -316,8 +340,6 @@ export const tableFilters: TableFilterMap = {
     return statuses.selected.has(status) || !_.includes(statuses.all, status);
   },
 
-
-
   'template-instance-status': (statuses, instance) => {
     if (!statuses || !statuses.selected || !statuses.selected.size) {
       return true;
@@ -331,14 +353,7 @@ export const tableFilters: TableFilterMap = {
       if (instance.status) {
         instance.status.conditions.forEach(cur => {
           if (cur.type === '') {
-            switch (cur.status) {
-              case 'Success':
-                phase = 'Succeeded';
-                break;
-              default:
-                phase = cur.status;
-                break;
-            }
+            phase = cur.status;
           }
         });
         return phase;
@@ -351,9 +366,7 @@ export const tableFilters: TableFilterMap = {
 
   machine: (str: string, machine: MachineKind): boolean => {
     const node: string = _.get(machine, 'status.nodeRef.name');
-    return (
-      fuzzyCaseInsensitive(str, machine.metadata.name) || (node && fuzzyCaseInsensitive(str, node))
-    );
+    return fuzzyCaseInsensitive(str, machine.metadata.name) || (node && fuzzyCaseInsensitive(str, node));
   },
 };
 

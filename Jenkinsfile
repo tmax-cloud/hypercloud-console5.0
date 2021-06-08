@@ -1,7 +1,7 @@
 pipeline {
   parameters {
     choice(name: 'BUILD_MODE', choices:['PATCH','HOTFIX','IMAGE'], description: 'Select the mode you want to act')
-    choice(name: 'DEPLOY', choices:['ck2-1', 'ck1-1', 'keycloak'], description: 'Select k8s env you want to deploy the console')
+    choice(name: 'DEPLOY', choices:['team-k8s', 'ck-k8s', 'keycloak'], description: 'Select k8s env you want to deploy the console')
 
     string(name: 'KEYCLOAK', defaultValue: 'hyperauth.org', description: 'hyperauth url for login')
     string(name: 'REALM', defaultValue: 'tmax', description: 'hyperauth realm info')
@@ -40,7 +40,7 @@ pipeline {
   }
   agent {
     kubernetes {
-      cloud 'ck1-1'
+      cloud 'team-k8s'
       // yamlFile './KubernetesPod.yaml'
       yaml '''\
         apiVersion: v1
@@ -87,11 +87,16 @@ pipeline {
             PATCH_VER = sh(script: 'cat ./CHANGELOG/tag.txt | head -2 | tail -1 | cut --delimiter="." --fields=3', returnStdout: true).trim()
             HOTFIX_VER = sh(script: 'cat ./CHANGELOG/tag.txt | head -2 | tail -1 | cut --delimiter="." --fields=4', returnStdout: true).trim()
           if (BUILD_MODE == 'PATCH') {
-            PATCH_VER++
+            //   (("${params.PATCH_VER}" as int) -1).toString()
+            def number = (PATCH_VER as int) + 1
+            PATCH_VER = number.toString()
+            // PATCH_VER++
             HOTFIX_VER = "0"
             VER = "${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}.${HOTFIX_VER}"
           } else if (BUILD_MODE == 'HOTFIX') {
-            HOTFIX_VER++
+            def hotfix_number = (HOTFIX_VER as int) + 1
+            HOTFIX_VER = hotfix_number.toString()
+            // HOTFIX_VER++
             VER = "${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}.${HOTFIX_VER}"
           }
         }
@@ -155,12 +160,16 @@ pipeline {
         script {
           if (BUILD_MODE == 'PATCH') {
             // TEMP = (("${params.PATCH_VER}" as int) -1).toString()
-            PATCH_VER--
+            def number = (PATCH_VER as int) -1
+            PATCH_VER = number.toString()
+            // PATCH_VER--
             HOTFIX_VER = "0"
             PRE_VER = "${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}.${HOTFIX_VER}"
           } else if (BUILD_MODE == 'HOTFIX') {
             // TEMP = (("${params.HOTFIX_VER}" as int) -1).toString()
-            HOTFIX_VER--
+            def hotfix_number = (HOTFIX_VER as int) - 1
+            HOTFIX_VER = hotfix_number.toString()
+            // HOTFIX_VER--
             PRE_VER = "${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}.${HOTFIX_VER}"
           }
         }
@@ -179,7 +188,7 @@ pipeline {
             date '+%F  %r' >> ./CHANGELOG/CHANGELOG-${VER}.md
             git log --grep=[patch] -F --all-match --no-merges --date-order --reverse \
             --pretty=format:\"- %s (%cn) %n    Message: %b\" \
-            --simplify-merges 5.1.0.0..${VER} \
+            --simplify-merges ${PRE_VER}..${VER} \
             >> ./CHANGELOG/CHANGELOG-${VER}.md
           """
         }
@@ -207,7 +216,7 @@ pipeline {
           subject: "[${PRODUCT}] Release Update - ${PRODUCT}:${VER}", 
           attachmentsPattern: "**/CHANGELOG/CHANGELOG-${VER}.md",
           body: "안녕하세요. \n\n${PRODUCT} Release Update 입니다. \n\n [필독] 타 모듈과의 버전을 맞추기위해 기존 5.1에서 5.0으로 변경했습니다. (PATCH, HOTFIX 는 기존 번호 유지)" + 
-          "\n\n 이번 패치노트에 5.1.x.x의 패치 이력까지 포함하여 CHANGELOG.md에 포함하였습니다. \n\n변경사항 파일로 첨부합니다. \n\n감사합니다.\n\n" +
+          "\n\n변경사항 파일로 첨부합니다. \n\n감사합니다.\n\n" +
                 "※ 이미지 : ${DOCKER_REGISTRY}/${PRODUCT}:${VER} \n\n※ 설치 가이드 : ${GUIDE_URL} ",
           mimeType: 'text/plain'  
         )

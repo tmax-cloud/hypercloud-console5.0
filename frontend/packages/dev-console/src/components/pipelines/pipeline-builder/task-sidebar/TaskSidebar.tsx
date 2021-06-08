@@ -17,7 +17,7 @@ import { TaskErrorType } from '../const';
 import TaskSidebarParam from './TaskSidebarParam';
 import TaskSidebarResource from './TaskSidebarResource';
 import TaskSidebarName from './TaskSidebarName';
-
+import { useTranslation } from 'react-i18next';
 import './TaskSidebar.scss';
 
 type TaskSidebarProps = {
@@ -30,6 +30,7 @@ type TaskSidebarProps = {
 };
 
 const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
+  const { t } = useTranslation();
   const {
     errorMap,
     onRemoveTask,
@@ -93,7 +94,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
             <ActionsMenu
               actions={[
                 {
-                  label: 'Remove Task',
+                  label: t('SINGLE:MSG_PIPELINES_CREATEFORM_23'),
                   callback: () => onRemoveTask(taskField.value.name),
                 },
               ]}
@@ -121,7 +122,7 @@ const TaskSidebar: React.FC<TaskSidebarProps> = (props) => {
               return (
                 <div key={param.name} className="odc-task-sidebar__param">
                   <TaskSidebarParam
-                    hasParamError={!!thisTaskError?.includes(TaskErrorType.MISSING_REQUIRED_PARAMS)}
+                    hasParamError={!thisParam.value && !!thisTaskError?.includes(TaskErrorType.MISSING_REQUIRED_PARAMS)}
                     resourceParam={param}
                     taskParam={thisParam}
                     onChange={(value) => {

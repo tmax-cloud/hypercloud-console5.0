@@ -15,7 +15,7 @@ import * as plugins from '../plugins';
 import { getActivePerspective } from '../reducers/ui';
 import { NamespaceRedirect } from './utils/namespace-redirect';
 import { RootState } from '../redux';
-import { pluralToKind } from './hypercloud/form';
+import { pluralToKind, isCreateManual } from './hypercloud/form';
 import { getPerspectives } from '../hypercloud/perspectives';
 import { GrafanaPage } from './hypercloud/grafana';
 
@@ -83,13 +83,14 @@ const DefaultPage = connect((state: RootState) => ({
 }))(DefaultPage_);
 
 const LazyRoute = props => {
-  let { kind, loader } = props;
-  let plural = props.computedMatch.params.plural;
-  kind = pluralToKind.get(plural)?.['createType'] ? 'form' : kind;
+  const plural = props.computedMatch.params.plural;
+  const kind = plural ? pluralToKind(plural) : props.kind;
+  const isManual = isCreateManual(kind);
+  const url = props.computedMatch.url;
+  let loader = props.loader;
   // 생성페이지 분기
-  if (props.computedMatch.url.split('/').indexOf('~new') > 0 && !loader) {
-    if (kind === 'form') {
-      kind = pluralToKind.get(plural)['kind'];
+  if (url.split('/').indexOf('~new') > 0 && !loader) {
+    if (isManual) {
       loader = () => import(`./hypercloud/form/${plural}/create-${kind.toLowerCase()}` /* webpackChunkName: "create-secret" */).then(m => m[`Create${kind}`]);
     } else {
       loader = () => import('./hypercloud/crd/create-pinned-resource').then(m => m.CreateDefaultPage);
@@ -144,6 +145,8 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective }) => (
           <LazyRoute path="/provisionedservices/ns/:ns" loader={() => import('./provisioned-services' /* webpackChunkName: "provisionedservices" */).then(m => m.ProvisionedServicesPage)} />
           <Route path="/provisionedservices" component={NamespaceRedirect} />
           <LazyRoute path="/brokermanagement" loader={() => import('./broker-management' /* webpackChunkName: "brokermanagment" */).then(m => m.BrokerManagementPage)} />
+          <LazyRoute path="/catalog/all-namespaces/serviceinstance" exact loader={() => import('./catalog/catalog-page' /* webpackChunkName: "catalog" */).then(m => m.CatalogPage)} />
+          <LazyRoute path="/catalog/ns/:ns/serviceinstance" exact loader={() => import('./catalog/catalog-page' /* webpackChunkName: "catalog" */).then(m => m.CatalogPage)} />
           <LazyRoute path="/catalog/create-service-instance" exact loader={() => import('./service-catalog/create-instance' /* webpackChunkName: "create-service-instance" */).then(m => m.CreateInstancePage)} />
           <LazyRoute path="/k8s/ns/:ns/serviceinstances/:name/create-binding" exact loader={() => import('./service-catalog/create-binding' /* webpackChunkName: "create-binding" */).then(m => m.CreateBindingPage)} />
           <LazyRoute path="/catalog/instantiate-template" exact loader={() => import('./instantiate-template' /* webpackChunkName: "instantiate-template" */).then(m => m.InstantiateTemplatePage)} />
@@ -189,6 +192,7 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective }) => (
           <LazyRoute path="/grafana/ns/:ns" exact loader={() => import('./hypercloud/grafana').then(m => NamespaceFromURL(m.GrafanaPage))} /> */}
 
           {/*Create Form */}
+          <LazyRoute path="/k8s/ns/:ns/customresourcedefinitions/:plural/~new" exact />
           <LazyRoute path="/k8s/cluster/rolebindings/~new" exact loader={() => import('./RBAC' /* webpackChunkName: "rbac" */).then(m => m.CreateRoleBinding)} kind="RoleBinding" />
           <LazyRoute path="/k8s/ns/:ns/rolebindings/~new" exact loader={() => import('./RBAC' /* webpackChunkName: "rbac" */).then(m => m.CreateRoleBinding)} kind="RoleBinding" />
           <LazyRoute path="/k8s/cluster/pipelines/~new" exact loader={() => import('../../packages/dev-console/src/components/pipelines/pipeline-builder' /* webpackChunkName: "PipelineBuilderPage" */).then(m => m.PipelineBuilderPage)} kind="Pipeline" />

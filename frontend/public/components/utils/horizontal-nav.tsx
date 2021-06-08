@@ -2,16 +2,27 @@ import * as _ from 'lodash-es';
 import * as React from 'react';
 import * as classNames from 'classnames';
 import { History, Location } from 'history';
+import { connect } from 'react-redux';
 import { Route, Switch, Link, withRouter, match, matchPath } from 'react-router-dom';
+import { RootState } from '@console/internal/redux';
+import { match as RouterMatch } from 'react-router';
+
+import * as UIActions from '../../actions/ui';
 
 import { EmptyBox, StatusBox } from './status-box';
 import { PodsPage } from '../pod';
 import NodesPage from '@console/app/src/components/nodes/NodesPage';
 import { AsyncComponent } from './async';
+import { modelFor, K8sResourceKindReference, K8sKind } from '@console/internal/module/k8s';
 import { K8sResourceKind, K8sResourceCommon } from '../../module/k8s';
 import { referenceForModel, referenceFor } from '../../module/k8s/k8s';
 import { useExtensions, HorizontalNavTab, isHorizontalNavTab } from '@console/plugin-sdk';
 import { EditDefaultPage } from '../hypercloud/crd/edit-resource';
+import { CustomResourceDefinitionModel } from '@console/internal/models';
+import { pluralToKind, isVanillaObject, isCreateManual } from '../hypercloud/form';
+import { kindToSchemaPath } from '@console/internal/module/hypercloud/k8s/kind-to-schema-path';
+import { getIdToken } from '../../hypercloud/auth';
+import { getK8sAPIPath } from '@console/internal/module/k8s/resource.js';
 import { useTranslation } from 'react-i18next';
 
 const editYamlComponent = props => <AsyncComponent loader={() => import('../edit-yaml').then(c => c.EditYAML)} obj={props.obj} />;
@@ -176,7 +187,7 @@ export const NavBar = withRouter<NavBarProps>(({ pages, baseURL, basePath }) => 
 });
 NavBar.displayName = 'NavBar';
 
-export const HorizontalNav = React.memo((props: HorizontalNavProps) => {
+const HorizontalNav_ = React.memo((props: HorizontalNavProps) => {
   const renderContent = (routes: JSX.Element[]) => {
     const { noStatusBox, obj, EmptyMsg, label } = props;
     const content = <Switch> {routes} </Switch>;
@@ -212,6 +223,44 @@ export const HorizontalNav = React.memo((props: HorizontalNavProps) => {
     );
   };
 
+  React.useEffect(() => {
+    // let kind = pluralToKind(props.match.params.plural);
+    // kind = 'AWSCluster';
+    // if (kind) {
+    let model = props.model;
+    if (model) {
+      let kind = model.kind;
+      const isCustomResourceType = !isVanillaObject(kind);
+      const isStructuralSchemaType = !(isVanillaObject(kind) || isCreateManual(kind));
+      let url;
+      if (isStructuralSchemaType) {
+        // structural schema로 해야하는 거
+        url = getK8sAPIPath({ apiGroup: CustomResourceDefinitionModel.apiGroup, apiVersion: CustomResourceDefinitionModel.apiVersion });
+        url = `${document.location.origin}${url}/customresourcedefinitions/${model.plural}.${model.apiGroup}`;
+      } else if (!isCreateManual(kind)) {
+        // github에 저장해둔거로 해야하는 거
+        const directory = kindToSchemaPath.get(model.kind)?.['directory'];
+        const file = kindToSchemaPath.get(model.kind)?.['file'];
+        url = `${document.location.origin}/api/resource/${directory}/${file}`;
+      } else {
+        // 직접 만든거
+        return;
+      }
+      const xhrTest = new XMLHttpRequest();
+      xhrTest.open('GET', url);
+      xhrTest.setRequestHeader('Authorization', `Bearer ${getIdToken()}`);
+      xhrTest.onreadystatechange = function() {
+        if (xhrTest.readyState == XMLHttpRequest.DONE && xhrTest.status == 200) {
+          let template = xhrTest.response;
+          template = JSON.parse(template);
+          template = isCustomResourceType ? template?.spec?.validation?.openAPIV3Schema : template;
+          props.setActiveSchema(template);
+        }
+      };
+      xhrTest.send();
+    }
+  }, []);
+
   const componentProps = {
     ..._.pick(props, ['filters', 'selected', 'match', 'loaded']),
     obj: _.get(props.obj, 'data'),
@@ -242,6 +291,8 @@ export const HorizontalNav = React.memo((props: HorizontalNavProps) => {
     return <Route path={path} exact key={p.name} render={render} />;
   });
 
+  props.setStatus4MenuActions && props.setStatus4MenuActions(props.obj.data?.status?.status);
+
   return (
     <div className={classNames('co-m-page__body', props.className)}>
       <div className="co-m-horizontal-nav">{!props.hideNav && <NavBar pages={pages} baseURL={props.match.url} basePath={props.match.path} />}</div>
@@ -250,9 +301,33 @@ export const HorizontalNav = React.memo((props: HorizontalNavProps) => {
   );
 }, _.isEqual);
 
+const stateToProps = (state: RootState, props: Omit<DefaultPageProps, 'model'>) => {
+  let plural = props.match.params.plural;
+  let kind = pluralToKind(props.match.params.plural);
+  let model = kind && modelFor(kind);
+  if (!plural) {
+    return null;
+  }
+  // crd중에 hypercloud에서 사용안하는 경우에는 redux에서 관리하는 plural과 kind 값으로 model 참조해야함.
+  if (kind && model) {
+    plural = referenceForModel(model);
+  } else {
+    kind = plural.split('~')[2];
+  }
+  return { model: state.k8s.getIn(['RESOURCES', 'models', plural]) || (state.k8s.getIn(['RESOURCES', 'models', kind]) as K8sKind) };
+};
+
+export const HorizontalNav = connect(stateToProps, {
+  setActiveSchema: UIActions.setActiveSchema,
+})(HorizontalNav_);
+
 export type PodsComponentProps = {
   obj: K8sResourceKind;
   customData?: any;
+};
+export type DefaultPageProps = {
+  match: RouterMatch<{ appName: string; ns: string; plural: K8sResourceKindReference }>;
+  model: K8sKind;
 };
 
 export type NodesComponentProps = {
@@ -281,6 +356,9 @@ export type HorizontalNavProps = {
   EmptyMsg?: React.ComponentType<any>;
   noStatusBox?: boolean;
   customData?: any;
+  setStatus4MenuActions?: any;
+  setActiveSchema?: any;
+  model?: K8sKind;
 };
 
 export type PageComponentProps<R extends K8sResourceCommon = K8sResourceKind> = {

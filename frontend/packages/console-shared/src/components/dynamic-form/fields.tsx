@@ -10,10 +10,11 @@ import { AccordionContent, AccordionItem, AccordionToggle, Switch } from '@patte
 import { MatchExpressions } from '@console/operator-lifecycle-manager/src/components/descriptors/spec/match-expressions';
 import { ResourceRequirements } from '@console/operator-lifecycle-manager/src/components/descriptors/spec/resource-requirements';
 import { AdditionalPropertyFields } from '@console/operator-lifecycle-manager/src/components/descriptors/spec/additional-properties';
+import { OneOfFields } from '@console/operator-lifecycle-manager/src/components/descriptors/spec/oneOf';
 import { ConfigureUpdateStrategy, UPDATE_STRATEGY_DESCRIPTION } from '@console/internal/components/modals/configure-update-strategy-modal';
 import { NodeAffinity, PodAffinity } from '@console/operator-lifecycle-manager/src/components/descriptors/spec/affinity';
 import { getSchemaErrors, useSchemaDescription, useSchemaLabel } from './utils';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 const Description = ({ id, description }) =>
   description ? (
     <span id={id} className="help-block">
@@ -24,9 +25,8 @@ const Description = ({ id, description }) =>
   ) : null;
 
 export const DescriptionField: React.FC<FieldProps> = ({ id, description }) => {
-  // const { t } = useTranslation();
-  // return <Description id={id} description={t(`COMMON:${description}`)} />;
-  return <Description id={id} description={description} />;
+  const { t } = useTranslation();
+  return <Description id={id} description={description && !description.includes(':') ? t(`DESCRIPTION:${description}`) : description} />;
 };
 
 export const FormField: React.FC<FormFieldProps> = ({ children, id, defaultLabel, required, schema, uiSchema }) => {
@@ -137,11 +137,26 @@ export const ResourceRequirementsField: React.FC<FieldProps> = ({ formData, idSc
     </dl>
   </FieldSet>
 );
-export const AdditionalPropertyField: React.FC<FieldProps> = ({ formData, idSchema, name, onChange, required, schema, uiSchema }) => (
-  <FieldSet defaultLabel={name || 'Resource Requirements'} idSchema={idSchema} required={required} schema={schema} uiSchema={uiSchema}>
-    <AdditionalPropertyFields data={formData} onChange={onChange} path={`${idSchema.$id}`}></AdditionalPropertyFields>
-  </FieldSet>
-);
+export const AdditionalPropertyField: React.FC<FieldProps> = props => {
+  const { formData, idSchema, name, onChange, required, schema, uiSchema } = props;
+  return (
+    <FieldSet defaultLabel={name || 'Resource Requirements'} idSchema={idSchema} required={required} schema={schema} uiSchema={uiSchema}>
+      <AdditionalPropertyFields formData={formData} onChange={properties => onChange(properties)} uid={idSchema.$id}></AdditionalPropertyFields>
+    </FieldSet>
+  );
+};
+
+export const OneOfField: React.FC<FieldProps> = props => {
+  const { formData, idSchema, name, onChange, required, schema, uiSchema } = props;
+  if (!name) {
+    return <NullField />;
+  }
+  return (
+    <FieldSet defaultLabel={name} idSchema={idSchema} required={required} schema={schema} uiSchema={uiSchema}>
+      <OneOfFields formData={formData} schema={schema} uid={idSchema.$id} onChange={properties => onChange(properties)}></OneOfFields>
+    </FieldSet>
+  );
+};
 
 export const DropdownField: React.FC<FieldProps> = ({ formData, idSchema, name, onChange, schema, uiSchema = {} }) => {
   const { items, title } = getUiOptions(uiSchema);
@@ -174,6 +189,7 @@ export default {
   LabelsField,
   MatchExpressionsField,
   NodeAffinityField,
+  OneOfField,
   NullField,
   PodAffinityField,
   ResourceRequirementsField,

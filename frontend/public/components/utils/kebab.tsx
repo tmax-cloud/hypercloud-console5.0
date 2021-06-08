@@ -7,7 +7,7 @@ import { KEY_CODES, Tooltip } from '@patternfly/react-core';
 import { EllipsisVIcon, AngleRightIcon } from '@patternfly/react-icons';
 import Popper from '@console/shared/src/components/popper/Popper';
 import { annotationsModal, configureReplicaCountModal, taintsModal, tolerationsModal, labelsModal, podSelectorModal, deleteModal, expandPVCModal } from '../modals';
-import { statusModal, claimModal, scanningModal } from '../hypercloud/modals';
+import { statusModal, scanningModal } from '../hypercloud/modals';
 import { asAccessReview, checkAccess, history, resourceObjPath, useAccessReview } from './index';
 import { AccessReviewResourceAttributes, K8sKind, K8sResourceKind, K8sResourceKindReference, referenceForModel } from '../../module/k8s';
 import { impersonateStateToProps } from '../../reducers/ui';
@@ -17,6 +17,7 @@ import { useTranslation, withTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { ResourceStringKeyMap } from '../../models/hypercloud/resource-plural';
 import * as hoistStatics from 'hoist-non-react-statics';
+import { ResourceLabel } from '@console/internal/models/hypercloud/resource-plural';
 
 export const kebabOptionsToMenu = (options: KebabOption[]): KebabMenuOption[] => {
   const subs: { [key: string]: KebabSubMenu } = {};
@@ -61,10 +62,13 @@ const KebabItem_: React.FC<KebabItemProps & { isAllowed: boolean }> = ({ option,
   const classes = classNames('pf-c-dropdown__menu-item', { 'pf-m-disabled': disabled });
   // MEMO : i18n 키 값과 변수 값을 한번에 String으로 받아올 수 밖에 없어서 불가피하게 여기서 split으로 나눠서 넣어준다..
   const labelSplit = option?.label?.split('**');
+  // MEMO : 번역이 필요없는 경우에도 번역 로직을 타고 있어서 스트링에 ":"이 포함될 때 이상한 파싱 에러가 나고 있었음. 그래서 이 옵션을 추가함.
+  // TODO : needTranslate의 default 값이 false여야할 것 같으나 시간 관계상 에러나는 부분에서만 false로 했음. 추후 변경 요망
+  const needTranslate = option?.needTranslate ?? true;
   return (
     <button className={classes} onClick={e => !disabled && onClick(e, option)} autoFocus={autoFocus} onKeyDown={onEscape && handleEscape} data-test-action={option.label}>
       {option.icon && <span className="oc-kebab__icon">{option.icon}</span>}
-      {!!labelSplit[1] ? t(labelSplit[0], { 0: t(labelSplit[1]) }) : t(labelSplit[0])}
+      {needTranslate ? (!!labelSplit[1] ? t(labelSplit[0], { 0: t(labelSplit[1]) }) : t(labelSplit[0])) : option.label}
     </button>
   );
 };
@@ -242,7 +246,7 @@ const kebabFactory: KebabFactory = {
   ModifyClaim: (kind, obj) => ({
     label: 'COMMON:MSG_MAIN_ACTIONBUTTON_31',
     callback: () =>
-      claimModal({
+      statusModal({
         kind,
         resource: obj,
         blocking: true,
@@ -277,23 +281,24 @@ const kebabFactory: KebabFactory = {
   }),
   ModifyAnnotations: (kind, obj) => ({
     label: 'COMMON:MSG_MAIN_ACTIONBUTTON_5',
-    callback: (t) =>
+    callback: t =>
       annotationsModal({
         kind,
         resource: obj,
         blocking: true,
         submitText: t('COMMON:MSG_COMMON_BUTTON_COMMIT_3'),
-        title: t('COMMON:MSG_MAIN_ACTIONBUTTON_5')
+        title: t('COMMON:MSG_MAIN_ACTIONBUTTON_5'),
       }),
     accessReview: asAccessReview(kind, obj, 'patch'),
   }),
   ModifyCount: (kind, obj) => ({
     label: 'COMMON:MSG_MAIN_ACTIONBUTTON_7',
-    callback: (t) =>
+    callback: t =>
       configureReplicaCountModal({
         resourceKind: kind,
         resource: obj,
         title: t('COMMON:MSG_MAIN_ACTIONBUTTON_7'),
+        message: t('SINGLE:MSG_DEPLOYMENTS_EDITDEPLOYMENTS_EDITPODCOUNT_2', { 0: ResourceLabel(kind, t) }),
         submitText: t('COMMON:MSG_COMMON_BUTTON_COMMIT_3'),
         cancelText: t('COMMON:MSG_COMMON_BUTTON_COMMIT_2'),
       }),
@@ -382,7 +387,6 @@ export const ResourceKebab = connectToModel((props: ResourceKebabProps) => {
 });
 
 class Kebab_ extends React.Component<any, { active: boolean }> {
-
   static factory: KebabFactory = kebabFactory;
   static getExtensionsActionsForKind = getExtensionsKebabActionsForKind;
 
@@ -474,7 +478,7 @@ export type KebabOption = {
   hidden?: boolean;
   label: string;
   href?: string;
-  callback?: (t?:TFunction) => any;
+  callback?: (t?: TFunction) => any;
   accessReview?: AccessReviewResourceAttributes;
   isDisabled?: boolean;
   tooltip?: string;
@@ -482,6 +486,7 @@ export type KebabOption = {
   // Eg. `Menu 1/Menu 2/Menu 3`
   path?: string;
   icon?: React.ReactNode;
+  needTranslate?: boolean;
 };
 
 export type KebabAction = (kind: K8sKind, obj: K8sResourceKind | any, resources?: any, customData?: any) => KebabOption;

@@ -11,25 +11,18 @@ import { DetailsPage, ListPage, Table, TableData, TableRow } from '../factory';
 import { DetailsItem, Kebab, navFactory, SectionHeading, ResourceSummary, ResourceLink, ResourceKebab, Timestamp } from '../utils';
 import { ResourceLabel } from '../../models/hypercloud/resource-plural';
 
-const { common } = Kebab.factory;
+const { ModifyLabels, ModifyAnnotations, Delete } = Kebab.factory;
 
 const kind = TemplateInstanceModel.kind;
 
-export const templateInstanceMenuActions = [...Kebab.getExtensionsActionsForKind(TemplateInstanceModel), ...common];
+export const templateInstanceMenuActions = [...Kebab.getExtensionsActionsForKind(TemplateInstanceModel), ModifyLabels, ModifyAnnotations, Delete];
 
 const templateInstancePhase = instance => {
   let phase = '';
   if (instance.status) {
     instance.status.conditions.forEach(cur => {
       if (cur.type === '') {
-        switch (cur.status) {
-          case 'Success':
-            phase = 'Succeeded';
-            break;
-          default:
-            phase = cur.status;
-            break;
-        }
+        phase = cur.status;
       }
     });
     return phase;
@@ -71,7 +64,7 @@ const TemplateInstanceDetails: React.FC<TemplateInstanceDetailsProps> = ({ obj: 
         <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: ResourceLabel(templateInstance, t) })} />
         <div className="row">
           <div className="col-md-6">
-            <ResourceSummary resource={templateInstance} showPodSelector showNodeSelector showOwner={false}></ResourceSummary>
+            <ResourceSummary resource={templateInstance} showOwner={false}></ResourceSummary>
           </div>
           <div className="col-md-6">
             <dl className="co-m-pane__details">
@@ -95,8 +88,8 @@ type TemplateInstanceDetailsProps = {
   obj: K8sResourceKind;
 };
 
-const { details, editResource } = navFactory;
-const TemplateInstancesDetailsPage: React.FC<TemplateInstancesDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={templateInstanceMenuActions} pages={[details(TemplateInstanceDetails), editResource()]} />;
+const { details, editYaml } = navFactory;
+const TemplateInstancesDetailsPage: React.FC<TemplateInstancesDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={templateInstanceMenuActions} pages={[details(TemplateInstanceDetails), editYaml()]} />;
 TemplateInstancesDetailsPage.displayName = 'TemplateInstancesDetailsPage';
 
 const tableColumnClasses = [
@@ -182,7 +175,7 @@ TemplateInstanceTableHeader.displayName = 'TemplateInstanceTableHeader';
 
 const TemplateInstancesList: React.FC = props => {
   const { t } = useTranslation();
-  return <Table {...props} aria-label="Template Instance" Header={TemplateInstanceTableHeader.bind(null, t)} Row={TemplateInstanceTableRow} />;
+  return <Table {...props} aria-label="Template Instance" Header={TemplateInstanceTableHeader.bind(null, t)} Row={TemplateInstanceTableRow} customSorts={{ templateInstancePhase }} />;
 };
 TemplateInstancesList.displayName = 'TemplateInstancesList';
 
@@ -202,7 +195,7 @@ const TemplateInstancesPage: React.FC<TemplateInstancesPageProps> = props => {
           type: 'template-instance-status',
           reducer: templateInstancePhase,
           items: [
-            { id: 'Succeeded', title: 'Success' },
+            { id: 'Succeeded', title: 'Succeeded' },
             { id: 'Error', title: 'Error' },
           ],
         },

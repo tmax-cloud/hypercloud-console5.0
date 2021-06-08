@@ -186,6 +186,12 @@ h6 {
 .pf-c-chip-group.pf-m-toolbar {
   margin-bottom: var(--pf-global--spacer--xs);
 }
+
+// MJ : Multidropdown의 chip컨테이너 닫기버튼 제거하는 부분
+// #multidropdown-toolbar .pf-c-chip-group__close {
+//   display: none;
+// }
+
 // PF components that calculate their correct height based on --pf-global--FontSize--md: 1rem
 .pf-c-modal-box,
 .pf-c-switch {
@@ -259,6 +265,10 @@ h6 {
     --pf-c-data-toolbar--PaddingTop: 0;
     --pf-c-data-toolbar__content--PaddingLeft: 0;
     --pf-c-data-toolbar__content--PaddingRight: 0;
+  }
+
+  #multidropdown-toolbar.pf-c-data-toolbar {
+    grid-gap: 5px;
   }
 
   .pf-c-page__main-section {
@@ -347,6 +357,21 @@ h6 {
 
   @media screen and (min-width: $grid-float-breakpoint) {
     --pf-c-page__sidebar--BoxShadow: none;
+  }
+
+  &::-webkit-scrollbar {
+    width: 7px;
+    background: none;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d8dadb;
+    border-radius: 7.5px;
+    opacity: 1;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: none;
   }
 
   &.pf-m-expanded {
@@ -614,4 +639,22 @@ button.pf-c-dropdown__menu-item.hover {
 }
 .modal-list li {
   margin-top: 8px;
+}
+
+.pf-c-wizard__nav {
+  z-index: 150 !important;
+}
+
+.btn-group-audit ul {
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.horizontal-line {
+  border-top: 1px #858585 solid;
+  margin: 20px 0;
+}
+
+.text-area {
+  resize: none;
 }

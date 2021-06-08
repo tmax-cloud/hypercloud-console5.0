@@ -111,11 +111,9 @@ class LogWindow_ extends React.PureComponent {
 
     // TODO maybe move these variables into state so they are only updated on changes
     const totalLineCount = pluralize(lines.length, 'line');
-    const linesBehindCount = pluralize(linesBehind, 'new line');
+    // const linesBehindCount = pluralize(linesBehind, 'new line');
     const headerText = bufferFull ? `last ${totalLineCount}` : totalLineCount;
-    const resumeText = linesBehind > 0 ? ` Resume stream and show ${linesBehindCount}` : ' Resume stream';
-
-    // MJ : String 발행되면 이 부분 i18n 적용하기
+    const resumeText = linesBehind > 0 ? t('COMMON:MSG_DETAILS_TABTERMINAL_11', { 0: linesBehind }) : t('SINGLE:MSG_PODS_PODDETAILS_TABLOG_1');
 
     return (
       <div className="log-window">

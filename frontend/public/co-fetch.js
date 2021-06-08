@@ -1,6 +1,6 @@
 import * as _ from 'lodash-es';
 import 'whatwg-fetch';
-import { getAccessToken } from './hypercloud/auth';
+import { getIdToken } from './hypercloud/auth';
 import { authSvc } from './module/auth';
 import store from './redux';
 import keycloak from './hypercloud/keycloak';
@@ -115,8 +115,8 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
     delete allOptions.headers['X-CSRFToken'];
   }
 
-  if (!!getAccessToken()) {
-    allOptions.headers.Authorization = 'Bearer ' + getAccessToken();
+  if (!!getIdToken()) {
+    allOptions.headers.Authorization = 'Bearer ' + getIdToken();
     const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
 
     // return fetch promise directly if timeout <= 0
@@ -164,11 +164,12 @@ export const coFetchCommon = (url, method = 'GET', options = {}, timeout) => {
       return response.text();
     }
 
+    const contentType = response.headers.get('Content-Type');
     // If the response has no body, return promise that resolves with an empty object
     if (response.headers.get('Content-Length') === '0') {
-      return Promise.resolve(response.headers.get('Content-Type') === 'text/plain' ? '' : {});
+      return Promise.resolve(contentType.indexOf('text/plain') > -1 ? '' : {});
     }
-    if (response.headers.get('Content-Type') === 'text/plain') {
+    if (contentType.indexOf('text/plain') > -1) {
       return response.text();
     }
     return response.json();

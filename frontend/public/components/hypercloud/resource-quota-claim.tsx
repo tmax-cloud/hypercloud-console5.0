@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
 
+import { Status } from '@console/shared';
 import { K8sResourceKind, K8sClaimResourceKind, modelFor } from '../../module/k8s';
 import { fromNow } from '@console/internal/components/utils/datetime';
 import { sortable } from '@patternfly/react-table';
@@ -13,7 +14,7 @@ const { common } = Kebab.factory;
 
 const tableColumnClasses = ['', '', classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), Kebab.columnClass];
 
-export const menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('ResourceQuotaClaim')), ...common, Kebab.factory.ModifyStatus];
+// export const menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('ResourceQuotaClaim')), ...common, Kebab.factory.ModifyStatus];
 
 const kind = 'ResourceQuotaClaim';
 
@@ -26,7 +27,7 @@ const ResourceQuotaClaimTableHeader = (t?: TFunction) => {
       props: { className: tableColumnClasses[0] },
     },
     {
-      title: t('COMMON:MSG_MAIN_TABLEHEADER_2'),
+      title: t('COMMON:MSG_MAIN_TABLEHEADER_98'),
       sortField: 'metadata.namespace',
       transforms: [sortable],
       props: { className: tableColumnClasses[1] },
@@ -57,16 +58,27 @@ const ResourceQuotaClaimTableHeader = (t?: TFunction) => {
 };
 ResourceQuotaClaimTableHeader.displayName = 'ResourceQuotaClaimTableHeader';
 
+const unmodifiableStatus = new Set(['Approved', 'Namespace Deleted']);
+const isUnmodifiable = (status: string) => unmodifiableStatus.has(status);
 const ResourceQuotaClaimTableRow: RowFunction<K8sClaimResourceKind> = ({ obj: resourcequotaclaims, index, key, style }) => {
+  let menuActions: any[];
+  if (isUnmodifiable(resourcequotaclaims?.status?.status)) {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('ResourceQuotaClaim')), ...common];
+  } else {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('ResourceQuotaClaim')), ...common, Kebab.factory.ModifyStatus];
+  }
+
   return (
     <TableRow id={resourcequotaclaims.metadata.uid} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>
         <ResourceLink kind={kind} name={resourcequotaclaims.metadata.name} namespace={resourcequotaclaims.metadata.namespace} title={resourcequotaclaims.metadata.uid} />
       </TableData>
       <TableData className={classNames(tableColumnClasses[1], 'co-break-word')}>
-        <ResourceLink kind="Namespace" name={resourcequotaclaims.metadata.namespace} title={resourcequotaclaims.metadata.namespace} />
+        <ResourceLink kind="Namespace" name={resourcequotaclaims.metadata.namespace} title={resourcequotaclaims.metadata.namespace} linkTo={resourcequotaclaims.status?.status === 'Approved'} />
       </TableData>
-      <TableData className={tableColumnClasses[2]}>{resourcequotaclaims?.status?.status}</TableData>
+      <TableData className={tableColumnClasses[2]}>
+        <Status status={resourcequotaclaims?.status?.status} />
+      </TableData>
       <TableData className={tableColumnClasses[3]}>{resourcequotaclaims.resourceName}</TableData>
       <TableData className={tableColumnClasses[4]}>{fromNow(resourcequotaclaims?.metadata?.creationTimestamp)}</TableData>
       <TableData className={tableColumnClasses[5]}>
@@ -108,16 +120,18 @@ export const ResourceQuotaClaimsPage: React.FC<ResourceQuotaClaimsPageProps> = p
       name: t('COMMON:MSG_LNB_MENU_80'),
     },
     {
-      href: 'resourcequotaclaims?rowFilter-resource-quota-claim-status=Awaiting',
+      // href: 'resourcequotaclaims?rowFilter-resource-quota-claim-status=Awaiting',
+      href: 'resourcequotaclaims',
       path: 'resourcequotaclaims',
       name: t('COMMON:MSG_LNB_MENU_102'),
     },
   ];
-  return <ListPage kind={'ResourceQuotaClaim'} canCreate={true} ListComponent={ResourceQuotaClaimsList} {...props} multiNavPages={pages} rowFilters={filters.bind(null, t)()} />;
+  return <ListPage kind={'ResourceQuotaClaim'} canCreate={true} ListComponent={ResourceQuotaClaimsList} {...props} multiNavPages={pages} rowFilters={filters.bind(null, t)()} defaultSelectedRows={['Awaiting']} />;
 };
 ResourceQuotaClaimsPage.displayName = 'ResourceQuotaClaimsPage';
 const ResourceQuotaClaimsDetails: React.FC<ResourceQuotaClaimDetailsProps> = ({ obj: resourcequotaclaims }) => {
   const { t } = useTranslation();
+
   return (
     <>
       <div className="co-m-pane__body">
@@ -131,14 +145,26 @@ const ResourceQuotaClaimsDetails: React.FC<ResourceQuotaClaimDetailsProps> = ({ 
             </div>
             <div className="col-md-6">
               <dl className="co-m-pane__details">
+                <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_118')}</dt>
+                <dd>{resourcequotaclaims.resourceName}</dd>
                 <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_45')}</dt>
-                <dd>{resourcequotaclaims?.status?.status}</dd>
+                <dd>
+                  <Status status={resourcequotaclaims.status?.status} />
+                </dd>
+                {resourcequotaclaims.status?.status === 'Rejected' && (
+                  <>
+                    <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_20')}</dt>
+                    <dd>{resourcequotaclaims.status?.reason}</dd>
+                  </>
+                )}
+                {/* <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_45')}</dt>
+                <dd>{resourcequotaclaims.status?.status}</dd>
                 <dt>{t('SINGLE:MSG_RESOURCEQUOTACLAIMS_RESOURCEQUOTACLAIMDETAILS_TABDETAILS_2')}</dt>
-                <dd>{resourcequotaclaims?.status?.reason}</dd>
-                <dt>{t('SINGLE:MSG_RESOURCEQUOTACLAIMS_RESOURCEQUOTACLAIMDETAILS_TABDETAILS_3')}</dt>
-                <dd>{resourcequotaclaims?.specLimit?.limitCpu}</dd>
+                <dd>{resourcequotaclaims.status?.reason}</dd> */}
+                {/* <dt>{t('SINGLE:MSG_RESOURCEQUOTACLAIMS_RESOURCEQUOTACLAIMDETAILS_TABDETAILS_3')}</dt>
+                <dd>{resourcequotaclaims.spec?.hard?.['limits.cpu']}</dd>
                 <dt>{t('SINGLE:MSG_RESOURCEQUOTACLAIMS_RESOURCEQUOTACLAIMDETAILS_TABDETAILS_4')}</dt>
-                <dd>{resourcequotaclaims?.specLimit?.limitMemory}</dd>
+                <dd>{resourcequotaclaims.spec?.hard?.['limits.memory']}</dd> */}
               </dl>
             </div>
           </div>
@@ -150,7 +176,17 @@ const ResourceQuotaClaimsDetails: React.FC<ResourceQuotaClaimDetailsProps> = ({ 
 ResourceQuotaClaimsDetails.displayName = 'ResourceQuotaClaimsDetails';
 
 const { details, editResource } = navFactory;
-export const ResourceQuotaClaimsDetailsPage: React.FC<ResourceQuotaClaimsDetailsPageProps> = props => <DetailsPage {...props} kind={'ResourceQuotaClaim'} menuActions={menuActions} pages={[details(ResourceQuotaClaimsDetails), editResource()]} />;
+export const ResourceQuotaClaimsDetailsPage: React.FC<ResourceQuotaClaimsDetailsPageProps> = props => {
+  let menuActions: any[];
+  const [status, setStatus] = React.useState();
+
+  if (isUnmodifiable(status)) {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common];
+  } else {
+    menuActions = [...Kebab.getExtensionsActionsForKind(modelFor('NamespaceClaim')), ...common, Kebab.factory.ModifyStatus];
+  }
+  return <DetailsPage {...props} kind={'ResourceQuotaClaim'} menuActions={menuActions} setStatus4MenuActions={setStatus} pages={[details(ResourceQuotaClaimsDetails), editResource()]} />;
+};
 ResourceQuotaClaimsDetailsPage.displayName = 'ResourceQuotaClaimsDetailsPage';
 
 type ResourceQuotaClaimDetailsProps = {

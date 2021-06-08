@@ -214,12 +214,18 @@ const Details_ = ({ flags, obj: pvc }) => {
 
 const Details = connectToFlags(FLAGS.CAN_LIST_PV)(Details_);
 
-const allPhases = ['Pending', 'Bound', 'Lost'];
+
+const allPhases = ['Pending', 'Bound', 'Lost', 'Terminating'];
 const filters = (t) => [
   {
     filterGroupName: t('COMMON:MSG_COMMON_FILTER_10'),
     type: 'pvc-status',
-    reducer: (pvc) => pvc.status.phase,
+    reducer: (pvc) => {
+      if (pvc?.metadata?.deletionTimestamp) {
+        return 'Terminating';
+      }
+      return pvc.status.phase
+    },
     items: _.map(allPhases, (phase) => ({
       id: phase,
       title: phase,
@@ -258,7 +264,7 @@ export const PersistentVolumeClaimsDetailsPage = (props) => (
     menuActions={menuActions}
     pages={[
       navFactory.details(Details),
-      navFactory.editYaml(),
+      navFactory.editResource(),
       navFactory.events(ResourceEventStream),
     ]}
   />

@@ -48,7 +48,7 @@ const TemplateDetails: React.FC<TemplateDetailsProps> = ({ obj: template }) => {
         <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: ResourceLabel(template, t) })} />
         <div className="row">
           <div className="col-md-6">
-            <ResourceSummary resource={template} showPodSelector showOwner={false}></ResourceSummary>
+            <ResourceSummary resource={template} showOwner={false}></ResourceSummary>
           </div>
           <div className="col-md-6">
             <dl className="co-m-pane__details">
@@ -140,7 +140,7 @@ TemplatesList.displayName = 'TemplatesList';
 
 const TemplatesPage: React.FC<TemplatesPageProps> = props => {
   const { t } = useTranslation();
-  return <ListPage title={t('COMMON:MSG_LNB_MENU_20')} createButtonText={t('COMMON:MSG_MAIN_CREATEBUTTON_1', { 0: t('COMMON:MSG_LNB_MENU_20') })} canCreate={false} kind={kind} ListComponent={TemplatesList} {...props} />;
+  return <ListPage title={t('COMMON:MSG_LNB_MENU_20')} createButtonText={t('COMMON:MSG_MAIN_CREATEBUTTON_1', { 0: t('COMMON:MSG_LNB_MENU_20') })} canCreate={true} kind={kind} ListComponent={TemplatesList} {...props} />;
 };
 TemplatesPage.displayName = 'TemplatesPage';
 

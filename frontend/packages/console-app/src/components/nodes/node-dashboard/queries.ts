@@ -42,12 +42,12 @@ export enum NodeQueries {
 
 const queries = {
   [NodeQueries.CPU_USAGE]: _.template(`instance:node_cpu:rate:sum{instance='<%= ipAddress %>'}`),
-  [NodeQueries.CPU_TOTAL]: _.template(`instance:node_num_cpu:sum{instance='<%= ipAddress %>'}`),
+  [NodeQueries.CPU_TOTAL]: _.template(`count(node_cpu_seconds_total{job="node-exporter",mode="idle",instance='<%= ipAddress %>'}) by(instance)`),
   [NodeQueries.MEMORY_USAGE]: _.template(`node_memory_MemTotal_bytes{instance='<%= ipAddress %>'} - node_memory_MemAvailable_bytes{instance='<%= ipAddress %>'}`),
   [NodeQueries.MEMORY_TOTAL]: _.template(`node_memory_MemTotal_bytes{instance='<%= ipAddress %>'}`),
-  [NodeQueries.POD_COUNT]: _.template(`kubelet_running_pods{instance=~'<%= podCountIp %>'}`),
-  [NodeQueries.FILESYSTEM_USAGE]: _.template(`instance:node_filesystem_usage:sum{instance='<%= ipAddress %>'}`),
-  [NodeQueries.FILESYSTEM_TOTAL]: _.template(`node_filesystem_size_bytes{instance='<%= ipAddress %>'}`),
+  [NodeQueries.POD_COUNT]: _.template(`sum(kube_pod_info{host_ip='<%= hostIp %>'})`),
+  [NodeQueries.FILESYSTEM_USAGE]: _.template(`node_filesystem_size_bytes{mountpoint="/",instance='<%= ipAddress %>'} - node_filesystem_free_bytes{mountpoint="/",instance='<%= ipAddress %>'}`),
+  [NodeQueries.FILESYSTEM_TOTAL]: _.template(`node_filesystem_size_bytes{mountpoint="/",instance='<%= ipAddress %>'}`),
   [NodeQueries.NETWORK_IN_UTILIZATION]: _.template(`instance:node_network_receive_bytes:rate:sum{instance='<%= ipAddress %>'}`),
   [NodeQueries.NETWORK_OUT_UTILIZATION]: _.template(`instance:node_network_transmit_bytes:rate:sum{instance='<%= ipAddress %>'}`),
 };
@@ -157,14 +157,15 @@ export const getResourceQutoaQueries = (node: string) => ({
 //   }),
 // });
 export const getUtilizationQueries = (node: string, ipAddress: string) => {
-  let podCountIp = ipAddress + ':10250';
-  ipAddress = ipAddress + ':9100';
+  // let podCountIp = ipAddress + ':10250';
+  ipAddress = ipAddress.indexOf(':') < 0 ? ipAddress + ':9100' : ipAddress;
+  let hostIp = ipAddress.split(':')[0];
   return {
     [NodeQueries.CPU_USAGE]: queries[NodeQueries.CPU_USAGE]({ ipAddress }),
     [NodeQueries.CPU_TOTAL]: queries[NodeQueries.CPU_TOTAL]({ ipAddress }),
     [NodeQueries.MEMORY_USAGE]: queries[NodeQueries.MEMORY_USAGE]({ ipAddress }),
     [NodeQueries.MEMORY_TOTAL]: queries[NodeQueries.MEMORY_TOTAL]({ ipAddress }),
-    [NodeQueries.POD_COUNT]: queries[NodeQueries.POD_COUNT]({ podCountIp }),
+    [NodeQueries.POD_COUNT]: queries[NodeQueries.POD_COUNT]({ hostIp }),
     [NodeQueries.FILESYSTEM_USAGE]: queries[NodeQueries.FILESYSTEM_USAGE]({
       ipAddress,
     }),

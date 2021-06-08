@@ -10,19 +10,21 @@ import { filterList } from '../actions/k8s';
 import AutocompleteInput from './autocomplete';
 import { storagePrefix } from './row-filter';
 import { useTranslation } from 'react-i18next';
+import { ServicePlanModel, ClusterServicePlanModel, ServiceClassModel, ClusterServiceClassModel } from '@console/internal/models';
 
 /**
  * Housing both the row filter and name/label filter in the same file.
  */
-
 enum FilterType {
   NAME = 'Name',
   LABEL = 'Label',
+  EXTERNAL_NAME = 'ExternalName',
 }
 
 const filterTypeMap = Object.freeze({
   [FilterType.LABEL]: 'labels',
   [FilterType.NAME]: 'name',
+  [FilterType.EXTERNAL_NAME]: 'externalName',
 });
 
 type Filter = {
@@ -32,6 +34,8 @@ type Filter = {
 type FilterKeys = {
   [key: string]: string;
 };
+
+const requireExternalNameFiltering = [ServicePlanModel.kind, ClusterServicePlanModel.kind, ServiceClassModel.kind, ClusterServiceClassModel.kind];
 
 const getDropdownItems = (rowFilters: RowFilter[], selectedItems, data, props) =>
   rowFilters.map(grp => {
@@ -56,7 +60,7 @@ const getDropdownItems = (rowFilters: RowFilter[], selectedItems, data, props) =
   });
 
 const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props => {
-  const { rowFilters = [], data, hideToolbar, hideLabelFilter, location, textFilter = filterTypeMap[FilterType.NAME], defaultSelectedItems } = props;
+  const { rowFilters = [], data, hideToolbar, hideLabelFilter, location, textFilter = filterTypeMap[FilterType.NAME], storeSelectedRows = new Set(), defaultSelectedRows = [] } = props;
 
   const [inputText, setInputText] = React.useState('');
   const [filterType, setFilterType] = React.useState(FilterType.NAME);
@@ -88,7 +92,7 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
   }, {});
 
   // (url) => {nameFilter, labelFilters, rowFilters}
-  const { name: nameFilter, labels: labelFilters, rowFiltersFromURL: selectedRowFilters } = (() => {
+  const { name: nameFilter, labels: labelFilters, externalName: externalNameFilter, rowFiltersFromURL: selectedRowFilters } = (() => {
     const rowFiltersFromURL: string[] = [];
     const params = new URLSearchParams(location.search);
     const q = params.get('label');
@@ -100,14 +104,15 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
       }
     });
     const labels = q ? q.split(',') : [];
-    return { name, labels, rowFiltersFromURL };
+    const externalName = params.get('externalName');
+    return { name, labels, externalName, rowFiltersFromURL };
   })();
 
   /* Logic for Name and Label Filter */
 
   const applyFilter = (input: string | string[], type: FilterType) => {
-    const filter = type === FilterType.NAME ? textFilter : filterTypeMap[FilterType.LABEL];
-    const value = type === FilterType.NAME ? input : { all: input };
+    const filter = filterTypeMap[type];
+    const value = type === FilterType.LABEL ? { all: input } : input;
     props.reduxIDs.forEach(id => props.filterList(id, filter, value));
   };
 
@@ -131,6 +136,16 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
     applyFilter(filterValue, FilterType.NAME);
   };
 
+  const updateExternalNameFilter = (filterValue: string) => {
+    if (!_.isEmpty(filterValue)) {
+      setQueryArgument(filterTypeMap[FilterType.EXTERNAL_NAME], filterValue);
+    } else {
+      removeQueryArgument(filterTypeMap[FilterType.EXTERNAL_NAME]);
+    }
+    setInputText(filterValue);
+    applyFilter(filterValue, FilterType.EXTERNAL_NAME);
+  };
+
   const updateSearchFilter = (value: string) => {
     switch (filterType) {
       case FilterType.NAME:
@@ -138,6 +153,9 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
         break;
       case FilterType.LABEL:
         setInputText(value);
+        break;
+      case FilterType.EXTERNAL_NAME:
+        updateExternalNameFilter(value);
         break;
       default:
         break;
@@ -175,6 +193,12 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
     setOpen(false);
   };
 
+  const defaultRowFilterSetting = (filterList: string[]) => {
+    applyRowFilter(filterList);
+    setQueryParameters(filterList);
+    setOpen(false);
+  };
+
   const clearAllRowFilter = (f: string) => {
     updateRowFilterSelected(_.intersection(filters[f], selectedRowFilters));
   };
@@ -188,21 +212,42 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
     updateRowFilterSelected(selectedRowFilters);
     updateNameFilter('');
     updateLabelFilter([]);
+    updateExternalNameFilter('');
   };
 
   // Initial URL parsing
   React.useEffect(() => {
     !_.isEmpty(labelFilters) && applyFilter(labelFilters, FilterType.LABEL);
     !_.isEmpty(nameFilter) && applyFilter(nameFilter, FilterType.NAME);
-    !_.isEmpty(selectedRowFilters) && applyRowFilter(selectedRowFilters);
-    applyRowFilter(defaultSelectedItems);
-    setQueryParameters(defaultSelectedItems);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    !_.isEmpty(externalNameFilter) && applyFilter(externalNameFilter, FilterType.EXTERNAL_NAME);
+
+    if (!_.isEmpty(defaultSelectedRows)) {
+      applyRowFilter(defaultSelectedRows);
+      setQueryParameters(defaultSelectedRows);
+    }
+    if (location.search.indexOf('rowFilter-pod-status') >= 0) {
+      defaultRowFilterSetting(location.search.split('rowFilter-pod-status=')[1].split('%2C'));
+    }
   }, []);
 
+  React.useEffect(() => {
+    if (_.isEmpty(selectedRowFilters) && storeSelectedRows.size > 0) {
+      applyRowFilter(Array.from(storeSelectedRows));
+      setQueryParameters(Array.from(storeSelectedRows));
+    }
+  });
   const switchFilter = type => {
     setFilterType(type);
-    setInputText(nameFilter && type === FilterType.NAME ? nameFilter : '');
+    switch (type) {
+      case FilterType.NAME:
+        setInputText(nameFilter || '');
+        break;
+      case FilterType.EXTERNAL_NAME:
+        setInputText(externalNameFilter || '');
+        break;
+      default:
+        setInputText('');
+    }
   };
 
   const dropdownItems = getDropdownItems(rowFilters, selectedRowFilters, data, props);
@@ -212,6 +257,19 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
     [FilterType.LABEL]: t('COMMON:MSG_COMMON_SEARCH_FILTER_2'),
     [FilterType.NAME]: t('COMMON:MSG_COMMON_SEARCH_FILTER_1'),
   };
+
+  const placeHolders = {
+    [FilterType.LABEL]: 'app=frontend',
+    [FilterType.NAME]: t('COMMON:MSG_COMMON_SEARCH_PLACEHOLDER_1'),
+    [FilterType.EXTERNAL_NAME]: t('COMMON:MSG_COMMON_SEARCH_PLACEHOLDER_3'),
+  };
+
+  // MEMO : 특정 리소스 타입에서만 필요로 하는 검색기준이 있을 때
+  if (props.kinds.length === 1) {
+    if (requireExternalNameFiltering.includes(props.kinds[0])) {
+      searchFilterTitle[FilterType.EXTERNAL_NAME] = t('COMMON:MSG_COMMON_SEARCH_FILTER_5');
+    }
+  }
 
   return (
     !hideToolbar && (
@@ -251,20 +309,22 @@ const FilterToolbar_: React.FC<FilterToolbarProps & RouteComponentProps> = props
           <DataToolbarItem className="co-filter-search--full-width">
             <DataToolbarFilter deleteChipGroup={() => updateLabelFilter([])} chips={!hideLabelFilter ? [...labelFilters] : []} deleteChip={(filter, chip: string) => updateLabelFilter(_.difference(labelFilters, [chip]))} categoryName={t('COMMON:MSG_COMMON_SEARCH_FILTER_2')}>
               <DataToolbarFilter chips={nameFilter?.length ? [nameFilter] : []} deleteChip={() => updateNameFilter('')} categoryName={t('COMMON:MSG_COMMON_SEARCH_FILTER_1')}>
-                <div className="pf-c-input-group">
-                  {!hideLabelFilter && <DropdownInternal items={searchFilterTitle} onChange={switchFilter} selectedKey={filterType} title={searchFilterTitle[filterType]} />}
-                  <AutocompleteInput
-                    className="co-text-node"
-                    onSuggestionSelect={selected => {
-                      updateLabelFilter(_.uniq([...labelFilters, selected]));
-                    }}
-                    showSuggestions={FilterType.LABEL === filterType}
-                    textValue={inputText}
-                    setTextValue={updateSearchFilter}
-                    placeholder={FilterType.NAME === filterType ? t('COMMON:MSG_COMMON_SEARCH_PLACEHOLDER_1') : 'app=frontend'}
-                    data={data}
-                  />
-                </div>
+                <DataToolbarFilter chips={externalNameFilter?.length ? [externalNameFilter] : []} deleteChip={() => updateExternalNameFilter('')} categoryName={t('외부 이름')}>
+                  <div className="pf-c-input-group">
+                    {!hideLabelFilter && <DropdownInternal items={searchFilterTitle} onChange={switchFilter} selectedKey={filterType} title={searchFilterTitle[filterType]} />}
+                    <AutocompleteInput
+                      className="co-text-node"
+                      onSuggestionSelect={selected => {
+                        updateLabelFilter(_.uniq([...labelFilters, selected]));
+                      }}
+                      showSuggestions={FilterType.LABEL === filterType}
+                      textValue={inputText}
+                      setTextValue={updateSearchFilter}
+                      placeholder={placeHolders[filterType]}
+                      data={data}
+                    />
+                  </div>
+                </DataToolbarFilter>
               </DataToolbarFilter>
             </DataToolbarFilter>
           </DataToolbarItem>
@@ -284,7 +344,8 @@ type FilterToolbarProps = {
   hideLabelFilter?: boolean;
   parseAutoComplete?: any;
   kinds?: any;
-  defaultSelectedItems?: string[];
+  storeSelectedRows?: any;
+  defaultSelectedRows?: string[];
 };
 
 export type RowFilter = {
@@ -299,5 +360,15 @@ export type RowFilter = {
   filter?: any;
 };
 
-export const FilterToolbar = withRouter(connect(null, { filterList })(FilterToolbar_));
+//TODO: doesnt consider multiple filters
+const mapStateToProps = (state, props) => {
+  const id = props.reduxIDs?.[0];
+  const name = `filters`;
+  const type = props.rowFilters?.[0].type;
+  const storeSelectedRows = state.k8s.getIn([id, name, type])?.selected;
+
+  return { storeSelectedRows };
+};
+
+export const FilterToolbar = withRouter(connect(mapStateToProps, { filterList })(FilterToolbar_));
 FilterToolbar.displayName = 'FilterToolbar';

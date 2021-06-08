@@ -31,7 +31,7 @@ const PodSecurityPolicyTableHeader = t => {
     },
     {
       title: t('COMMON:MSG_MAIN_TABLEHEADER_47'),
-      sortFunc: 'spec.seLinux.rule',
+      sortField: 'spec.seLinux.rule',
       transforms: [sortable],
       props: { className: tableColumnClasses[2] },
     },
@@ -110,8 +110,8 @@ const PodSecurityPoliciesDetails: React.FC<PodSecurityPoliciesDetailsProps> = ({
 };
 PodSecurityPoliciesDetails.displayName = 'PodSecurityPoliciesDetails';
 
-const { details, editYaml } = navFactory;
-export const PodSecurityPoliciesDetailsPage: React.FC<PodSecurityPoliciesDetailsPageProps> = props => <DetailsPage {...props} kind={'PodSecurityPolicy'} menuActions={menuActions} pages={[details(PodSecurityPoliciesDetails), editYaml()]} />;
+const { details, editResource } = navFactory;
+export const PodSecurityPoliciesDetailsPage: React.FC<PodSecurityPoliciesDetailsPageProps> = props => <DetailsPage {...props} kind={'PodSecurityPolicy'} menuActions={menuActions} pages={[details(PodSecurityPoliciesDetails), editResource()]} />;
 PodSecurityPoliciesDetailsPage.displayName = 'PodSecurityPoliciesDetailsPage';
 
 type PodSecurityPoliciesDetailsProps = {

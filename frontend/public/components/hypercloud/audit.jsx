@@ -49,7 +49,7 @@ class Inner extends React.PureComponent {
         <div className="co-sysevent__box">
           <div className="co-sysevent__header">
             <div className="co-sysevent__subheader">
-              {objectRef.Resource}
+              {objectRef.Resource} ({objectRef.Name})
               <Timestamp timestamp={timestamp} />
             </div>
             <div
@@ -114,7 +114,7 @@ class AuditPage_ extends React.Component {
       apiservices: 'apiservices',
       attributemanifests: 'attributemanifests',
       authorizationpolicies: 'authorizationpolicies',
-      catalogserviceclaims: 'catalogserviceclaims',
+      clustertemplateclaims: 'clustertemplateclaims',
       cdis: 'cdis',
       cephblockpools: 'cephblockpools',
       cephclusters: 'cephclusters',

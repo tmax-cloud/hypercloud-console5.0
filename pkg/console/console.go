@@ -33,7 +33,7 @@ const (
 	alertManagerProxyPath      = "/api/alertmanager"
 
 	grafanaProxyPath          = "/api/grafana/"
-	kialiProxyPath            = "/api/kiali/"
+	kialiProxyPath            = "/api/kiali"
 	webhookPath               = "/api/webhook/"
 	hypercloudServerPath      = "/api/hypercloud/"
 	multiHypercloudServerPath = "/api/multi-hypercloud/"
@@ -105,7 +105,8 @@ func New(cfg *v1.Config) (*Console, error) {
 // Gateway is API gateway like reverse proxy server related in k8s, Prometheus, Grafana, and hypercloud-operator
 func (c *Console) Gateway() http.Handler {
 	standardMiddleware := alice.New(c.recoverPanic, c.logRequest, secureHeaders, handlers.ProxyHeaders)
-	tokenMiddleware := alice.New(c.tokenHandler)
+	// tokenMiddleware := alice.New(c.jwtHandler, c.tokenHandler) // jwt validation handler + token handler
+	tokenMiddleware := alice.New(c.tokenHandler) // select token depending on release-mode
 	r := mux.NewRouter()
 
 	handle := func(path string, handler http.Handler) {
@@ -250,9 +251,12 @@ func (c *Console) Gateway() http.Handler {
 		kialiProxy := proxy.NewProxy(c.KialiProxyConfig)
 		handle(kialiProxyAPIPath, http.StripPrefix(
 			proxy.SingleJoiningSlash(c.BaseURL.Path, kialiProxyAPIPath),
-			tokenMiddleware.ThenFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				kialiProxy.ServeHTTP(w, r)
 			})),
+		// tokenMiddleware.ThenFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 	kialiProxy.ServeHTTP(w, r)
+		// })),
 		)
 	}
 	// NOTE: kibana proxy

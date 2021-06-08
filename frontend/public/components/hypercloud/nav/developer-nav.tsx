@@ -1,13 +1,16 @@
 import * as React from 'react';
 
 import { Translation } from 'react-i18next';
-import { ResourceNSLink, ResourceClusterLink, NewTabLink } from '../../nav/items';
+import { ResourceNSLink, ResourceClusterLink, NewTabLink, HrefLink } from '../../nav/items';
 import { NavSection } from '../../nav/section';
 
 const DeveloperNav = () => (
   <Translation>
     {t => (
       <>
+        <NavSection title='+ Add' isSingleChild={true}>
+          <HrefLink href='/add' activePath='/add/' name='+ Add' />
+        </NavSection>
         <NavSection title={t('COMMON:MSG_LNB_MENU_10')}>
           <ResourceNSLink resource="servicebrokers" name={t('COMMON:MSG_LNB_MENU_11')} />
           <ResourceNSLink resource="serviceclasses" name={t('COMMON:MSG_LNB_MENU_12')} />
@@ -17,7 +20,7 @@ const DeveloperNav = () => (
           {/* <ResourceClusterLink resource="clusterserviceplans" name="Cluster Service Plan" /> */}
           <ResourceNSLink resource="serviceinstances" name={t('COMMON:MSG_LNB_MENU_17')} />
           <ResourceNSLink resource="servicebindings" name={t('COMMON:MSG_LNB_MENU_18')} />
-          <ResourceNSLink resource="catalogserviceclaims" name={t('COMMON:MSG_LNB_MENU_19')} />
+          <ResourceNSLink resource="clustertemplateclaims" name={t('COMMON:MSG_LNB_MENU_19')} />
           <ResourceNSLink resource="templates" name={t('COMMON:MSG_LNB_MENU_20')} />
           <ResourceClusterLink resource="clustertemplates" name={t('COMMON:MSG_LNB_MENU_104')} />
           <ResourceNSLink resource="templateinstances" name={t('COMMON:MSG_LNB_MENU_21')} />
@@ -46,13 +49,14 @@ const DeveloperNav = () => (
           <ResourceNSLink resource="integrationjobs" name={t('COMMON:MSG_LNB_MENU_185')} />
           <ResourceNSLink resource="integrationconfigs" name={t('COMMON:MSG_LNB_MENU_183')} />
         </NavSection>
-        <NavSection title="AI DevOps">
-          <ResourceNSLink resource="notebooks" name="Notebook" />
+        <NavSection title={t('COMMON:MSG_LNB_MENU_64')}>
+          <ResourceNSLink resource="notebooks" name={t('COMMON:MSG_LNB_MENU_65')} />
           <ResourceNSLink resource="experiments" name="Experiment" />
-          <ResourceNSLink resource="trainingjobs" name="TrainingJob" />
-          <ResourceNSLink resource="inferenceservices" name="InferenceService" />
-          <ResourceNSLink resource="workflowtemplates" name="WorkflowTemplate" />
-          <ResourceNSLink resource="workflows" name="Workflow" />
+          <ResourceNSLink resource="trainingjobs" name={t('COMMON:MSG_LNB_MENU_68')} />
+          <ResourceNSLink resource="inferenceservices" name={t('COMMON:MSG_LNB_MENU_192')} />
+          <ResourceNSLink resource="trainedmodels" name="Trained Model" />
+          <ResourceNSLink resource="workflowtemplates" name={t('COMMON:MSG_LNB_MENU_69')} />
+          <ResourceNSLink resource="workflows" name={t('COMMON:MSG_LNB_MENU_70')} />
         </NavSection>
         <NavSection title={t('COMMON:MSG_DETAILS_TABDETAILS_CONTAINERS_TABLEHEADER_3')}>
           <ResourceNSLink resource="registries" name={t('COMMON:MSG_LNB_MENU_187')} />

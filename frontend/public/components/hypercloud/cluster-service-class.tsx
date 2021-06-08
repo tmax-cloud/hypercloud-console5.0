@@ -21,13 +21,15 @@ const ClusterServiceClassDetails: React.FC<ClusterServiceClassDetailsProps> = ({
         <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: ResourceLabel(clusterServiceClass, t) })} />
         <div className="row">
           <div className="col-md-6">
-            <ResourceSummary resource={clusterServiceClass} showPodSelector showNodeSelector></ResourceSummary>
+            <ResourceSummary resource={clusterServiceClass} showPodSelector={false} showNodeSelector={false} showAnnotations={false} showOwner={false}></ResourceSummary>
           </div>
           <div className="col-md-6">
             <dl className="co-m-pane__details">
-              <dt>{t('COMMON:MSG_MAIN_TABLEHEADER_83')}</dt>
-              <dd>{clusterServiceClass.spec.bindable ? t('COMMON:MSG_MAIN_TABLECONTENTS_1') : t('COMMON:MSG_MAIN_TABLECONTENTS_2')}</dd>
-              <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_18')}</dt>
+              <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_16')}</dt>
+              <dd>{clusterServiceClass.spec.bindable ? 'Available' : 'Unavailable'}</dd>
+              <dt>{t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_17')}</dt>
+              <dd>{clusterServiceClass.spec.externalName}</dd>
+              <dt>{t('COMMON:MSG_MAIN_TABLEHEADER_86')}</dt>
               <dd>
                 <ResourceLink kind="ClusterServiceBroker" name={clusterServiceClass.spec.clusterServiceBrokerName} title={clusterServiceClass.spec.clusterServiceBrokerName} />
               </dd>
@@ -55,7 +57,7 @@ const ClusterServicePlanTab: React.FC<ClusterServicePlansTabProps> = ({ obj }) =
   return <ClusterServicePlansPage showTitle={false} canCreate={false} selector={selector} />;
 };
 
-const { details, editResource } = navFactory;
+const { details } = navFactory;
 const ClusterServiceClassesDetailsPage: React.FC<ClusterServiceClassesDetailsPageProps> = props => {
   const { t } = useTranslation();
   return (
@@ -64,7 +66,6 @@ const ClusterServiceClassesDetailsPage: React.FC<ClusterServiceClassesDetailsPag
       kind={kind}
       pages={[
         details(ClusterServiceClassDetails),
-        editResource(),
         {
           href: 'clusterserviceplan',
           name: t('COMMON:MSG_DETAILS_TAB_4'),
@@ -78,9 +79,10 @@ ClusterServiceClassesDetailsPage.displayName = 'ClusterServiceClassesDetailsPage
 
 const tableColumnClasses = [
   '', // NAME
-  classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), // BINDABLE
-  classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), // CLUSTER SERVICE BROKER
-  classNames('pf-m-hidden', 'pf-m-visible-on-xl'), // CREATED
+  classNames('pf-m-hidden', 'pf-m-visible-on-sm'), // BINDABLE
+  classNames('pf-m-hidden', 'pf-m-visible-on-sm'), // EXTERNAL NAME
+  classNames('pf-m-hidden', 'pf-m-visible-on-lg'), // CLUSTER SERVICE BROKER
+  classNames('pf-m-hidden', 'pf-m-visible-on-lg'), // CREATED
 ];
 
 const ClusterServiceClassTableRow = ({ obj, index, key, style }) => {
@@ -90,10 +92,11 @@ const ClusterServiceClassTableRow = ({ obj, index, key, style }) => {
         <ResourceLink kind={kind} name={obj.metadata.name} title={obj.metadata.name} />
       </TableData>
       <TableData className={tableColumnClasses[1]}>{obj.spec.bindable ? 'Available' : 'Unavailable'}</TableData>
-      <TableData className={tableColumnClasses[2]}>
+      <TableData className={tableColumnClasses[2]}>{obj.spec.externalName}</TableData>
+      <TableData className={tableColumnClasses[3]}>
         <ResourceLink kind="ClusterServiceBroker" name={obj.spec.clusterServiceBrokerName} title={obj.spec.clusterServiceBrokerName} />
       </TableData>
-      <TableData className={tableColumnClasses[3]}>
+      <TableData className={tableColumnClasses[4]}>
         <Timestamp timestamp={obj.metadata.creationTimestamp} />
       </TableData>
     </TableRow>
@@ -115,16 +118,22 @@ const ClusterServiceClassTableHeader = (t?: TFunction) => {
       props: { className: tableColumnClasses[1] },
     },
     {
+      title: t('COMMON:MSG_MAIN_TABLEHEADER_6'),
+      sortField: 'spec.externalName',
+      transforms: [sortable],
+      props: { className: tableColumnClasses[2] },
+    },
+    {
       title: t('COMMON:MSG_LNB_MENU_14'),
       sortField: 'spec.clusterServiceBrokerName',
       transforms: [sortable],
-      props: { className: tableColumnClasses[2] },
+      props: { className: tableColumnClasses[3] },
     },
     {
       title: t('COMMON:MSG_MAIN_TABLEHEADER_12'),
       sortField: 'metadata.creationTimestamp',
       transforms: [sortable],
-      props: { className: tableColumnClasses[3] },
+      props: { className: tableColumnClasses[4] },
     },
   ];
 };
