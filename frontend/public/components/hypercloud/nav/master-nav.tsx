@@ -31,10 +31,11 @@ const MasterNav = () => (
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_98')} type="grafana" />
           <NewTabLink name={t('COMMON:MSG_LNB_MENU_99')} type="kibana" />
           <NewTabLink name={t('COMMON:GitLab')} type="git" />
+          <HrefLink href="/topology" name="Topology" />
         </NavSection>
         <NavSection title={t('COMMON:MSG_LNB_MENU_7')}>
           <HrefLink href="/operatorhub" name={t('COMMON:MSG_LNB_MENU_8')} />
-          <ResourceNSLink resource='clusterserviceversions' name={t('COMMON:MSG_LNB_MENU_9')} startsWith={['operators.coreos.com', 'clusterserviceversions',]} />
+          <ResourceNSLink resource="clusterserviceversions" name={t('COMMON:MSG_LNB_MENU_9')} startsWith={['operators.coreos.com', 'clusterserviceversions']} />
         </NavSection>
         <NavSection title={t('COMMON:MSG_LNB_MENU_22')}>
           <ResourceNSLink resource="pods" name={t('COMMON:MSG_LNB_MENU_23')} />
