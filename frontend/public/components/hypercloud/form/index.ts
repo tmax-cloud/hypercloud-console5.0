@@ -87,7 +87,7 @@ const pluralToKindMap = new Map([
   ['imagereplicates', 'ImageReplicate'],
   ['signerpolicies', 'SignerPolicy'],
   ['notebooks', 'Notebook'],
-  ['experiments', 'Experiment'],
+  ['hyperparametertunings', 'HyperparameterTuning'],
   ['trainingjobs', 'TrainingJob'],
   ['tfjobs', 'TFJob'],
   ['pytorchjobs', 'PyTorchJob'],

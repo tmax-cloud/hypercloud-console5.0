@@ -787,16 +787,16 @@ export const NotebookModel: K8sKind = {
   crd: false,
 };
 
-export const ExperimentModel: K8sKind = {
-  label: 'Experiment',
-  labelPlural: 'Experiments',
+export const HyperparameterTuningModel: K8sKind = {
+  label: 'Hyperparameter Tuning',
+  labelPlural: 'Hyperparameter Tunings',
   apiVersion: 'v1beta1',
   apiGroup: 'kubeflow.org',
-  plural: 'experiments',
-  abbr: 'EX',
+  plural: 'hyperparametertunings',
+  abbr: 'HT',
   namespaced: true,
-  kind: 'Experiment',
-  id: 'experiment',
+  kind: 'HyperparameterTuning',
+  id: 'hyperparametertuning',
   crd: false,
 };
 

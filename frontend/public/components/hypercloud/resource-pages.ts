@@ -62,7 +62,7 @@ import {
   ClusterClaimModel,
   RepositoryModel,
   NotebookModel,
-  ExperimentModel,
+  HyperparameterTuningModel,
   TrainingJobModel,
   TFJobModel,
   PyTorchJobModel,
@@ -140,7 +140,7 @@ export const hyperCloudDetailsPages = ImmutableMap<ResourceMapKey, ResourceMapVa
   .set(referenceForModel(SignerPolicyModel), () => import('./signer-policy' /* webpackChunkName: "image-sign-request" */).then(m => m.SignerPoliciesDetailsPage))
   .set(referenceForModel(ImageScanRequestModel), () => import('./image-scan-request' /* webpackChunkName: "image-sign-request" */).then(m => m.ImageScanRequestsDetailsPage))
   .set(referenceForModel(NotebookModel), () => import('./notebook' /* webpackChunkName: "notebook" */).then(m => m.NotebooksDetailsPage))
-  .set(referenceForModel(ExperimentModel), () => import('./experiment' /* webpackChunkName: "experiment" */).then(m => m.ExperimentsDetailsPage))
+  .set(referenceForModel(HyperparameterTuningModel), () => import('./hyperparametertuning' /* webpackChunkName: "hyperparametertuning" */).then(m => m.HyperparameterTuningsDetailsPage))
   .set(referenceForModel(TFJobModel), () => import('./training-job' /* webpackChunkName: "training-job" */).then(m => m.TrainingJobsDetailsPage))
   .set(referenceForModel(PyTorchJobModel), () => import('./training-job' /* webpackChunkName: "training-job" */).then(m => m.TrainingJobsDetailsPage))
   .set(referenceForModel(InferenceServiceModel), () => import('./inference-service' /* webpackChunkName: "inference-service" */).then(m => m.InferenceServicesDetailsPage))
@@ -214,7 +214,7 @@ export const hyperCloudListPages = ImmutableMap<ResourceMapKey, ResourceMapValue
   .set(referenceForModel(SignerPolicyModel), () => import('./signer-policy' /* webpackChunkName: "image-sign-request" */).then(m => m.SignerPoliciesPage))
   .set(referenceForModel(ImageScanRequestModel), () => import('./image-scan-request' /* webpackChunkName: "image-scan-request" */).then(m => m.ImageScanRequestsPage))
   .set(referenceForModel(NotebookModel), () => import('./notebook' /* webpackChunkName: "notebook" */).then(m => m.NotebooksPage))
-  .set(referenceForModel(ExperimentModel), () => import('./experiment' /* webpackChunkName: "experiment" */).then(m => m.ExperimentsPage))
+  .set(referenceForModel(HyperparameterTuningModel), () => import('./hyperparametertuning' /* webpackChunkName: "hyperparametertuning" */).then(m => m.HyperparameterTuningsPage))
   .set(referenceForModel(TrainingJobModel), () => import('./training-job' /* webpackChunkName: "training-job" */).then(m => m.TrainingJobsPage))
   .set(referenceForModel(InferenceServiceModel), () => import('./inference-service' /* webpackChunkName: "inference-service" */).then(m => m.InferenceServicesPage))
   .set(referenceForModel(TrainedModelModel), () => import('./trained-model' /* webpackChunkName: "trained-model" */).then(m => m.TrainedModelsPage))

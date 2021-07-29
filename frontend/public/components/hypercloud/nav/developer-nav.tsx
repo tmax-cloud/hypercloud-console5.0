@@ -51,7 +51,7 @@ const DeveloperNav = () => (
         </NavSection>
         <NavSection title={t('COMMON:MSG_LNB_MENU_64')}>
           <ResourceNSLink resource="notebooks" name={t('COMMON:MSG_LNB_MENU_65')} />
-          <ResourceNSLink resource="experiments" name={t('COMMON:MSG_LNB_MENU_194')} />
+          <ResourceNSLink resource="hyperparametertunings" name={t('COMMON:MSG_LNB_MENU_194')} />
           <ResourceNSLink resource="trainingjobs" name={t('COMMON:MSG_LNB_MENU_68')} />
           <ResourceNSLink resource="inferenceservices" name={t('COMMON:MSG_LNB_MENU_192')} />
           <ResourceNSLink resource="trainedmodels" name={t('COMMON:MSG_LNB_MENU_196')} />

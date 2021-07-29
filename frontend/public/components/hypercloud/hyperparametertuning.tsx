@@ -8,17 +8,17 @@ import { TFunction } from 'i18next';
 import { K8sResourceKind } from '../../module/k8s';
 import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from '../factory';
 import { DetailsItem, Kebab, KebabAction, detailsPage, navFactory, ResourceKebab, ResourceLink, ResourceSummary, SectionHeading } from '../utils';
-import { ExperimentModel } from '../../models';
+import { HyperparameterTuningModel } from '../../models';
 import { ResourceLabel } from '../../models/hypercloud/resource-plural';
 import { Status } from '@console/shared';
 
-export const menuActions: KebabAction[] = [...Kebab.getExtensionsActionsForKind(ExperimentModel), ...Kebab.factory.common];
+export const menuActions: KebabAction[] = [...Kebab.getExtensionsActionsForKind(HyperparameterTuningModel), ...Kebab.factory.common];
 
-const kind = ExperimentModel.kind;
+const kind = HyperparameterTuningModel.kind;
 
 const tableColumnClasses = ['', '', classNames('pf-m-hidden', 'pf-m-visible-on-sm', 'pf-u-w-16-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), classNames('pf-m-hidden', 'pf-m-visible-on-lg'), Kebab.columnClass];
 
-const ExperimentTableHeader = (t?: TFunction) => {
+const HyperparameterTuningTableHeader = (t?: TFunction) => {
   return [
     {
       title: t('COMMON:MSG_MAIN_TABLEHEADER_1'),
@@ -59,7 +59,7 @@ const ExperimentTableHeader = (t?: TFunction) => {
     },
   ];
 };
-ExperimentTableHeader.displayName = 'ExperimentTableHeader';
+HyperparameterTuningTableHeader.displayName = 'HyperparameterTuningTableHeader';
 
 const getConditionStatus = obj => {
   const conditions = obj.status?.conditions;
@@ -100,64 +100,64 @@ const getOptimizationStatus = obj => {
   }
 };
 
-const ExperimentTableRow: RowFunction<K8sResourceKind> = ({ obj: experiment, index, key, style }) => {
-  const trials = experiment.status?.trials || '-';
-  const maxTrials = experiment.spec?.maxTrialCount || '-';
+const HyperparameterTuningTableRow: RowFunction<K8sResourceKind> = ({ obj: hyperparametertuning, index, key, style }) => {
+  const trials = hyperparametertuning.status?.trials || '-';
+  const maxTrials = hyperparametertuning.spec?.maxTrialCount || '-';
   return (
-    <TableRow id={experiment.metadata.uid} index={index} trKey={key} style={style}>
+    <TableRow id={hyperparametertuning.metadata.uid} index={index} trKey={key} style={style}>
       <TableData className={tableColumnClasses[0]}>
-        <ResourceLink kind={kind} name={experiment.metadata.name} namespace={experiment.metadata.namespace} title={experiment.metadata.uid} />
+        <ResourceLink kind={kind} name={hyperparametertuning.metadata.name} namespace={hyperparametertuning.metadata.namespace} title={hyperparametertuning.metadata.uid} />
       </TableData>
       <TableData className={classNames(tableColumnClasses[1], 'co-break-word')}>
-        <ResourceLink kind="Namespace" name={experiment.metadata.namespace} title={experiment.metadata.namespace} />
+        <ResourceLink kind="Namespace" name={hyperparametertuning.metadata.namespace} title={hyperparametertuning.metadata.namespace} />
       </TableData>
-      <TableData className={tableColumnClasses[2]}>{experiment.spec?.algorithm?.algorithmName || '-'}</TableData>
+      <TableData className={tableColumnClasses[2]}>{hyperparametertuning.spec?.algorithm?.algorithmName || '-'}</TableData>
       <TableData className={tableColumnClasses[3]}>{`${trials} / ${maxTrials}`}</TableData>
-      <TableData className={tableColumnClasses[4]}>{getOptimizationStatus(experiment)}</TableData>
+      <TableData className={tableColumnClasses[4]}>{getOptimizationStatus(hyperparametertuning)}</TableData>
       <TableData className={tableColumnClasses[5]}>
-        <Status status={getConditionStatus(experiment)} />
+        <Status status={getConditionStatus(hyperparametertuning)} />
       </TableData>
       <TableData className={tableColumnClasses[6]}>
-        <ResourceKebab actions={menuActions} kind={kind} resource={experiment} />
+        <ResourceKebab actions={menuActions} kind={kind} resource={hyperparametertuning} />
       </TableData>
     </TableRow>
   );
 };
 
-export const ExperimentDetailsList: React.FC<ExperimentDetailsListProps> = ({ experiment }) => {
+export const HyperparameterTuningDetailsList: React.FC<HyperparameterTuningDetailsListProps> = ({ hyperparametertuning }) => {
   const { t } = useTranslation();
-  const trials = experiment.status?.trials || '-';
-  const maxTrials = experiment.spec?.maxTrialCount || '-';
+  const trials = hyperparametertuning.status?.trials || '-';
+  const maxTrials = hyperparametertuning.spec?.maxTrialCount || '-';
   return (
     <dl className="co-m-pane__details">
-      <DetailsItem label={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_45')} obj={experiment}>
-        <Status status={getConditionStatus(experiment)} />
+      <DetailsItem label={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_45')} obj={hyperparametertuning}>
+        <Status status={getConditionStatus(hyperparametertuning)} />
       </DetailsItem>
-      <DetailsItem label={t('알고리즘 이름')} obj={experiment} path="spec.algorithm.algorithmName">
-        {experiment.spec?.algorithm?.algorithmName}
+      <DetailsItem label={t('알고리즘 이름')} obj={hyperparametertuning} path="spec.algorithm.algorithmName">
+        {hyperparametertuning.spec?.algorithm?.algorithmName}
       </DetailsItem>
-      <DetailsItem label={t('트라이얼 개수')} obj={experiment}>
+      <DetailsItem label={t('트라이얼 개수')} obj={hyperparametertuning}>
         {`${trials} / ${maxTrials}`}
       </DetailsItem>
-      <DetailsItem label={t('최적화 상태')} obj={experiment}>
-        {getOptimizationStatus(experiment)}
+      <DetailsItem label={t('최적화 상태')} obj={hyperparametertuning}>
+        {getOptimizationStatus(hyperparametertuning)}
       </DetailsItem>
     </dl>
   );
 };
 
-const ExperimentDetails: React.FC<ExperimentDetailsProps> = ({ obj: experiment }) => {
+const HyperparameterTuningDetails: React.FC<HyperparameterTuningDetailsProps> = ({ obj: hyperparametertuning }) => {
   const { t } = useTranslation();
   return (
     <>
       <div className="co-m-pane__body">
-        <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: ResourceLabel(experiment, t) })} />
+        <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DETAILS_1', { 0: ResourceLabel(hyperparametertuning, t) })} />
         <div className="row">
           <div className="col-lg-6">
-            <ResourceSummary resource={experiment} />
+            <ResourceSummary resource={hyperparametertuning} />
           </div>
           <div className="col-lg-6">
-            <ExperimentDetailsList experiment={experiment} />
+            <HyperparameterTuningDetailsList hyperparametertuning={hyperparametertuning} />
           </div>
         </div>
       </div>
@@ -166,29 +166,29 @@ const ExperimentDetails: React.FC<ExperimentDetailsProps> = ({ obj: experiment }
 };
 
 const { details, editYaml } = navFactory;
-export const Experiments: React.FC = props => {
+export const HyperparameterTunings: React.FC = props => {
   const { t } = useTranslation();
-  return <Table {...props} aria-label="Experiments" Header={ExperimentTableHeader.bind(null, t)} Row={ExperimentTableRow} virtualize />;
+  return <Table {...props} aria-label="HyperparameterTunings" Header={HyperparameterTuningTableHeader.bind(null, t)} Row={HyperparameterTuningTableRow} virtualize />;
 };
 
-export const ExperimentsPage: React.FC<ExperimentsPageProps> = props => <ListPage canCreate={true} ListComponent={Experiments} kind={kind} {...props} />;
+export const HyperparameterTuningsPage: React.FC<HyperparameterTuningsPageProps> = props => <ListPage canCreate={true} ListComponent={HyperparameterTunings} kind={kind} {...props} />;
 
-export const ExperimentsDetailsPage: React.FC<ExperimentsDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={menuActions} pages={[details(detailsPage(ExperimentDetails)), editYaml()]} />;
+export const HyperparameterTuningsDetailsPage: React.FC<HyperparameterTuningsDetailsPageProps> = props => <DetailsPage {...props} kind={kind} menuActions={menuActions} pages={[details(detailsPage(HyperparameterTuningDetails)), editYaml()]} />;
 
-type ExperimentDetailsListProps = {
-  experiment: K8sResourceKind;
+type HyperparameterTuningDetailsListProps = {
+  hyperparametertuning: K8sResourceKind;
 };
 
-type ExperimentDetailsProps = {
+type HyperparameterTuningDetailsProps = {
   obj: K8sResourceKind;
 };
 
-type ExperimentsPageProps = {
+type HyperparameterTuningsPageProps = {
   showTitle?: boolean;
   namespace?: string;
   selector?: any;
 };
 
-type ExperimentsDetailsPageProps = {
+type HyperparameterTuningsDetailsPageProps = {
   match: any;
 };
