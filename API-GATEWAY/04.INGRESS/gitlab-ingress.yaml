@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gitlab-ingress-gateway
+  namespace: gitlab-system
+spec:
+  rules:
+  - host: waiting.ip
+    http:
+      paths:
+      - backend:
+          serviceName: gitlab-service
+          servicePort: 80
+        pathType: ImplementationSpecific
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.9.148

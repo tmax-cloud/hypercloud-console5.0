@@ -1,0 +1,20 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: console-ingressroute
+  namespace: api-gateway-system
+spec:
+  entryPoints:
+  - websecure
+  - web
+  routes:
+  - kind: Rule
+    match: PathPrefix(`/`, `/static/`, `/api/resource/`, `/api/kubernetes/`) && Host(`console.tmaxcloud.org`)
+    services:
+    - name: console-service@file
+      kind: TraefikService
+      # serversTransport: insecure-transport       
+  tls: {} # use default tls 
+    # secretName: console-tls
+
+

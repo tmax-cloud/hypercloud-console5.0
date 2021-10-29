@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: console-config
+  namespace: api-gateway-system
+data:
+  traefik.yml: |
+    http:
+      services:
+        console-service:
+          loadBalancer:
+            servers:
+            - url: "http://0.0.0.0:31303"
+      middlewares:
+        dashboard-auth:
+          basicAuth:
+            users:
+              - "admin:$apr1$WboCaB7Z$PJbsvKlI3XMq12xMeQMmG."
+

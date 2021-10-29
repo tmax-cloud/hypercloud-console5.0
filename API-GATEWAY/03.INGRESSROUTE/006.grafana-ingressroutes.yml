@@ -1,0 +1,22 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingressroute
+  namespace: api-gateway-system
+spec:
+  entryPoints:
+  - websecure
+  - web
+  routes:
+  - kind: Rule
+    match: PathPrefix(`/api/grafana`) && Host(`console.tmaxcloud.org`)
+    priority: 100                      
+    services:
+    - kind: Service
+      name: grafana
+      namespace: monitoring
+      port: 3000
+      scheme: http
+  tls: {}
+    # secretName: api-gateway-server-tls
+    # tls: {}

@@ -1,0 +1,25 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: redirect-test
+  namespace: api-gateway-system
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
+    # traefik.ingress.kubernetes.io/router.pathmatcher: "/"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/service.serversscheme: https    
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    traefik.ingress.kubernetes.io/redirect-regex: "^https://www.(.*)"
+    traefik.ingress.kubernetes.io/redirect-replacement: "https://$1"
+spec:
+  ingressClassName: "tmax"  
+  tls:
+    - hosts:
+        - "hypercloud.com"
+        - "www.hypercloud.com"
+      secretName: api-gateway-server-tls
+  rules:
+  - host: hypercloud.com
+  - host: www.hypercloud.com

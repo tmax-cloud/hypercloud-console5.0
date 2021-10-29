@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  config.json: |
+    {}
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: traefik-jwt-decode
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: traefik-jwt-decode
+    helm.sh/chart: traefik-jwt-decode-0.1.0
+  name: traefik-jwt-decode
+  namespace: api-gateway-system

@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: traefik-jwt-decode
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: traefik-jwt-decode
+    helm.sh/chart: traefik-jwt-decode-0.1.0
+  name: traefik-jwt-decode
+  namespace: api-gateway-system
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: traefik-jwt-decode
+      app.kubernetes.io/name: traefik-jwt-decode
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: traefik-jwt-decode
+        app.kubernetes.io/name: traefik-jwt-decode
+    spec:
+      containers:
+      - env:
+        - name: AUTH_HEADER_KEY
+          value: Authorization
+        - name: CACHE_ENABLED
+          value: "true"
+        - name: CLAIM_MAPPING_FILE_PATH
+          value: /claim-mappings/config.json
+        - name: JWKS_URL
+          value: https://hyperauth.org/auth/realms/tmax/protocol/openid-connect/certs
+        - name: LOG_LEVEL
+          value: info
+        - name: LOG_TYPE
+          value: json
+        - name: MAX_CACHE_KEYS
+          value: "10000"
+        - name: PORT
+          value: "8080"
+        - name: TOKEN_VALIDATED_HEADER_KEY
+          value: jwt-token-validated
+        image: jinsnow/traefik-jwt-decode:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: traefik-jwt-decode
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ping
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /claim-mappings
+          name: claim-mappings
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: traefik-jwt-decode
+        name: claim-mappings
+

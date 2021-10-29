@@ -1,0 +1,95 @@
+## ref https://cert-manager.io/next-docs/reference/api-docs/#cert-manager.io%2fv1alpha3
+---
+
+# apiVersion: v1
+# data:
+#   secret-access-key: aUUreU9FUFp3NzI5cTN4RG1WNlJHT3V5eEhIT2FGaFJxVFlhbHp3TA==
+#   # secret-access-key: eU9FUFp3NzI5cTN4RG1WNlJHT3V5eEhIT2FGaFJxVFlhbHp3TAo=
+# kind: Secret
+# metadata:
+#   name: route53-secret
+#   namespace: api-gateway-system
+# type: Opaque
+
+# kubectl create secret generic route53-secret --namespace api-gateway-system -from-literal=secret-access-key="DaLiLHqK2aLgSam8e4FYnCOuFwOIFxTQTrkLksx7"
+--- 
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: tmaxcloud-acme-clusterissuer
+  namespace: api-gateway-system
+spec:
+  acme:
+    server: "https://acme-v02.api.letsencrypt.org/directory"
+    email: yjs890403@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - dns01:
+          route53:
+            region: ap-northeast-2
+            # region: us-east-1
+            accessKeyID: AKIA5D7L5Q3I7OW7APRS
+            secretAccessKeySecretRef:
+              name: route53-secret
+              key: secret-access-key
+            hostedZoneID: Z0168768GHU66XKGU2VL    
+
+---
+
+# apiVersion: cert-manager.io/v1
+# kind: Issuer
+# metadata:
+#   name: selfsigned-issuer
+#   namespace: api-gateway-system
+# spec:
+#   selfSigned: {}
+
+# ---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-gateway-acme-tmaxcloud
+  namespace: api-gateway-system
+spec:
+  secretName: api-gateway-acme-tmaxcloud
+  duration: 2880h # 120d
+  renewBefore: 360h # 15d
+  commonName: tmaxcloud.org
+  dnsNames:
+    - tmaxcloud.org
+    # - "*.sunnycloud.link"
+    - "*.tmaxcloud.org"
+  #   - traefik.traefik.svc
+  # ipAddresses:
+  #   - 192.168.9.144
+  isCA: false
+  # keySize: 2048
+  # keyAlgorithm: rsa
+  # keyEncoding: pkcs1
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth 
+  issuerRef:
+    # kind: Issuer
+    # group: cert-manager.io
+    name: tmaxcloud-acme-clusterissuer
+    # kind: Issuer
+    # name: ck-selfsigned-clusterissuer
+
+---
+# https://doc.traefik.io/traefik/routing/providers/kubernetes-crd/#kind-tlsoption
+# Traefik currently only uses the TLS Store named "default". This means that if you have two stores that are named default in different kubernetes namespaces, they may be randomly chosen. For the time being, please only configure one TLSSTore named default.
+## TLSSTore : Allows to configure the default TLS store
+apiVersion: traefik.containo.us/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: api-gateway-system
+spec:
+  defaultCertificate:
+    secretName: api-gateway-acme-tmaxcloud

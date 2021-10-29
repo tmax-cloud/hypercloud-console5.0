@@ -1,0 +1,19 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard-ingressroute
+  namespace: api-gateway-system
+spec:
+  entryPoints:
+  - traefik
+  routes:
+  - match: PathPrefix(`/api`, `/dashboard`, `/`) && Host(`dashboard.tmaxcloud.org`)
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+    middlewares:
+    - name: dashboard-auth@file
+  tls: {} # use default tls 
+  # tls:
+    # secretName: api-gateway-server-tls
