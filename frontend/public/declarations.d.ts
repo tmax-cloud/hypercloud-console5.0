@@ -43,6 +43,7 @@ declare interface Window {
     KeycloakAuthURL: string;
     KeycloakRealm: string;
     gitlabURL: string;
+    registryURL: string;
     singleClusterBasePath: string;
   };
   windowError?: boolean | string;

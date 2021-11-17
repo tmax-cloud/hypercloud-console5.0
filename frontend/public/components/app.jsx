@@ -29,7 +29,6 @@ import { Page } from '@patternfly/react-core';
 // import Keycloak from 'keycloak-js';
 import keycloak from '../hypercloud/keycloak';
 import { setAccessToken, setIdToken, setId, resetLoginState } from '../hypercloud/auth';
-import { initializationForMenu } from '@console/internal/components/hypercloud/utils/menu-utils';
 import { setUrlFromIngresses } from '@console/internal/components/hypercloud/utils/ingress-utils';
 import { isMasterClusterPerspective } from '@console/internal/hypercloud/perspectives';
 

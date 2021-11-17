@@ -6,7 +6,7 @@ import { coFetchJSON } from '@console/internal/co-fetch';
 import i18next, { TFunction } from 'i18next';
 import { ResourceLabel, getI18nInfo } from '@console/internal/models/hypercloud/resource-plural';
 import { MenuContainerLabels, CUSTOM_LABEL_TYPE } from '@console/internal/hypercloud/menu/menu-types';
-import { ingressUrlWithLabelSelector, DoneMessage } from './ingress-utils';
+import { DoneMessage } from './ingress-utils';
 import { selectorToString } from '@console/internal/module/k8s/selector';
 
 const en = i18next.getFixedT('en');
@@ -37,58 +37,8 @@ const initializeCmpFlag = () => {
   });
 };
 
-const initializeMenuUrl = (labelSelector: any, menuKey: string) => {
-  return new Promise((resolve, reject) => {
-    const url = ingressUrlWithLabelSelector(labelSelector);
-    coFetchJSON(url)
-      .then(res => {
-        const { items } = res;
-        if (items?.length > 0) {
-          const ingress = items[0];
-          const host = ingress.spec?.rules?.[0]?.host;
-          if (!!host) {
-            const menu = _.get(CustomMenusMap, menuKey);
-            if (menuKey === 'Grafana') {
-              !!menu && _.assign(menu, { url: `https://${host}/login/generic_oauth` });
-            } else {
-              !!menu && _.assign(menu, { url: `https://${host}` });
-            }
-          }
-        }
-        resolve(DoneMessage);
-      })
-      .catch(err => {
-        resolve(DoneMessage);
-      });
-  });
-};
-
 export const initializationForMenu = async () => {
   await initializeCmpFlag();
-  await initializeMenuUrl(
-    {
-      'ingress.tmaxcloud.org/name': 'hyperregistry ',
-    },
-    'Harbor',
-  );
-  await initializeMenuUrl(
-    {
-      'ingress.tmaxcloud.org/name': 'gitlab ',
-    },
-    'Git',
-  );
-  await initializeMenuUrl(
-    {
-      'ingress.tmaxcloud.org/name': 'grafana ',
-    },
-    'Grafana',
-  );
-  await initializeMenuUrl(
-    {
-      'ingress.tmaxcloud.org/name': 'kiali ',
-    },
-    'Kiali',
-  );
 };
 
 export const getMenuTitle = (kind, t: TFunction): { label: string; type: string } => {
