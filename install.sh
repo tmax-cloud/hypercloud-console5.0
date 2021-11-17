@@ -13,6 +13,7 @@ deploy_temp="$temp_Dir/5.deploy.yaml"
 KIBANA="kibana.kube-logging.svc.cluster.local:5601"
 KUBEFLOW="istio-ingressgateway.istio-system.svc"
 GITLAB="http://gitlab-test-deploy.ck1-2.192.168.6.151.nip.io/"
+REGISTRY="http://localhost"
 OPERATOR_VER="5.1.0.1"
 
 # GET ENV 

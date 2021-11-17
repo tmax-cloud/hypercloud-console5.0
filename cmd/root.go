@@ -95,7 +95,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfg.KialiEndpoint, "kiali-endpoint", "", "URL of the KIALI Portal")
 	rootCmd.PersistentFlags().StringVar(&cfg.KibanaEndpoint, "kibana-endpoint", "", "URL of the KIBANA Portal")
 	rootCmd.PersistentFlags().StringVar(&cfg.KubeflowEndpoint, "kubeflow-endpoint", "", "URL of the Kubeflow server")
-	rootCmd.PersistentFlags().StringVar(&cfg.GitlabURL, "managed-gitlab-url", "http://gitlab-test-deploy.ck1-2.192.168.6.151.nip.io/", "URL of gitlab server")
+	rootCmd.PersistentFlags().StringVar(&cfg.GitlabURL, "managed-gitlab-url", "http://gitlab.localhost/", "URL of gitlab server")
+	rootCmd.PersistentFlags().StringVar(&cfg.RegistryURL, "registry-url", "http://registry.localhost/", "URL of the registry")
 	// appInfo
 	rootCmd.PersistentFlags().BoolVar(&cfg.McMode, "mc-mode", true, "Choose Cluster Mode (multi | single)")
 	rootCmd.PersistentFlags().BoolVar(&cfg.ReleaseMode, "release-mode", true, "when true, use jwt token given by keycloak")

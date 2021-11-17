@@ -63,6 +63,7 @@ type ClusterInfo struct {
 	KibanaEndpoint   string `yaml:"kibanaEndpoint,omitempty"`
 	KubeflowEndpoint string `yaml:"kubeflowEndpoint,omitempty"`
 	GitlabURL        string `yaml:"gitlabURL,omitempty"`
+	RegistryURL      string `yaml:"registryURL,onitempty`
 }
 
 // +k8s:deepcopy-gen=true

@@ -62,6 +62,7 @@ type jsGlobals struct {
 	GrafanaPublicURL    string `json:"grafanaPublicURL"`
 	PrometheusPublicURL string `json:"prometheusPublicURL"`
 	GitlabURL           string `json:"gitlabURL"`
+	RegistryURL         string `json:"registryURL"`
 
 	GOARCH string `json:"GOARCH"`
 	GOOS   string `json:"GOOS"`
@@ -87,6 +88,7 @@ type Console struct {
 	McMode          bool
 	ReleaseModeFlag bool
 	GitlabURL       string
+	RegistryURL     string
 	// Keycloak (Hyperauth) information for logging to console
 	KeycloakRealm           string
 	KeycloakAuthURL         string
@@ -435,6 +437,7 @@ func (c *Console) indexHandler(w http.ResponseWriter, r *http.Request) {
 		KeycloakUseHiddenIframe: c.KeycloakUseHiddenIframe,
 
 		GitlabURL:       c.GitlabURL,
+		RegistryURL:     c.RegistryURL,
 		McMode:          c.McMode,
 		ReleaseModeFlag: c.ReleaseModeFlag,
 	}

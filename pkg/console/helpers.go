@@ -167,6 +167,7 @@ func createConsole(config *v1.Config) (*Console, error) {
 		McMode:          config.McMode,
 		ReleaseModeFlag: config.ReleaseMode,
 		GitlabURL:       config.GitlabURL,
+		RegistryURL:     config.RegistryURL,
 
 		KeycloakRealm:    config.KeycloakRealm,
 		KeycloakAuthURL:  config.KeycloakAuthURL,

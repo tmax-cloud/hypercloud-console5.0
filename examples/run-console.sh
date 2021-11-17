@@ -2,8 +2,8 @@
 
 set -exuo pipefail
 
-myIP=$(hostname -I | awk '{print $1}')
-# myIP=$(ipconfig getifaddr en0)
+# myIP=$(hostname -I | awk '{print $1}')
+myIP=$(ipconfig getifaddr en0)
 # Default K8S Endpoint is public POC environment 
 # k8sIP='220.90.208.100'
 # k8sIP='172.22.6.2'
@@ -53,10 +53,10 @@ KUBEFLOW_IP='192.168.9.141'
     --kiali-endpoint=https://$KIALI/api/kiali \
     --kibana-endpoint=https://$k8sIP:$KIBANA_PORT/api/kibana/ \
     --kubeflow-endpoint=http://$KUBEFLOW_IP/api/kubeflow/ \
-    --mc-mode=true \
+    --mc-mode=false \
     --public-dir=./frontend/public/dist \
     --managed-gitlab-url=http://gitlab-test-deploy.ck1-2.192.168.6.151.nip.io/ \
-
+    --registry-url=http://localhost/ \
     # --release-mode=true \
     # --release-mode=false \
     # --k8s-mode=off-cluster \

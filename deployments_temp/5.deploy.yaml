@@ -27,17 +27,16 @@ spec:
             - --redirect-port=80
             - --tls-cert-file=/var/https-cert/cert
             - --tls-key-file=/var/https-cert/key
-            - --keycloak-realm=tmax
-            - --keycloak-auth-url=https://hyperauth.org/auth
-            - --keycloak-client-id=ck-integration-hypercloud5
-            - --mc-mode=true
-            - --release-mode=false
+            - --keycloak-realm=@@REALM@@
+            - --keycloak-auth-url=https://@@KEYCLOAK@@/auth
+            - --keycloak-client-id=@@CLIENTID@@
+            - --mc-mode=@@MC_MODE@@
             - --grafana-endpoint=http://grafana.monitoring.svc:3000/api/grafana/
-            - --kiali-endpoint=https://0.0.0.0:20001/api/kiali
-            - --kibana-endpoint=http://kibana.kube-logging.svc.cluster.local:5601/api/kibana/
-            - --kubeflow-endpoint=http://istio-ingressgateway.istio-system.svc/api/kubeflow/
-            - --managed-gitlab-url=http://gitlab-test-deploy.ck1-2.192.168.6.151.nip.io/
-          image: tmaxcloudck/hypercloud-console:5.0.32.0
+            - --kiali-endpoint=https://@@KIALI@@/api/kiali
+            - --kibana-endpoint=http://@@KIBANA@@/api/kibana/
+            - --kubeflow-endpoint=http://@@KUBEFLOW@@/api/kubeflow/
+            - --managed-gitlab-url=@@GITLAB@@
+          image: tmaxcloudck/hypercloud-console:@@CONSOLE_VER@@
           imagePullPolicy: Always
           name: console
           ports:
@@ -63,7 +62,7 @@ spec:
             - /manager
           args:
             - --pwd=/var/tmp/configs/
-          image: tmaxcloudck/console-operator:5.1.0.1
+          image: tmaxcloudck/console-operator:@@OPERATOR_VER@@
           name: manager
           volumeMounts:
             - mountPath: /var/tmp/configs
