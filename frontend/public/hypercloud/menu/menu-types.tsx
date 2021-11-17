@@ -150,7 +150,7 @@ export const CustomMenusMap: CustomMenus = {
     visible: true,
     type: MenuLinkType.NewTabLink,
     defaultLabel: 'COMMON:MSG_LNB_MENU_98',
-    url: '',
+    url: `${document.location.origin}/api/grafana/login/generic_oauth`,
     isMultiOnly: false,
   },
   Kibana: {
@@ -166,7 +166,7 @@ export const CustomMenusMap: CustomMenus = {
     visible: true,
     type: MenuLinkType.NewTabLink,
     defaultLabel: 'COMMON:MSG_LNB_MENU_195',
-    url: '',
+    url: window.SERVER_FLAGS.gitlabURL,
     isMultiOnly: false,
   },
   Add: {
