@@ -176,7 +176,7 @@ export class Dropdown extends DropdownMixin {
     this.onBookmark = (...args) => this.onBookmark_(...args);
     this.onFavorite = (...args) => this.onFavorite_(...args);
     this.onClick = (...args) => this.onClick_(...args);
-
+    console.log(`Namespace : ${this.props.isNamespace}`)
     let bookmarks = props.defaultBookmarks || {};
     let favoriteKey;
     if (props.storageKey) {
@@ -396,15 +396,22 @@ export class Dropdown extends DropdownMixin {
           </li>,
         );
       }
-      if(content=="모든 네임스페이스"){
-        rows.unshift(<DropDownRow className={klass} key={key} itemKey={key} content={content} onBookmark={!noBookmark && storageKey && this.onBookmark} onclick={this.onClick} selected={selected} hover={hover} autocompleteFilter={autocompleteFilter} />)
-      }else{
-
         rows.push(<DropDownRow className={klass} key={key} itemKey={key} content={content} onBookmark={!noBookmark && storageKey && this.onBookmark} onclick={this.onClick} selected={selected} hover={hover} autocompleteFilter={autocompleteFilter} />);
-      }
+    
     };
+    if(this.props.isNamespace){
+      let namespaceArray = Object.entries(items)
 
-    _.each(items, (v, k) => addItem(k, v));
+      namespaceArray.map(([key, value], index)=>{
+        if([key] =='#ALL_NS#'){
+          this.props.sortFunction(namespaceArray, index)
+        }
+      })
+      namespaceArray.map(([key, value], index)=> addItem([key], [value]))
+    }
+    else{   
+      _.each(items, (v, k) => addItem(k, v));
+    }
 
     //render PF4 dropdown markup if this is not the autocomplete filter
     if (autocompleteFilter) {
