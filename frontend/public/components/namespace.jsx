@@ -583,9 +583,15 @@ class NamespaceBarDropdowns_ extends React.Component {
       .forEach(name => (items[name] = name));
 
     const sortFuntion = (items, index)=>{
-      items.splice(index, 1)
-      items.unshift([ALL_NAMESPACES_KEY, allNamespacesTitle])
+      let sortedItems = items.map(([key, value], index)=>{
+        if([key]==ALL_NAMESPACES_KEY){
+          items.splice(index, 1)
+          items.unshift([ALL_NAMESPACES_KEY, allNamespacesTitle])
+        }
+      })
+      return sortedItems;
     }
+
     let title = activeNamespace;
     if (activeNamespace === ALL_NAMESPACES_KEY) {
       title = allNamespacesTitle;
@@ -628,7 +634,6 @@ class NamespaceBarDropdowns_ extends React.Component {
           menuClassName="co-namespace-selector__menu"
           buttonClassName="pf-m-plain"
           // canFavorite
-          isNamespace ={true}
           sortFunction ={sortFuntion}
           items={items}
           actionItems={defaultActionItem}

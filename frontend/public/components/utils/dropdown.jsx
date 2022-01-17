@@ -399,15 +399,11 @@ export class Dropdown extends DropdownMixin {
         rows.push(<DropDownRow className={klass} key={key} itemKey={key} content={content} onBookmark={!noBookmark && storageKey && this.onBookmark} onclick={this.onClick} selected={selected} hover={hover} autocompleteFilter={autocompleteFilter} />);
     
     };
-    if(this.props.isNamespace){
+    if(this.props.sortFunction){
       let namespaceArray = Object.entries(items)
-
-      namespaceArray.map(([key, value], index)=>{
-        if([key] =='#ALL_NS#'){
-          this.props.sortFunction(namespaceArray, index)
-        }
-      })
-      namespaceArray.map(([key, value], index)=> addItem([key], [value]))
+      let sortedNamespace = this.props.sortFunction(namespaceArray)
+      sortedNamespace.forEach(([key, value], index)=> addItem([key], [value]))
+      //namespaceArray.map(([key, value], index)=> addItem([key], [value]))
     }
     else{   
       _.each(items, (v, k) => addItem(k, v));
