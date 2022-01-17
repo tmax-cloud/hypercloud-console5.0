@@ -403,13 +403,13 @@ export class Dropdown extends DropdownMixin {
      
       let namespaceArray = Object.entries(items)
       let sortedNamespace = this.props.sortFunction(namespaceArray)
-      sortedNamespace.forEach(([key, value], index)=> addItem([key], [value]))
+      sortedNamespace.forEach(([key, value], index)=> addItem(key, value))
     
     }
     else{   
       _.each(items, (v, k) => addItem(k, v));
     }
-
+    //_.each(items, (v, k) => addItem(k, v));
     //render PF4 dropdown markup if this is not the autocomplete filter
     if (autocompleteFilter) {
       return (
@@ -558,7 +558,9 @@ const ActionsMenu_ = ({ actions, impersonate, title = undefined }) => {
     }
 
     Promise.all(promises)
-      .then(results => setVisible(_.some(results, 'status.allowed')))
+      .then(results => {
+        setVisible(_.some(results, 'status.allowed'))
+      })
       .catch(() => setVisible(true));
   }, [actions, impersonate, setVisible]);
 
