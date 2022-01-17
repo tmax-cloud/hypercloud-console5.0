@@ -176,7 +176,7 @@ export class Dropdown extends DropdownMixin {
     this.onBookmark = (...args) => this.onBookmark_(...args);
     this.onFavorite = (...args) => this.onFavorite_(...args);
     this.onClick = (...args) => this.onClick_(...args);
-    console.log(`Namespace : ${this.props.isNamespace}`)
+   
     let bookmarks = props.defaultBookmarks || {};
     let favoriteKey;
     if (props.storageKey) {
@@ -400,10 +400,11 @@ export class Dropdown extends DropdownMixin {
     
     };
     if(this.props.sortFunction){
+     
       let namespaceArray = Object.entries(items)
       let sortedNamespace = this.props.sortFunction(namespaceArray)
       sortedNamespace.forEach(([key, value], index)=> addItem([key], [value]))
-      //namespaceArray.map(([key, value], index)=> addItem([key], [value]))
+    
     }
     else{   
       _.each(items, (v, k) => addItem(k, v));
