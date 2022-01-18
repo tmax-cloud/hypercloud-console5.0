@@ -44,7 +44,6 @@ export const deleteModal = (kind, ns) => {
   let { label, weight, accessReview } = Kebab.factory.Delete(kind, ns);
   let callback = undefined;
   let tooltip;
-
   if (ns.metadata.name === 'default') {
     tooltip = `${kind.label} default cannot be deleted`;
   } else if (ns.status.phase === 'Terminating') {
@@ -52,16 +51,7 @@ export const deleteModal = (kind, ns) => {
   } else {
     callback = () => deleteNamespaceModal({ kind, resource: ns });
   }
-  if (tooltip) {
-    label = (
-      <div className="dropdown__disabled">
-        <Tooltip content={tooltip}>
-          <span>{label}</span>
-        </Tooltip>
-      </div>
-    );
-  }
-  return { label, weight, callback, accessReview };
+  return { label, weight, callback, accessReview, tooltip };
 };
 
 const nsMenuActions = [Kebab.factory.ModifyLabels, Kebab.factory.ModifyAnnotations, Kebab.factory.Edit, deleteModal];
