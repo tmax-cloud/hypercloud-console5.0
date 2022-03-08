@@ -84,32 +84,27 @@ const MultiNavMenus = [
     menuType: MenuType.REGISTERED_MENU,
     kind: Models.TFApplyClaimModel.kind,
   },
-  {
-    menuType: MenuType.CONTAINER,
-    label: MenuContainerLabels.federation,
-    innerMenus: [
-      Models.FederatedPodModel.kind,
-      Models.FederatedDeploymentModel.kind,
-      Models.FederatedReplicaSetModel.kind,
-      Models.FederatedHPAModel.kind,
-      Models.FederatedDaemonSetModel.kind,
-      Models.FederatedStatefulSetModel.kind,
-      Models.FederatedConfigMapModel.kind,
-      Models.FederatedSecretModel.kind,
-      Models.FederatedJobModel.kind,
-      Models.FederatedCronJobModel.kind,
-      MenuType.SEPERATOR,
-      Models.FederatedIngressModel.kind,
-      Models.FederatedServiceModel.kind,
-      MenuType.SEPERATOR,
-      Models.FederatedNamespaceModel.kind,
-    ],
-  },
-  {
-    menuType: MenuType.CONTAINER,
-    label: MenuContainerLabels.ansible,
-    innerMenus: [Models.AWXModel.kind],
-  },
+  // { MEMO : 추후 페더레이션 메뉴 활성화하려면 주석 처리 풀어주면 됨. 
+  //   menuType: MenuType.CONTAINER,
+  //   label: MenuContainerLabels.federation,
+  //   innerMenus: [
+  //     Models.FederatedPodModel.kind,
+  //     Models.FederatedDeploymentModel.kind,
+  //     Models.FederatedReplicaSetModel.kind,
+  //     Models.FederatedHPAModel.kind,
+  //     Models.FederatedDaemonSetModel.kind,
+  //     Models.FederatedStatefulSetModel.kind,
+  //     Models.FederatedConfigMapModel.kind,
+  //     Models.FederatedSecretModel.kind,
+  //     Models.FederatedJobModel.kind,
+  //     Models.FederatedCronJobModel.kind,
+  //     MenuType.SEPERATOR,
+  //     Models.FederatedIngressModel.kind,
+  //     Models.FederatedServiceModel.kind,
+  //     MenuType.SEPERATOR,
+  //     Models.FederatedNamespaceModel.kind,
+  //   ],
+  // },
 ];
 
 const SingleNavMenus = [
@@ -155,6 +150,19 @@ const SingleNavMenus = [
   },
 ];
 
+const BaremetalNavMenus = [
+  {
+    menuType: MenuType.CONTAINER,
+    label: MenuContainerLabels.ansible,
+    innerMenus: [Models.AWXModel.kind],
+  },
+  {
+    menuType: MenuType.CONTAINER,
+    label: MenuContainerLabels.provisioning,
+    innerMenus: [Models.NodeConfigModel.kind, Models.BareMetalHostModel.kind],
+  },
+];
+
 const CustomNavMenus = [
   {
     kind: 'Add',
@@ -162,4 +170,4 @@ const CustomNavMenus = [
   },
 ];
 
-export default { MasterNavMenus, DeveloperNavMenus, MultiNavMenus, SingleNavMenus, CustomNavMenus };
+export default { MasterNavMenus, DeveloperNavMenus, MultiNavMenus, SingleNavMenus, BaremetalNavMenus, CustomNavMenus };

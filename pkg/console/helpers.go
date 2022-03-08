@@ -190,7 +190,7 @@ func createConsole(config *v1.Config) (*Console, error) {
 }
 
 func newProxy(endpoint string) *proxy.Config {
-	url := validateURL(endpoint, endpoint)
+	endpointUrl := validateURL(endpoint, endpoint)
 	return &proxy.Config{
 		HeaderBlacklist: []string{"X-CSRFToken"},
 		// TLSClientConfig: &tls.Config{
@@ -199,7 +199,7 @@ func newProxy(endpoint string) *proxy.Config {
 		TLSClientConfig: oscrypto.SecureTLSConfig(&tls.Config{
 			InsecureSkipVerify: true,
 		}),
-		Endpoint: url,
+		Endpoint: endpointUrl,
 		Origin:   "http://localhost",
 	}
 }

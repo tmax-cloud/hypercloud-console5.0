@@ -393,6 +393,8 @@ func (c *Console) Server() http.Handler {
 	k8sApiHandler := http.StripPrefix(proxy.SingleJoiningSlash(c.BaseURL.Path, "/api/resource/"), http.FileServer(http.Dir("./api")))
 	r.PathPrefix(proxy.SingleJoiningSlash(c.BaseURL.Path, "/api/resource/")).Handler(gzipHandler(securityHeadersMiddleware(k8sApiHandler)))
 
+	r.PathPrefix(c.BaseURL.Path).HandlerFunc(c.indexHandler)
+
 	k8sProxy := proxy.NewProxy(c.K8sProxyConfig)
 	k8sProxyHandler := http.StripPrefix(proxy.SingleJoiningSlash(c.BaseURL.Path, k8sProxyPath), tokenMiddleware.ThenFunc(func(rw http.ResponseWriter, r *http.Request) {
 		r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.StaticUser.Token))
@@ -407,25 +409,18 @@ func (c *Console) Server() http.Handler {
 			k8sProxy.ServeHTTP(w, r)
 		})))
 
-	r.Methods("GET").PathPrefix(consolePath + "/apis/v1/").Handler(http.StripPrefix(consolePath,
+	r.Methods("GET").PathPrefix(consolePath + "/api/v1/").Handler(http.StripPrefix(consolePath,
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Info("Use default serviceaccount token")
 			r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.StaticUser.Token))
 			k8sProxy.ServeHTTP(w, r)
 		})))
 
-	r.PathPrefix(c.BaseURL.Path).HandlerFunc(c.indexHandler)
-
 	r.PathPrefix("/api/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "not found")
 	})
 	return standardMiddleware.Then(r)
-}
-
-func (c *Console) Dashboard() http.Handler {
-	r := mux.NewRouter()
-	return r
 }
 
 func (c *Console) indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -503,29 +498,3 @@ func kubeVersion(config *rest.Config) (string, error) {
 	}
 	return "", errors.New("failed to get kubernetes version")
 }
-
-// func (c *Console) IngressHandler(w http.ResponseWriter, r *http.Request) {
-// 	res := c.getIngress()
-// 	w.Write([]byte(res))
-// }
-
-// func (c *Console) getIngress() string {
-// 	config := &rest.Config{
-// 		Host:        c.K8sProxyConfig.Endpoint.String(),
-// 		Transport:   c.K8sClient.Transport,
-// 		BearerToken: c.StaticUser.Token,
-// 	}
-// 	clientset, err := kubernetes.NewForConfig(config)
-// 	if err != nil {
-// 		fmt.Printf("%+v", err.Error())
-// 	}
-// 	ingresses, err := clientset.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{
-// 		// LabelSelector: "kubernetes.io=test",
-// 		// ,metav1.LabelSelector,
-// 	})
-// 	if err != nil {
-// 		fmt.Printf("%+v", err.Error())
-// 		fmt.Println(c.StaticUser.Token)
-// 	}
-// 	return ingresses.Items[0].Status.String()
-// }

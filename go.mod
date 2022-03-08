@@ -8,10 +8,15 @@ require (
 	github.com/eapache/channels v1.1.0
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-chi/chi/v5 v5.0.7
+	github.com/go-kit/kit v0.10.0
+	github.com/go-kit/log v0.2.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gravitational/trace v1.1.14 // indirect
+	github.com/ilyakaznacheev/cleanenv v1.2.6
+	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/justinas/alice v1.2.0
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect

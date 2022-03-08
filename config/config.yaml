@@ -1,0 +1,18 @@
+http:
+  listen: "http://0.0.0.0:9000"
+  baseAddress: "http://0.0.0.0:9000"
+  basePath: "/"
+  certFile: ""
+  keyFile: ""
+  RedirectPort: 31303
+
+auth:
+  keycloakAuthURL: "https://hyperauth.tmaxcloud.org/auth"
+  keycloakRealm: "tmax"
+  keycloakClientId: "hypercloud5"
+
+app:
+  mcMode: true
+  releaseMode: true
+  publicDir: "./frontend/public/dist"
+  customProductName: "hypercloud"
