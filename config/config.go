@@ -19,8 +19,8 @@ type (
 		Listen       string `yaml:"listen" env:"LISTEN" env-default:"http://0.0.0.0:9000" env-description:"listen Address"`
 		BaseAddress  string `yaml:"baseAddress" env:"BASE_ADDRESS" env-default:"http://0.0.0.0:9000" env-description:"Format: <http | https>://domainOrIPAddress[:port]. Example: https://console.hypercloud.com."`
 		BasePath     string `yaml:"basePath" env:"BASE_PATH" env-default:"/"`
-		CertFile     string `yaml:"certFile,omitempty" env:"TLS_CERT_FILE"`
-		KeyFile      string `yaml:"keyFile,omitempty" env:"TLS_KEY_FILE"`
+		CertFile     string `yaml:"certFile,omitempty" env:"TLS_CERT_FILE" env-default:"./tls/tls.crt" env-description:"The TLS certificate"`
+		KeyFile      string `yaml:"keyFile,omitempty" env:"TLS_KEY_FILE" env-default:"./tls/tls.key" env-description:"The TLS certificate key"`
 		RedirectPort int    `yaml:"redirectPort,omitempty" env:"REDIRECT_PORT"`
 	}
 	AUTH struct {
@@ -58,10 +58,12 @@ func NewConfig() (*Config, error) {
 			return nil, fmt.Errorf("Env error: %w", err)
 		}
 		cfg.Listen = args.Listen
+		//cfg.KeyFile = args.KeyFile
 	}
 
-	fmt.Printf("%v \n", args.Listen)
-	fmt.Printf("%v \n", cfg.Listen)
+	fmt.Printf("%v \n", args.KeyFile)
+	fmt.Printf("%v \n", cfg.KeyFile)
+	fmt.Printf("%v \n", cfg.CertFile)
 
 	return cfg, nil
 
@@ -89,10 +91,13 @@ type Args struct {
 func ProcessArgs(cfg interface{}) Args {
 	var a Args
 
-	f := flag.NewFlagSet("console-flag", flag.ExitOnError)
+	f := flag.NewFlagSet("console-flag", flag.ContinueOnError)
 	f.StringVar(&a.ConfigPath, "config", "", "Path to configuration file (./config/config.yaml)")
 	f.StringVar(&a.Listen, "listen", "http://0.0.0.0:9000", "listen Address")
-
+	f.StringVar(&a.BaseAddress, "base-address", "http://0.0.0.0:9000", "Format: <http | https>://domainOrIPAddress[:port]. Example: https://console.hypercloud.com.")
+	f.StringVar(&a.BasePath, "base-path", "/", "")
+	f.StringVar(&a.CertFile, "tls-cert-file", "./tls/tls.crt", "")
+	f.StringVar(&a.KeyFile, "tls-cert-key", "checkout", "")
 	fu := f.Usage
 	f.Usage = func() {
 		fu()
