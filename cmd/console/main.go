@@ -2,6 +2,7 @@ package main
 
 import (
 	"console/config"
+	"flag"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -58,7 +59,12 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 	rootCmd.PersistentFlags().BoolVar(&cfg.APP.ReleaseMode, "index.releaseMode", true, "when true, use jwt token given by keycloak")
 	rootCmd.PersistentFlags().StringVar(&cfg.APP.PublicDir, "index.publicDir", "./frontend/public/dist", "listen Address")
 	rootCmd.PersistentFlags().StringVar(&cfg.APP.CustomProductName, "index.customProductName", "hypercloud", "prduct name for console | default hypercloud")
+	f := rootCmd.Flags()
 
+	f.Parsed()
+	f.Parsed()
+	fmt.Println(viper.AllKeys())
+	fmt.Println()
 	return rootCmd
 }
 
@@ -74,10 +80,19 @@ func initializeConfig(cmd *cobra.Command) error {
 		}
 	}
 
+	f := flag.NewFlagSet("console", flag.ExitOnError)
+	f.String("test", "test", "test")
+	f.VisitAll(func(f *flag.Flag) {
+		v.BindEnv(f.Name, fmt.Sprintf("%s", strings.ToUpper(f.Name)))
+	})
+
 	v.SetEnvPrefix(envPrefix)
 	v.AutomaticEnv()
 
 	bindFlags(cmd, v)
+
+	fmt.Println(v.AllKeys())
+
 	return nil
 }
 
