@@ -3,42 +3,99 @@ package main
 import (
 	"console/config"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-kit/kit/log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"strings"
 )
 
 const (
-	//defaultPort	= "9000"
-	defaultAddress = "http://0.0.0.0:9000"
+	defaultConfigFileName = "config"
+	defaultConfigFilePath = "./config"
+	envPrefix             = "CONSOLE"
 )
 
 func main() {
-	var logger log.Logger
-	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	cmd := NewConsoleCommand()
+	cobra.CheckErr(cmd.Execute())
+}
 
-	cfg, err := config.NewConfig()
-	if err != nil {
+func NewConsoleCommand() *cobra.Command {
+	cfg := config.NewConfig()
 
+	rootCmd := &cobra.Command{
+		Use:   "console",
+		Short: "web console for supercloud & hypercloud",
+		Long: `The console has three major features, 
+First, we provide a react app for supercloud UI. 
+Second, we provide the index.html for react app operation. 
+Finally, we provide a proxy function for querying the kubernetes resource API`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return initializeConfig(cmd)
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			out := cmd.OutOrStdout()
+			fmt.Fprintln(out, "config", cfg)
+
+		},
 	}
-	fmt.Printf("%v \n", cfg)
+	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.Listen, "http.listen", "http://0.0.0.0:9000", "listen Address")
+	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.BaseAddress, "http.baseAddress", "http://0.0.0.0:9000", "Format: <http | https>://domainOrIPAddress[:port]. Example: https://console.hypercloud.com.")
+	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.BasePath, "http.basePath", "/test", "testubg")
+	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.CertFile, "http.certFile", "./tls/tls.crt", "TLS certificate. If the certificate is signed by a certificate authority, the certFile should be the concatenation of the server's certificate followed by the CA's certificate.")
+	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.KeyFile, "http.keyFile", "./tls/tls.key", "The TLS certificate key.")
+	rootCmd.PersistentFlags().IntVar(&cfg.HTTP.RedirectPort, "http.redirectPort", 0, "Port number under which the console should listen for custom hostname redirect.")
 
-	r := chi.NewRouter()
+	rootCmd.PersistentFlags().StringVar(&cfg.AUTH.KeycloakRealm, "auth.keycloakRealm", "", "Keycloak Realm Name")
+	rootCmd.MarkPersistentFlagRequired("auth.keycloakRealm")
+	rootCmd.PersistentFlags().StringVar(&cfg.AUTH.KeycloakClientId, "auth.keycloakClientId", "", "Keycloak Client Id")
+	rootCmd.MarkPersistentFlagRequired("auth.keycloakClientId")
+	rootCmd.PersistentFlags().StringVar(&cfg.AUTH.KeycloakAuthURL, "auth.keycloakAuthUrl", "", "URL of the Keycloak Auth server.")
+	rootCmd.MarkPersistentFlagRequired("auth.keycloakAuthUrl")
+	rootCmd.PersistentFlags().BoolVar(&cfg.AUTH.KeycloakUseHiddenIframe, "auth.keycloakUseHiddenIframe", false, "Use keycloak Hidden Iframe")
 
-	errs := make(chan error, 2)
-	go func() {
-		logger.Log("transport", "http", "address", defaultAddress, "msg", "listening")
-		errs <- http.ListenAndServe(defaultAddress, r)
-	}()
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
+	rootCmd.PersistentFlags().BoolVar(&cfg.APP.McMode, "index.mcMode", true, "Choose Cluster Mode (multi | single)")
+	rootCmd.PersistentFlags().BoolVar(&cfg.APP.ReleaseMode, "index.releaseMode", true, "when true, use jwt token given by keycloak")
+	rootCmd.PersistentFlags().StringVar(&cfg.APP.PublicDir, "index.publicDir", "./frontend/public/dist", "listen Address")
+	rootCmd.PersistentFlags().StringVar(&cfg.APP.CustomProductName, "index.customProductName", "hypercloud", "prduct name for console | default hypercloud")
 
-	logger.Log("terminated", <-errs)
+	return rootCmd
+}
+
+func initializeConfig(cmd *cobra.Command) error {
+	v := viper.New()
+
+	v.SetConfigName(defaultConfigFileName)
+	v.AddConfigPath(defaultConfigFilePath)
+
+	if err := v.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return err
+		}
+	}
+
+	v.SetEnvPrefix(envPrefix)
+	v.AutomaticEnv()
+
+	bindFlags(cmd, v)
+	return nil
+}
+
+// Bind each cobra flag to its associated viper configuration (config file and environment variable)
+func bindFlags(cmd *cobra.Command, v *viper.Viper) {
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		// Environment variables can't have dashes in them, so bind them to their equivalent
+		// keys with underscores, e.g. --favorite-color to STING_FAVORITE_COLOR
+		if strings.Contains(f.Name, "-") || strings.Contains(f.Name, ".") {
+			envVarSuffix := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
+			envVarSuffix = strings.ReplaceAll(envVarSuffix, ".", "_")
+			v.BindEnv(f.Name, fmt.Sprintf("%s_%s", envPrefix, envVarSuffix))
+		}
+
+		// Apply the viper config value to the flag when the flag is not set and viper has a value
+		if !f.Changed && v.IsSet(f.Name) {
+			val := v.Get(f.Name)
+			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+		}
+	})
 }

@@ -1,8 +1,8 @@
 apiVersion: console.hypercloud.io/v1beta1
 kind: ConsoleConfig
 consoleInfo:
-  listen: https://172.18.116.146:9000
-  baseAddress: "https://172.18.116.146:9000"
+  listen: https://0.0.0.0:9000
+  baseAddress: "https://0.0.0.0:9000"
   basePath: "/"
   certFile: "tls/tls.crt"
   keyFile: "tls/tls.key"
