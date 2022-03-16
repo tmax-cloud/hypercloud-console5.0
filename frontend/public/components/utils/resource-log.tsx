@@ -14,7 +14,8 @@ import { LineBuffer } from './line-buffer';
 import * as screenfull from 'screenfull';
 import { k8sGet, k8sList } from '@console/internal/module/k8s';
 import { ConsoleExternalLogLinkModel, ProjectModel } from '@console/internal/models';
-import { connectToFlags, FlagsObject } from '../../reducers/features';
+import { useFlag } from '@console/shared/src/hooks/flag';
+import { usePrevious } from '@console/shared/src/hooks/previous';
 
 export const STREAM_EOF = 'eof';
 export const STREAM_LOADING = 'loading';
@@ -26,6 +27,8 @@ export const LOG_SOURCE_RUNNING = 'running';
 export const LOG_SOURCE_TERMINATED = 'terminated';
 export const LOG_SOURCE_WAITING = 'waiting';
 
+const DEFAULT_BUFFER_SIZE = 1000;
+
 // Messages to display for corresponding log status
 const streamStatusMessages = {
   [STREAM_EOF]: 'COMMON:MSG_DETAILS_TABLOGS_9',
@@ -34,7 +37,7 @@ const streamStatusMessages = {
   [STREAM_ACTIVE]: 'COMMON:MSG_DETAILS_TABLOGS_11',
 };
 
-const replaceVariables = (template, values) => {
+const replaceVariables = (template: string, values: any): string => {
   return _.reduce(
     values,
     (result, value, name) => {
@@ -45,6 +48,20 @@ const replaceVariables = (template, values) => {
     },
     template,
   );
+};
+
+// Build a log API url for a given resource
+const getResourceLogURL = (resource: K8sResourceKind, containerName?: string, bufferSize?: number): string => {
+  return resourceURL(modelFor(resource.kind), {
+    name: resource.metadata.name,
+    ns: resource.metadata.namespace,
+    path: 'log',
+    queryParams: {
+      container: containerName || '',
+      follow: 'true',
+      tailLines: `${bufferSize}`,
+    },
+  });
 };
 
 // Component for log stream controls
@@ -130,50 +147,47 @@ export const LogControls = (props: LogControlsProps) => {
   );
 };
 
-type LogControlsProps = {
-  isFullscreen: boolean;
-  dropdown?: React.ReactNode;
-  status?: string;
-  resource?: any;
-  containerName?: string;
-  podLogLinks?: K8sResourceKind[];
-  namespaceUID?: string;
-  toggleStreaming?: () => void;
-  onDownload: () => void;
-  toggleFullscreen: () => void;
-};
-
 // Resource agnostic log component
-const ResourceLog_ = (props: ResourceLogProps) => {
+export const ResourceLog = (props: ResourceLogProps) => {
+  const { bufferSize = DEFAULT_BUFFER_SIZE, containerName, dropdown, resource, resourceStatus } = props;
+  const { t } = useTranslation();
   const buffer = React.useRef(new LineBuffer(props.bufferSize));
   const resourceLogRef = React.useRef();
-  let ws;
+  const ws = React.useRef<any>();
+  const externalLogLinkFlag = useFlag(FLAGS.CONSOLE_EXTERNAL_LOG_LINK);
 
   const [error, setError] = React.useState(false);
   const [lines, setLines] = React.useState([]);
   const [linesBehind, setLinesBehind] = React.useState(0);
-  const [resourceStatus, setResourceStatus] = React.useState(LOG_SOURCE_WAITING);
+  const [totalLineCount, setTotalLineCount] = React.useState(0);
   const [stale, setStale] = React.useState(false);
   const [status, setStatus] = React.useState(STREAM_LOADING);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [namespaceUID, setNamespaceUID] = React.useState('');
   const [podLogLinks, setPodLogLinks] = React.useState();
 
-  // Updates log status
-  const updateStatus = newStatus => {
-    // Reset linesBehind when transitioning out of paused state
-    if (status !== STREAM_ACTIVE && newStatus === STREAM_ACTIVE) {
+  const previousResourceStatus = usePrevious(resourceStatus);
+  const previousTotalLineCount = usePrevious(totalLineCount);
+  const bufferFull = lines.length === bufferSize;
+  const watchURL = getResourceLogURL(resource, containerName, bufferSize);
+
+  // Update lines behind while stream is paused, reset when unpaused
+  React.useEffect(() => {
+    if (status === STREAM_ACTIVE) {
       setLinesBehind(0);
     }
-    setStatus(newStatus);
-  };
+
+    if (status === STREAM_PAUSED) {
+      setLinesBehind(currentLinesBehind => Math.min(currentLinesBehind + (totalLineCount - previousTotalLineCount), bufferSize));
+    }
+  }, [status, totalLineCount, previousTotalLineCount, bufferSize]);
 
   // Initialize websocket connection and wire up handlers
-  const wsInit = React.useCallback(() => {
+  const startWebSocket = React.useCallback(() => {
     // Handler for websocket onopen event
     const onOpen = () => {
       buffer.current.clear();
-      updateStatus(STREAM_ACTIVE);
+      setStatus(STREAM_ACTIVE);
     };
     // Handler for websocket onclose event
     const onClose = () => {
@@ -187,52 +201,35 @@ const ResourceLog_ = (props: ResourceLogProps) => {
     const onMessage = msg => {
       if (msg) {
         const text = Base64.decode(msg);
-        const linesAdded = buffer.current.ingest(text);
-        setLinesBehind(currentLinesBehind => (status === STREAM_PAUSED ? currentLinesBehind + linesAdded : currentLinesBehind));
+        setTotalLineCount(currentLineCount => currentLineCount + buffer.current.ingest(text));
         setLines([...buffer.current.getLines()]);
       }
     };
-    if ([LOG_SOURCE_RUNNING, LOG_SOURCE_TERMINATED, LOG_SOURCE_RESTARTING].includes(resourceStatus)) {
-      const urlOpts = {
-        ns: props.resource.metadata.namespace,
-        name: props.resource.metadata.name,
-        path: 'log',
-        queryParams: {
-          container: props.containerName || '',
-          follow: 'true',
-          tailLines: `${props.bufferSize}`,
-        },
-      };
-      const watchURL = resourceURL(modelFor(props.resource.kind), urlOpts);
-      const wsOpts = {
-        host: 'auto',
-        path: watchURL,
-        subprotocols: ['base64.binary.k8s.io'],
-      };
-
-      ws = new WSFactory(watchURL, wsOpts)
-        .onclose(onClose)
-        .onerror(onError)
-        .onmessage(onMessage)
-        .onopen(onOpen);
-    }
-  }, [resourceStatus, props.resource.metadata.namespace, props.resource.metadata.name, props.resource.kind, props.containerName, props.bufferSize]);
-
-  // Destroy websocket
-  const wsDestroy = React.useCallback(() => {
-    ws && ws.destroy();
-  }, [ws]);
-
-  // Destroy and reinitialize websocket connection
-  const restartStream = React.useCallback(() => {
     setError(false);
     setLines([]);
+    setTotalLineCount(0);
     setLinesBehind(0);
     setStale(false);
     setStatus(STREAM_LOADING);
-    wsDestroy();
-    wsInit();
-  }, [wsDestroy, wsInit]);
+    ws.current?.destroy();
+    ws.current = new WSFactory(watchURL, {
+      host: 'auto',
+      path: watchURL,
+      subprotocols: ['base64.binary.k8s.io'],
+    })
+      .onclose(onClose)
+      .onerror(onError)
+      .onmessage(onMessage)
+      .onopen(onOpen);
+  }, [watchURL]);
+
+  // Restart websocket if startWebSocket function changes
+  React.useEffect(() => {
+    if (!error && !stale && [LOG_SOURCE_RUNNING, LOG_SOURCE_TERMINATED, LOG_SOURCE_RESTARTING].includes(resourceStatus)) {
+      startWebSocket();
+    }
+    return () => ws.current?.destroy();
+  }, [error, resourceStatus, stale, startWebSocket]);
 
   // Toggle currently displayed log content to/from fullscreen
   const toggleFullscreen = () => {
@@ -241,12 +238,12 @@ const ResourceLog_ = (props: ResourceLogProps) => {
 
   // Toggle streaming/paused status
   const toggleStreaming = () => {
-    updateStatus(status === STREAM_ACTIVE ? STREAM_PAUSED : STREAM_ACTIVE);
+    setStatus(currentStatus => (currentStatus === STREAM_ACTIVE ? STREAM_PAUSED : STREAM_ACTIVE));
   };
 
   React.useEffect(() => {
-    if (props.flags.CONSOLE_EXTERNAL_LOG_LINK && props.resource.kind === 'Pod') {
-      Promise.all([k8sList(ConsoleExternalLogLinkModel), k8sGet(ProjectModel, props.resource.metadata.namespace)])
+    if (externalLogLinkFlag && resource.kind === 'Pod') {
+      Promise.all([k8sList(ConsoleExternalLogLinkModel), k8sGet(ProjectModel, resource.metadata.namespace)])
         .then(([podLogLinks_, project]) => {
           // Project UID and namespace UID are the same value. Use the projects
           // API since normal OpenShift users can list projects.
@@ -255,10 +252,9 @@ const ResourceLog_ = (props: ResourceLogProps) => {
         })
         .catch(e => setError(e));
     }
-  }, [props.flags.CONSOLE_EXTERNAL_LOG_LINK, props.resource.kind, props.resource.metadata.namespace]);
+  }, [externalLogLinkFlag, resource.kind, resource.metadata.namespace]);
 
   React.useEffect(() => {
-    wsInit();
     if (screenfull.enabled) {
       screenfull.on('change', () => {
         setIsFullscreen(screenfull.isFullscreen);
@@ -269,7 +265,6 @@ const ResourceLog_ = (props: ResourceLogProps) => {
     }
 
     return () => {
-      wsDestroy();
       if (screenfull.enabled) {
         screenfull.off('change');
         screenfull.off('error');
@@ -277,26 +272,12 @@ const ResourceLog_ = (props: ResourceLogProps) => {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // If container comes out of restarting state, currently displayed logs might be stale
   React.useEffect(() => {
-    if (props.resourceStatus !== resourceStatus) {
-      setResourceStatus(props.resourceStatus);
-      // Container changed from non-running to running state, so currently displayed logs are stale
-      if (resourceStatus === LOG_SOURCE_RESTARTING && props.resourceStatus !== LOG_SOURCE_RESTARTING) {
-        setStale(true);
-      }
+    if (previousResourceStatus === LOG_SOURCE_RESTARTING && resourceStatus !== LOG_SOURCE_RESTARTING) {
+      setStale(true);
     }
-  }, [props.resourceStatus, resourceStatus]);
-
-  React.useEffect(() => {
-    const resourceStarted = resourceStatus === LOG_SOURCE_WAITING && props.resourceStatus !== LOG_SOURCE_WAITING;
-    if (resourceStarted) {
-      restartStream();
-    }
-  }, [props.resourceStatus, resourceStatus, restartStream]);
-
-  React.useEffect(() => {
-    restartStream();
-  }, [props.containerName, restartStream]);
+  }, [previousResourceStatus, resourceStatus]);
 
   // Download currently displayed log content
   const download = () => {
@@ -308,33 +289,35 @@ const ResourceLog_ = (props: ResourceLogProps) => {
     saveAs(blob, `${filename}.log`);
   };
 
-  const { resource, containerName, dropdown, bufferSize } = props;
-  const { t } = useTranslation();
-  const bufferFull = lines.length === bufferSize;
-
   return (
     <>
-      {error && <Alert isInline className="co-alert" variant="danger" title={t('COMMON:MSG_DETAILS_TABLOGS_4')} action={<AlertActionLink onClick={restartStream}>{t('COMMON:MSG_DETAILS_TABLOGS_15')}</AlertActionLink>} />}
-      {stale && <Alert isInline className="co-alert" variant="info" title={t('COMMON:MSG_DETAILS_TABLOGS_3', { something: resource.kind })} action={<AlertActionLink onClick={restartStream}>{t('COMMON:MSG_DETAILS_TABLOGS_13')}</AlertActionLink>} />}
+      {error && <Alert isInline className="co-alert" variant="danger" title={t('COMMON:MSG_DETAILS_TABLOGS_4')} action={<AlertActionLink onClick={() => setError(false)}>{t('COMMON:MSG_DETAILS_TABLOGS_15')}</AlertActionLink>} />}
+      {stale && <Alert isInline className="co-alert" variant="info" title={t('COMMON:MSG_DETAILS_TABLOGS_3', { something: resource.kind })} action={<AlertActionLink onClick={() => setStale(false)}>{t('COMMON:MSG_DETAILS_TABLOGS_13')}</AlertActionLink>} />}
       <div ref={resourceLogRef} className={classNames('resource-log', { 'resource-log--fullscreen': isFullscreen })}>
         <LogControls dropdown={dropdown} isFullscreen={isFullscreen} onDownload={download} status={status} toggleFullscreen={toggleFullscreen} toggleStreaming={toggleStreaming} resource={resource} containerName={containerName} podLogLinks={podLogLinks} namespaceUID={namespaceUID} />
-        <LogWindow lines={lines} linesBehind={linesBehind} bufferFull={bufferFull} isFullscreen={isFullscreen} status={status} updateStatus={updateStatus} />
+        <LogWindow lines={lines} linesBehind={linesBehind} bufferFull={bufferFull} isFullscreen={isFullscreen} status={status} updateStatus={setStatus} />
       </div>
     </>
   );
 };
 
-export const ResourceLog = connectToFlags(FLAGS.CONSOLE_EXTERNAL_LOG_LINK)(ResourceLog_);
-
-ResourceLog.defaultProps = {
-  bufferSize: 1000,
+type LogControlsProps = {
+  isFullscreen: boolean;
+  dropdown?: React.ReactNode;
+  status?: string;
+  resource?: any;
+  containerName?: string;
+  podLogLinks?: K8sResourceKind[];
+  namespaceUID?: string;
+  toggleStreaming?: () => void;
+  onDownload: () => void;
+  toggleFullscreen: () => void;
 };
 
 type ResourceLogProps = {
-  bufferSize: number;
+  bufferSize?: number;
   containerName?: string;
   dropdown?: React.ReactNode;
   resource: any;
   resourceStatus: string;
-  flags: FlagsObject;
 };
