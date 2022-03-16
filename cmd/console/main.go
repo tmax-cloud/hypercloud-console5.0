@@ -2,11 +2,12 @@ package main
 
 import (
 	"console/config"
-	"flag"
+	"console/internal/server"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"net/http"
 	"strings"
 )
 
@@ -37,6 +38,8 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 		Run: func(cmd *cobra.Command, args []string) {
 			out := cmd.OutOrStdout()
 			fmt.Fprintln(out, "config", cfg)
+			srv := server.New()
+			http.ListenAndServe(":9090",srv)
 
 		},
 	}
@@ -55,16 +58,13 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 	rootCmd.MarkPersistentFlagRequired("auth.keycloakAuthUrl")
 	rootCmd.PersistentFlags().BoolVar(&cfg.AUTH.KeycloakUseHiddenIframe, "auth.keycloakUseHiddenIframe", false, "Use keycloak Hidden Iframe")
 
-	rootCmd.PersistentFlags().BoolVar(&cfg.APP.McMode, "index.mcMode", true, "Choose Cluster Mode (multi | single)")
-	rootCmd.PersistentFlags().BoolVar(&cfg.APP.ReleaseMode, "index.releaseMode", true, "when true, use jwt token given by keycloak")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.PublicDir, "index.publicDir", "./frontend/public/dist", "listen Address")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.CustomProductName, "index.customProductName", "hypercloud", "prduct name for console | default hypercloud")
-	f := rootCmd.Flags()
+	rootCmd.PersistentFlags().BoolVar(&cfg.APP.McMode, "app.mcMode", true, "Choose Cluster Mode (multi | single)")
+	rootCmd.PersistentFlags().BoolVar(&cfg.APP.ReleaseMode, "app.releaseMode", true, "when true, use jwt token given by keycloak")
+	rootCmd.PersistentFlags().StringVar(&cfg.APP.PublicDir, "app.publicDir", "./frontend/public/dist", "listen Address")
+	rootCmd.PersistentFlags().StringVar(&cfg.APP.CustomProductName, "app.customProductName", "hypercloud", "prduct name for console | default hypercloud")
 
-	f.Parsed()
-	f.Parsed()
+
 	fmt.Println(viper.AllKeys())
-	fmt.Println()
 	return rootCmd
 }
 
@@ -79,12 +79,6 @@ func initializeConfig(cmd *cobra.Command) error {
 			return err
 		}
 	}
-
-	f := flag.NewFlagSet("console", flag.ExitOnError)
-	f.String("test", "test", "test")
-	f.VisitAll(func(f *flag.Flag) {
-		v.BindEnv(f.Name, fmt.Sprintf("%s", strings.ToUpper(f.Name)))
-	})
 
 	v.SetEnvPrefix(envPrefix)
 	v.AutomaticEnv()

@@ -11,7 +11,7 @@ auth:
   keycloakRealm: "tmax"
   keycloakClientId: "hypercloud5"
 
-index:
+app:
   mcMode: true
   releaseMode: true
   publicDir: "./frontend/public/dist"
