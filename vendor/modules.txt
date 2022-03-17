@@ -165,6 +165,9 @@ github.com/fsnotify/fsnotify
 ## explicit
 github.com/go-chi/chi/v5
 github.com/go-chi/chi/v5/middleware
+# github.com/go-chi/cors v1.2.0
+## explicit
+github.com/go-chi/cors
 # github.com/go-errors/errors v1.0.1
 github.com/go-errors/errors
 # github.com/go-kit/log v0.2.0

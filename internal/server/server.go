@@ -1,18 +1,41 @@
 package server
 
 import (
+	"console/internal/console"
+	"console/pkg/hypercloud/proxy"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	kitlog "github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 )
 
-type Server struct {
+type App struct {
+	BasePath         string `yaml:"basePath" json:"basePath"`
+	PublicDir        string `yaml:"publicDir,omitempty" json:"publicDir"`
+	KubeAPIServerURL string `yaml:"KubeAPIServerURL" json:"kubeAPIServerURL"`
 
-	// handler for static asset, index.html
-	//console *console.Console
-	// handler for kubernetes proxy
+	ConsoleVersion string `json:"consoleVersion"`
+	GOARCH         string `json:"GOARCH"`
+	GOOS           string `json:"GOOS"`
+
+	KeycloakAuthURL         string `yaml:"keycloakAuthURL" json:"keycloakAuthURL"`
+	KeycloakRealm           string `yaml:"keycloakRealm" json:"keycloakRealm"`
+	KeycloakClientId        string `yaml:"keycloakClientId" json:"keycloakClientId"`
+	KeycloakUseHiddenIframe bool   `yaml:"keycloakUseHiddenIframe,omitempty" json:"keycloakUseHiddenIframe"`
+
+	McMode            bool   `yaml:"mcMode,omitempty" json:"mcMode"`
+	ReleaseMode       bool   `yaml:"releaseMode,omitempty" json:"releaseMode"`
+	CustomProductName string `yaml:"customProductName,omitempty" json:"customProductName"`
+}
+
+type Server struct {
+	App
+
+	// Proxy // A client with the correct TLS setup for communicating with the API server.
+	K8sProxyConfig *proxy.Config
+	K8sClient      *http.Client
 
 	Logger kitlog.Logger
 
@@ -20,11 +43,11 @@ type Server struct {
 }
 
 // New returns a new HTTP server.
-func New() *Server {
+func New(console console.Console, logger kitlog.Logger) *Server {
+
 	s := &Server{
-		//console: &console.Console{},
-		Logger:  nil,
-		router:  nil,
+		Console: console,
+		Logger:  logger,
 	}
 
 	r := chi.NewRouter()
@@ -33,36 +56,32 @@ func New() *Server {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
-	r.Use(accessControl)
+	// Basic CORS
+	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	r.Route("/api/console", func(r chi.Router) {
-		r.Get("/test",http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Get("/test", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 			w.Write([]byte("hi?"))
 		}))
 	})
 
-	r.Method("GET","/metrics",promhttp.Handler())
+	r.Method("GET", "/metrics", promhttp.Handler())
 
 	s.router = r
 	return s
 }
 
 func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.router.ServeHTTP(w,r)
+	s.router.ServeHTTP(w, r)
 }
-
-func accessControl(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, X-CSRF-Token, Accept, Authorization")
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		h.ServeHTTP(w, r)
-	})
-}
-

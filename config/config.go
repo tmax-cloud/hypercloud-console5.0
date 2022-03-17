@@ -1,35 +1,47 @@
 package config
 
+import "console/pkg/version"
+
 type (
 	Config struct {
 		HTTP `yaml:"http"`
-		AUTH `yaml:"auth"`
 		APP  `yaml:"app"`
 	}
 	HTTP struct {
 		Listen       string `yaml:"listen"`
 		BaseAddress  string `yaml:"baseAddress"`
-		BasePath     string `yaml:"basePath"`
 		CertFile     string `yaml:"cert,omitempty"`
 		KeyFile      string `yaml:"key,omitempty"`
 		RedirectPort int    `yaml:"redirectPort,omitempty"`
 	}
-	AUTH struct {
-		KeycloakAuthURL         string `yaml:"keycloakAuthURL"`
-		KeycloakRealm           string `yaml:"keycloakRealm"`
-		KeycloakClientId        string `yaml:"keycloakClientId"`
-		KeycloakUseHiddenIframe bool   `yaml:"keycloakUseHiddenIframe,omitempty"`
-	}
 	APP struct {
-		McMode            bool   `yaml:"mcMode,omitempty"`
-		ReleaseMode       bool   `yaml:"releaseMode,omitempty"`
-		PublicDir         string `yaml:"publicDir,omitempty"`
-		CustomProductName string `yaml:"customProductName,omitempty"`
+		BasePath  string `yaml:"basePath" json:"basePath"`
+		PublicDir string `yaml:"publicDir,omitempty" json:"publicDir"`
+
+		ConsoleVersion string `json:"consoleVersion"`
+		GOARCH         string `json:"GOARCH"`
+		GOOS           string `json:"GOOS"`
+		KubeVersion    string `json:"kubeVersion"`
+
+		KeycloakAuthURL         string `yaml:"keycloakAuthURL" json:"keycloakAuthURL"`
+		KeycloakRealm           string `yaml:"keycloakRealm" json:"keycloakRealm"`
+		KeycloakClientId        string `yaml:"keycloakClientId" json:"keycloakClientId"`
+		KeycloakUseHiddenIframe bool   `yaml:"keycloakUseHiddenIframe,omitempty" json:"keycloakUseHiddenIframe"`
+
+		McMode            bool   `yaml:"mcMode,omitempty" json:"mcMode"`
+		ReleaseMode       bool   `yaml:"releaseMode,omitempty" json:"releaseMode"`
+		CustomProductName string `yaml:"customProductName,omitempty" json:"customProductName"`
 	}
 )
 
 func NewConfig() *Config {
-	cfg := &Config{}
+	cfg := &Config{
+		HTTP: HTTP{},
+		APP: APP{
+			ConsoleVersion: version.Version,
+			GOARCH:,
+		},
+	}
 	return cfg
 }
 
