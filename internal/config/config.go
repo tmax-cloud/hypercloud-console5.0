@@ -10,7 +10,6 @@ type (
 	Config struct {
 		HTTP `yaml:"http"`
 		App  server.App `yaml:"app"`
-		Api  cluster.Api
 	}
 	HTTP struct {
 		Listen       string `yaml:"listen"`

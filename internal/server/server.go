@@ -3,6 +3,7 @@ package server
 import (
 	"console/internal/console"
 	"console/pkg/hypercloud/proxy"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -30,12 +31,26 @@ type App struct {
 	CustomProductName string `yaml:"customProductName,omitempty" json:"customProductName"`
 }
 
+type k8sHandler struct {
+	k8sProxyConfig *proxy.Config
+	k8sClient      *http.Client
+	k8sToken       string
+}
+
+func newK8sHandler(KubeAPIServerURL string) k8sHandler {
+	fmt.Println(KubeAPIServerURL)
+	//Proxy 만들어주는 작업하면 될듯
+	return k8sHandler{
+		k8sProxyConfig: nil,
+		k8sClient:      nil,
+		k8sToken:       "",
+	}
+}
+
 type Server struct {
 	App
-
+	k8sHandler
 	// Proxy // A client with the correct TLS setup for communicating with the API server.
-	K8sProxyConfig *proxy.Config
-	K8sClient      *http.Client
 
 	Logger kitlog.Logger
 
@@ -46,8 +61,10 @@ type Server struct {
 func New(console console.Console, logger kitlog.Logger) *Server {
 
 	s := &Server{
-		Console: console,
-		Logger:  logger,
+		App:        App{},
+		k8sHandler: newK8sHandler("k8sURL"),
+		Logger:     logger,
+		router:     nil,
 	}
 
 	r := chi.NewRouter()
