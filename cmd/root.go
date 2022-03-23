@@ -57,6 +57,7 @@ var (
 
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.HelpFunc()(cmd, args)
+			log.Fatal("ete")
 		},
 	}
 )

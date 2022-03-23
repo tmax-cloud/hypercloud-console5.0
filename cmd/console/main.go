@@ -1,14 +1,23 @@
 package main
 
 import (
-	"console/config"
+	"console/internal/console"
 	"console/internal/server"
+	"context"
+	"crypto/tls"
 	"fmt"
+	kitlog "github.com/go-kit/log"
+	oscrypto "github.com/openshift/library-go/pkg/crypto"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"net/http"
+	"net/url"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 )
 
 const (
@@ -17,15 +26,24 @@ const (
 	envPrefix             = "CONSOLE"
 )
 
+type ServingInfo struct {
+	Listen       string `yaml:"listen"`
+	BaseAddress  string `yaml:"baseAddress"`
+	CertFile     string `yaml:"cert,omitempty"`
+	KeyFile      string `yaml:"key,omitempty"`
+	RedirectPort int    `yaml:"redirectPort,omitempty"`
+}
+
 func main() {
 	cmd := NewConsoleCommand()
 	cobra.CheckErr(cmd.Execute())
 }
 
-func NewConsoleCommand() *cobra.Command {
-	cfg := config.NewConfig()
+var (
+	servingInfo = &ServingInfo{}
+	app = server.NewAppConfig()
 
-	rootCmd := &cobra.Command{
+	rootCmd = &cobra.Command{
 		Use:   "console",
 		Short: "web console for supercloud & hypercloud",
 		Long: `The console has three major features, 
@@ -36,34 +54,134 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 			return initializeConfig(cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			out := cmd.OutOrStdout()
-			fmt.Fprintln(out, "config", cfg)
-			srv := server.New()
-			http.ListenAndServe(":9090", srv)
+			fs := cmd.Flags()
 
+			var (
+				k8sApi, _ = fs.GetString("clusterInfo.kubeAPIServerURL")
+				token, _ = fs.GetString("clusterInfo.kubeToken")
+			)
+			k8sHandler := server.NewK8sHandlerConfig(k8sApi,token)
+
+			var logger kitlog.Logger
+			logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+			logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
+
+			app.AddLogger(kitlog.With(logger, "component","App"))
+			k8sHandler.AddLogger(kitlog.With(logger,"component","k8sHandler"))
+
+			fmt.Printf("%v",servingInfo)
+			httpHandler := server.NewServer(app,k8sHandler)
+
+			listenURL := console.ValidateFlagIsURL("listen",servingInfo.Listen)
+			switch listenURL.Scheme {
+			case "http":
+			case "https":
+				console.ValidateFlagNotEmpty("tls-cert-file", servingInfo.CertFile)
+				console.ValidateFlagNotEmpty("tls-key-file", servingInfo.KeyFile)
+			default:
+				console.FlagFatalf("listen", "scheme must be one of: http, https")
+			}
+
+			httpsrv := &http.Server{
+				Addr: listenURL.Host,
+				Handler: httpHandler,
+				// Disable HTTP/2, which breaks WebSockets.
+				TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+				TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
+			}
+
+			//if servingInfo.RedirectPort != 0 {
+			//	go func() {
+			//		redirectServer := &http.Server{
+			//			Addr: ":8080",
+			//			Handler: http.NotFoundHandler(),
+			//		}
+			//		httpsrv.ListenAndServe()
+			//	}()
+			//}
+
+			serverCtx, serverStopCtx := context.WithCancel(context.Background())
+			sig := make(chan os.Signal, 1)
+			signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+			go func() {
+				<-sig
+
+				// Shutdown signal with grace period of 30 seconds
+				shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+
+				go func() {
+					<-shutdownCtx.Done()
+					if shutdownCtx.Err() == context.DeadlineExceeded {
+						logger.Log("Error","graceful shutdown timed out.. forcing exit.")
+						os.Exit(1)
+					}
+				}()
+
+				// Trigger graceful shutdown
+				err := httpsrv.Shutdown(shutdownCtx)
+				if err != nil {
+					logger.Log("Error",err)
+					os.Exit(1)
+				}
+				//if servingInfo.RedirectPort != 0 {
+				//	redirectServer.Shutdown(shutdownCtx)
+				//}
+				serverStopCtx()
+			}()
+
+			// Run the server
+			err := httpsrv.ListenAndServe()
+			if err != nil && err != http.ErrServerClosed {
+				logger.Log("Error",err)
+				os.Exit(1)
+			}
+
+
+
+			<-serverCtx.Done()
+
+
+
+
+
+
+			//httpsrv := &http.Server{
+			//	Addr: httpServer.BaseAddress,
+			//	Handler: consoleHandler,
+			//	// Disable HTTP/2, which breaks WebSockets.
+			//	TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+			//	TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
+			//}
+			//
+			//http.ListenAndServe("0.0.0.0:9090", srv)
 		},
 	}
-	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.Listen, "http.listen", "http://0.0.0.0:9000", "listen Address")
-	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.BaseAddress, "http.baseAddress", "http://0.0.0.0:9000", "Format: <http | https>://domainOrIPAddress[:port]. Example: https://console.hypercloud.com.")
-	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.CertFile, "http.certFile", "./tls/tls.crt", "TLS certificate. If the certificate is signed by a certificate authority, the certFile should be the concatenation of the server's certificate followed by the CA's certificate.")
-	rootCmd.PersistentFlags().StringVar(&cfg.HTTP.KeyFile, "http.keyFile", "./tls/tls.key", "The TLS certificate key.")
-	rootCmd.PersistentFlags().IntVar(&cfg.HTTP.RedirectPort, "http.redirectPort", 0, "Port number under which the console should listen for custom hostname redirect.")
+)
 
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.KeycloakRealm, "app.keycloakRealm", "", "Keycloak Realm Name")
+func NewConsoleCommand() *cobra.Command {
+	rootCmd.PersistentFlags().StringVar(&servingInfo.Listen, "servingInfo.listen", "http://0.0.0.0:9000", "listen Address")
+	rootCmd.PersistentFlags().StringVar(&servingInfo.BaseAddress, "servingInfo.baseAddress", "http://0.0.0.0:9000", "Format: <http | https>://domainOrIPAddress[:port]. Example: https://console.hypercloud.com.")
+	rootCmd.PersistentFlags().StringVar(&servingInfo.CertFile, "servingInfo.certFile", "./tls/tls.crt", "TLS certificate. If the certificate is signed by a certificate authority, the certFile should be the concatenation of the server's certificate followed by the CA's certificate.")
+	rootCmd.PersistentFlags().StringVar(&servingInfo.KeyFile, "servingInfo.keyFile", "./tls/tls.key", "The TLS certificate key.")
+	rootCmd.PersistentFlags().IntVar(&servingInfo.RedirectPort, "servingInfo.redirectPort", 0, "Port number under which the console should listen for custom hostname redirect.")
+
+	rootCmd.PersistentFlags().StringVar(&app.KeycloakRealm, "app.keycloakRealm", "", "Keycloak Realm Name")
 	rootCmd.MarkPersistentFlagRequired("app.keycloakRealm")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.KeycloakClientId, "app.keycloakClientId", "", "Keycloak Client Id")
+	rootCmd.PersistentFlags().StringVar(&app.KeycloakClientId, "app.keycloakClientId", "", "Keycloak Client Id")
 	rootCmd.MarkPersistentFlagRequired("app.keycloakClientId")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.KeycloakAuthURL, "app.keycloakAuthUrl", "", "URL of the Keycloak Auth server.")
+	rootCmd.PersistentFlags().StringVar(&app.KeycloakAuthURL, "app.keycloakAuthUrl", "", "URL of the Keycloak Auth server.")
 	rootCmd.MarkPersistentFlagRequired("app.keycloakAuthUrl")
-	rootCmd.PersistentFlags().BoolVar(&cfg.APP.KeycloakUseHiddenIframe, "app.keycloakUseHiddenIframe", false, "Use keycloak Hidden Iframe")
+	rootCmd.PersistentFlags().BoolVar(&app.KeycloakUseHiddenIframe, "app.keycloakUseHiddenIframe", false, "Use keycloak Hidden Iframe")
 
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.BasePath, "app.basePath", "/test", "testubg")
-	rootCmd.PersistentFlags().BoolVar(&cfg.APP.McMode, "app.mcMode", true, "Choose Cluster Mode (multi | single)")
-	rootCmd.PersistentFlags().BoolVar(&cfg.APP.ReleaseMode, "app.releaseMode", true, "when true, use jwt token given by keycloak")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.PublicDir, "app.publicDir", "./frontend/public/dist", "listen Address")
-	rootCmd.PersistentFlags().StringVar(&cfg.APP.CustomProductName, "app.customProductName", "hypercloud", "prduct name for console | default hypercloud")
+	rootCmd.PersistentFlags().StringVar(&app.BasePath, "app.basePath", "/", "basePath")
+	rootCmd.PersistentFlags().StringVar(&app.PublicDir, "app.publicDir", "./frontend/public/dist", "listen Address")
+	rootCmd.PersistentFlags().BoolVar(&app.McMode, "app.mcMode", true, "Choose Cluster Mode (multi | single)")
+	rootCmd.PersistentFlags().BoolVar(&app.ReleaseMode, "app.releaseMode", true, "when true, use jwt token given by keycloak")
+	rootCmd.PersistentFlags().StringVar(&app.CustomProductName, "app.customProductName", "hypercloud", "prduct name for console | default hypercloud")
 
-	fmt.Println(viper.AllKeys())
+	//rootCmd.PersistentFlags().StringVar(&k8sHandler.KubeAPIServerURL, "k8sHandler.kubeAPIServerURL", "kubernetes.default.svc", "kube api server hostname")
+	rootCmd.PersistentFlags().String("clusterInfo.kubeAPIServerURL","https://172.23.4.201:6443", "kube api server hostname")
+	rootCmd.PersistentFlags().String("clusterInfo.kubeToken","","kubernetes token for API")
 	return rootCmd
 }
 
@@ -84,8 +202,9 @@ func initializeConfig(cmd *cobra.Command) error {
 
 	bindFlags(cmd, v)
 
-	fmt.Println(v.AllKeys())
-
+	//fmt.Println(v.AllKeys())
+	//fmt.Println(v.Get("kubeToken"))
+	//fmt.Println(v.Get("kubeAPIServerURL"))
 	return nil
 }
 
@@ -106,4 +225,47 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
 		}
 	})
+}
+
+func (h *ServingInfo) RunServer(consoleHandler *server.Server) *http.Server {
+	listenURL := &url.URL{}
+	console.ValidateFlagIsURL("Listen",h.Listen)
+	switch listenURL.Scheme {
+	case "http":
+	case "https":
+		console.ValidateFlagNotEmpty("tls-cert-file", h.CertFile)
+		console.ValidateFlagNotEmpty("tls-key-file", h.KeyFile)
+	default:
+		console.FlagFatalf("listen", "scheme must be one of: http, https")
+	}
+
+	httpsrv := &http.Server{
+		Addr: listenURL.Host,
+		Handler: consoleHandler,
+		// Disable HTTP/2, which breaks WebSockets.
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+		TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
+	}
+	fmt.Println(httpsrv)
+
+	if h.RedirectPort != 0 {
+		go func() {
+			// Listen on passed port number to be redirected to the console
+			redirectServer := http.NewServeMux()
+			redirectServer.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
+				redirectURL := &url.URL{
+					Scheme:   listenURL.Scheme,
+					Host:     listenURL.Host,
+					RawQuery: req.URL.RawQuery,
+					Path:     req.URL.Path,
+				}
+				http.Redirect(res, req, redirectURL.String(), http.StatusMovedPermanently)
+			})
+			//redirectPort := fmt.Sprintf(":%d", h.RedirectPort)
+			//log.Infof("Listening on %q for custom hostname redirect...", redirectPort)
+			//log.Fatal(http.ListenAndServe(redirectPort, redirectServer))
+		}()
+	}
+	return httpsrv
+
 }
