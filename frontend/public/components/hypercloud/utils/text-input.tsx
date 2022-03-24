@@ -17,4 +17,5 @@ type TextInputProps = {
   type?: string;
   valid?: boolean;
   isDisabled?: boolean;
+  style?: any;
 } & React.HTMLProps<HTMLInputElement>;
