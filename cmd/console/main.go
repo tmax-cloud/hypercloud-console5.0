@@ -69,10 +69,10 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 			app.AddLogger(kitlog.With(logger, "component","App"))
 			k8sHandler.AddLogger(kitlog.With(logger,"component","k8sHandler"))
 
-			fmt.Printf("%v",servingInfo)
 			httpHandler := server.NewServer(app,k8sHandler)
 
 			listenURL := console.ValidateFlagIsURL("listen",servingInfo.Listen)
+			baseURL := console.ValidateFlagIsURL("baseAddress",servingInfo.BaseAddress)
 			switch listenURL.Scheme {
 			case "http":
 			case "https":
@@ -81,7 +81,6 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 			default:
 				console.FlagFatalf("listen", "scheme must be one of: http, https")
 			}
-
 			httpsrv := &http.Server{
 				Addr: listenURL.Host,
 				Handler: httpHandler,
@@ -89,16 +88,48 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 				TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 				TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
 			}
+			//Run the server
+			go func() {
+				if listenURL.Scheme == "https" {
+					err := httpsrv.ListenAndServeTLS(servingInfo.CertFile,servingInfo.KeyFile)
+					if err != nil && err != http.ErrServerClosed {
+						logger.Log("Error",err)
+						os.Exit(1)
+					}
+				} else {
+					err := httpsrv.ListenAndServe()
+					if err != nil && err != http.ErrServerClosed {
+						logger.Log("Error",err)
+						os.Exit(1)
+					}
+				}
+			}()
 
-			//if servingInfo.RedirectPort != 0 {
-			//	go func() {
-			//		redirectServer := &http.Server{
-			//			Addr: ":8080",
-			//			Handler: http.NotFoundHandler(),
-			//		}
-			//		httpsrv.ListenAndServe()
-			//	}()
-			//}
+			redirectServer := &http.Server{}
+			if servingInfo.RedirectPort != 0 {
+				mux := http.NewServeMux()
+				mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+					redirectURL := &url.URL{
+						Scheme: baseURL.Scheme,
+						Host: baseURL.Host,
+						RawQuery: r.URL.RawQuery,
+						Path: r.URL.Path,
+					}
+					http.Redirect(w, r, redirectURL.String(), http.StatusMovedPermanently)
+				})
+				redirectPort := fmt.Sprintf(":%d", servingInfo.RedirectPort)
+				redirectServer = &http.Server{
+					Addr: redirectPort,
+					Handler: mux,
+				}
+				go func() {
+					err := redirectServer.ListenAndServe()
+					if err != nil && err != http.ErrServerClosed {
+						logger.Log("Error",err)
+						os.Exit(1)
+					}
+				}()
+			}
 
 			serverCtx, serverStopCtx := context.WithCancel(context.Background())
 			sig := make(chan os.Signal, 1)
@@ -106,6 +137,7 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 			go func() {
 				<-sig
 
+				logger.Log("msg","Shutdown signal received")
 				// Shutdown signal with grace period of 30 seconds
 				shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
 
@@ -118,42 +150,24 @@ Finally, we provide a proxy function for querying the kubernetes resource API`,
 				}()
 
 				// Trigger graceful shutdown
+				logger.Log("msg","graceful Shutdown httpsrv")
 				err := httpsrv.Shutdown(shutdownCtx)
 				if err != nil {
 					logger.Log("Error",err)
 					os.Exit(1)
 				}
-				//if servingInfo.RedirectPort != 0 {
-				//	redirectServer.Shutdown(shutdownCtx)
-				//}
+				logger.Log("msg","graceful Shutdown redirectServer")
+				if servingInfo.RedirectPort != 0 {
+					err := redirectServer.Shutdown(shutdownCtx)
+					if err != nil {
+						logger.Log("Error",err)
+						os.Exit(1)
+					}
+				}
 				serverStopCtx()
 			}()
 
-			// Run the server
-			err := httpsrv.ListenAndServe()
-			if err != nil && err != http.ErrServerClosed {
-				logger.Log("Error",err)
-				os.Exit(1)
-			}
-
-
-
 			<-serverCtx.Done()
-
-
-
-
-
-
-			//httpsrv := &http.Server{
-			//	Addr: httpServer.BaseAddress,
-			//	Handler: consoleHandler,
-			//	// Disable HTTP/2, which breaks WebSockets.
-			//	TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
-			//	TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
-			//}
-			//
-			//http.ListenAndServe("0.0.0.0:9090", srv)
 		},
 	}
 )
@@ -202,9 +216,6 @@ func initializeConfig(cmd *cobra.Command) error {
 
 	bindFlags(cmd, v)
 
-	//fmt.Println(v.AllKeys())
-	//fmt.Println(v.Get("kubeToken"))
-	//fmt.Println(v.Get("kubeAPIServerURL"))
 	return nil
 }
 
@@ -225,47 +236,4 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
 		}
 	})
-}
-
-func (h *ServingInfo) RunServer(consoleHandler *server.Server) *http.Server {
-	listenURL := &url.URL{}
-	console.ValidateFlagIsURL("Listen",h.Listen)
-	switch listenURL.Scheme {
-	case "http":
-	case "https":
-		console.ValidateFlagNotEmpty("tls-cert-file", h.CertFile)
-		console.ValidateFlagNotEmpty("tls-key-file", h.KeyFile)
-	default:
-		console.FlagFatalf("listen", "scheme must be one of: http, https")
-	}
-
-	httpsrv := &http.Server{
-		Addr: listenURL.Host,
-		Handler: consoleHandler,
-		// Disable HTTP/2, which breaks WebSockets.
-		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
-		TLSConfig:    oscrypto.SecureTLSConfig(&tls.Config{}),
-	}
-	fmt.Println(httpsrv)
-
-	if h.RedirectPort != 0 {
-		go func() {
-			// Listen on passed port number to be redirected to the console
-			redirectServer := http.NewServeMux()
-			redirectServer.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
-				redirectURL := &url.URL{
-					Scheme:   listenURL.Scheme,
-					Host:     listenURL.Host,
-					RawQuery: req.URL.RawQuery,
-					Path:     req.URL.Path,
-				}
-				http.Redirect(res, req, redirectURL.String(), http.StatusMovedPermanently)
-			})
-			//redirectPort := fmt.Sprintf(":%d", h.RedirectPort)
-			//log.Infof("Listening on %q for custom hostname redirect...", redirectPort)
-			//log.Fatal(http.ListenAndServe(redirectPort, redirectServer))
-		}()
-	}
-	return httpsrv
-
 }

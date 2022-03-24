@@ -1,9 +1,9 @@
 servingInfo:
   listen: "http://0.0.0.0:31303"
-  baseAddress: "http://0.0.0.0:31303"
+  baseAddress: "http://192.168.0.111:31303"
   certFile: ""
   keyFile: ""
-  redirectPort: 8080
+  redirectPort: 31300
 
 app:
   keycloakAuthURL: "https://hyperauth.tmaxcloud.org/auth"
