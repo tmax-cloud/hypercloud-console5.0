@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
 set -e 
-DOCKER_REGISTRY="jinsnow"
-PRODUCT="console"
-MAJOR_VERSION="5"
-MINOR_VERSION="1"
-PATCH_VERSION="0"
-HOTFIX_VERSION="0"
+DOCKER_REGISTRY="docker.io"
+CONSOLE_IMG="tmaxcloudck/hypercloud-console"
+CONSOLE_VERSION="shinhan.1.0.0"
+BUILD_ID="100"
 
 #build docker image 
-docker build --rm=true -t ${DOCKER_REGISTRY}/${PRODUCT}:${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}.${HOTFIX_VERSION} -f ./Dockerfile .
+docker build --rm=true --build-arg=BUILD_ID=${BUILD_ID} -t ${DOCKER_REGISTRY}/${CONSOLE_IMG}:${CONSOLE_VERSION} -f ./Dockerfile .
+yes | docker image prune --filter label=stage=builder --filter label=build=${BUILD_ID}
 
-docker push ${DOCKER_REGISTRY}/${PRODUCT}:${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}.${HOTFIX_VERSION}
+read -p "Enter the docker ID : " docker_id
+read -sp "Enter the $docker_id : " docker_pw
+docker login -u ${docker_id} -p ${docker_pw}
+docker push ${DOCKER_REGISTRY}/${CONSOLE_IMG}:${CONSOLE_VERSION}

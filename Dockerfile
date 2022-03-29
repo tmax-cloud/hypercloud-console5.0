@@ -1,10 +1,16 @@
 FROM golang:1.16 AS golang
+ARG BUILD_ID
+LABEL stage=builder
+LABEL build=$BUILD_ID
 RUN mkdir -p /go/src/github.com/openshift/console/
 ADD . /go/src/github.com/openshift/console/
 WORKDIR /go/src/github.com/openshift/console/
 RUN ./build-backend.sh
 
-FROM quay.io/coreos/tectonic-console-builder:v22 AS build
+FROM quay.io/coreos/tectonic-console-builder:v23 AS build
+ARG BUILD_ID
+LABEL stage=builder
+LABEL build=$BUILD_ID
 RUN mkdir -p /go/src/github.com/openshift/console/
 COPY --from=golang /go/src/github.com/openshift/console/ /go/src/github.com/openshift/console/
 WORKDIR /go/src/github.com/openshift/console/
