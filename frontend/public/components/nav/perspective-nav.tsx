@@ -4,7 +4,7 @@ import * as _ from 'lodash-es';
 import { RootState } from '../../redux';
 import { setPinnedResources } from '../../actions/ui';
 import { getActivePerspective, getPinnedResources } from '../../reducers/ui';
-import { getCmpListFetchUrl } from '@console/internal/components/hypercloud/utils/menu-utils';
+import { getCmpListFetchUrl, initializeMenuUrls } from '@console/internal/components/hypercloud/utils/menu-utils';
 import { coFetchJSON } from '@console/internal/co-fetch';
 import { dynamicMenusFactory, basicMenusFactory } from './menus';
 import './_perspective-nav.scss';
@@ -39,6 +39,12 @@ const PerspectiveNav: React.FC<StateProps & DispatchProps> = ({ perspective, fla
         // MEMO : CMP CR이 없을 땐 기본메뉴들로 구성하도록 설정함. getNavItems에서 tabs 없을 시 기본메뉴 return함.
         setCmp({ tabs: [] });
       });
+
+    // 링크형 메뉴들의 주소 설정은 Ingress의 host주소 조회를 통해 설정. 마스터/싱글 클러스터 별로 URL 매핑.
+    (async () => {
+      // TODO: singlecluster 일경우 콜 정상동작 하는지, 클러스터 드롭다운 변경시 정상동작하는지 테스트 필요
+      await initializeMenuUrls(perspective);
+    })();
   }, [perspective]);
 
   return !!cmp ? getNavItems(perspective, cmp, flags) : <></>;

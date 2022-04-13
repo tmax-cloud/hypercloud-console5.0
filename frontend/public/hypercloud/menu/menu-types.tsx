@@ -230,14 +230,6 @@ export const CustomMenusMap: CustomMenus = {
     url: '',
     isMultiOnly: false,
   },
-  Trace: {
-    kind: 'trace',
-    visible: true,
-    type: MenuLinkType.NewTabLink,
-    defaultLabel: 'COMMON:MSG_DETAILS_TABTRACE_1',
-    url: '',
-    isMultiOnly: false,
-  },
   HelmChart: {
     kind: 'HelmChart',
     visible: true,

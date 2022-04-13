@@ -5,11 +5,23 @@ import { CMP_PRIMARY_KEY, CustomMenusMap, MenuContainerLabels, CUSTOM_LABEL_TYPE
 import { coFetchJSON } from '@console/internal/co-fetch';
 import i18next, { TFunction } from 'i18next';
 import { ResourceLabel, getI18nInfo } from '@console/internal/models/hypercloud/resource-plural';
-
-import { ingressUrlWithLabelSelector, DoneMessage } from './ingress-utils';
+import { DoneMessage, getIngressUrl } from './ingress-utils';
 import { selectorToString } from '@console/internal/module/k8s/selector';
+import { PerspectiveType } from '@console/internal/hypercloud/perspectives';
+import { setServicePort } from '@console/internal/actions/ui';
+import store from '@console/internal/redux';
 
 const en = i18next.getFixedT('en');
+
+// TODO: hc-default-menus에서 찾도록 변경
+const INGRESS_LABEL_VALUES = [
+  { labelValue: 'hyperregistry', menuKey: CustomMenusMap.Harbor.kind, perspectives: [PerspectiveType.MASTER.toString()] },
+  { labelValue: 'argocd', menuKey: CustomMenusMap.ArgoCD.kind, perspectives: [PerspectiveType.MASTER.toString()] },
+  { labelValue: 'gitlab', menuKey: CustomMenusMap.Git.kind, perspectives: [PerspectiveType.MASTER.toString()] },
+  { labelValue: 'grafana', menuKey: CustomMenusMap.Grafana.kind, perspectives: [PerspectiveType.MASTER.toString()] },
+  { labelValue: 'kiali', menuKey: CustomMenusMap.Kiali.kind, perspectives: [PerspectiveType.DEVELOPER.toString()] },
+  { labelValue: 'kibana', menuKey: CustomMenusMap.Kibana.kind, perspectives: [PerspectiveType.MASTER.toString(), PerspectiveType.SINGLE.toString()] },
+];
 
 export const getCmpListFetchUrl = () => {
   const { apiGroup, apiVersion, plural } = ClusterMenuPolicyModel;
@@ -20,6 +32,7 @@ export const getCmpListFetchUrl = () => {
 
   return `${location.origin}/api/kubernetes/apis/${apiGroup}/${apiVersion}/${plural}?${query}`;
 };
+
 const initializeCmpFlag = () => {
   return new Promise(resolve => {
     coFetchJSON(getCmpListFetchUrl())
@@ -38,30 +51,12 @@ const initializeCmpFlag = () => {
   });
 };
 
-const initializeMenuUrl = async (labelSelector: any, menuKey: string, port: string) => {
-  return new Promise(resolve => {
-    const url = ingressUrlWithLabelSelector(labelSelector);
-    coFetchJSON(url)
-      .then(res => {
-        const { items } = res;
-        if (items?.length > 0) {
-          const ingress = items[0];
-          const host = ingress.spec?.rules?.[0]?.host;
-          if (host) {
-            const menu = _.get(CustomMenusMap, menuKey);
-            if (menuKey === 'Grafana') {
-              !!menu && _.assign(menu, { url: `https://${host}${port}/login/generic_oauth` });
-            } else {
-              !!menu && _.assign(menu, { url: `https://${host}${port}` });
-            }
-          }
-        }
-        resolve(DoneMessage);
-      })
-      .catch(() => {
-        resolve(DoneMessage);
-      });
-  });
+const initializeMenuUrl = async (label: string, menuKey: string) => {
+  const ingressUrl = await getIngressUrl(label);
+  const url = ingressUrl || '';
+  const grafanaUrl = ingressUrl ? `${ingressUrl}/login/generic_oauth` : '';
+  const menu = _.get(CustomMenusMap, menuKey);
+  !!menu && _.assign(menu, { url: menuKey === CustomMenusMap.Grafana.kind ? grafanaUrl : url });
 };
 
 const initializePort = async () => {
@@ -70,42 +65,28 @@ const initializePort = async () => {
     if (window.SERVER_FLAGS.svcType === 'NodePort') {
       const { spec } = await k8sGet(ServiceModel, 'api-gateway', 'api-gateway-system', { basePath: `${location.origin}/api/console` });
       if (spec.type === 'NodePort') {
-        return `:${spec.ports.find((port: any) => port.name === 'websecure').port}`;
+        store.dispatch(setServicePort(`:${spec.ports.find((port: any) => port.name === 'websecure').port}`));
       }
     }
   } catch (error) {
     console.error(`Failed to get api-gateway service:\n${error}`);
   }
-  return '';
+  store.dispatch(setServicePort(''));
 };
 
-const defaultIngressLabelKey = 'ingress.tmaxcloud.org/name';
-const labelMenuMatchingList = [
-  { labelValue: 'hyperregistry', menuKey: 'Harbor' },
-  { labelValue: 'argocd', menuKey: 'ArgoCD' },
-  { labelValue: 'gitlab', menuKey: 'Git' },
-  { labelValue: 'grafana', menuKey: 'Grafana' },
-  { labelValue: 'kiali', menuKey: 'Kiali' },
-  { labelValue: 'kibana', menuKey: 'Kibana' },
-  { labelValue: 'jaeger', menuKey: 'Trace' },
-];
-const initializeMenuUrlsPromise = (labeMatchingList: any[], port: string) => {
-  const promiesList = [];
-  labeMatchingList.map((m) => {
-    promiesList.push(
-      initializeMenuUrl(
-        { [(m.labelKey) ? m.labelKey : defaultIngressLabelKey]: m.labelValue },
-        m.menuKey,
-        port,
-      )
-    );
+export const initializeMenuUrls = async (perspective: string) => {
+  const promises = [];
+  INGRESS_LABEL_VALUES.map(m => {
+    if (!m.perspectives || m.perspectives.includes(perspective)) {
+      promises.push(initializeMenuUrl(m.labelValue, m.menuKey));
+    }
   });
-  return promiesList;
-}
+  Promise.all(promises);
+};
+
 export const initializationForMenu = async () => {
   await initializeCmpFlag();
-  const port = await initializePort();
-  Promise.all(initializeMenuUrlsPromise(labelMenuMatchingList, port));
+  await initializePort();
 };
 
 export const getLabelTextByKind = (kind, t: TFunction) => {

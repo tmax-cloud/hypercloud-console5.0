@@ -4,39 +4,50 @@ import { Selector } from '@console/internal/module/k8s';
 import { coFetchJSON } from '@console/internal/co-fetch';
 import { selectorToString } from '@console/internal/module/k8s/selector';
 import { initializationForMenu } from '@console/internal/components/hypercloud/utils/menu-utils';
+import { getServicePort } from '@console/internal/actions/ui';
 
 export const DoneMessage = 'done';
+
+export const DEFAULT_INGRESS_LABEL_KEY = 'ingress.tmaxcloud.org/name';
 
 export const ingressUrlWithLabelSelector = labelSelector => {
   const { apiGroup, apiVersion, plural } = IngressModel;
   const labelSelectorString = selectorToString(labelSelector as Selector);
   const query = `&${encodeURIComponent('labelSelector')}=${encodeURIComponent(labelSelectorString)}`;
-  // MEMO : ingress 조회를 위해 필요한 콜은 마스터클러스터 콜이여서 직접 location.origin으로 도메인 설정해줌.
-  // MEMO : (직접적인 https://가 포함된 도메인 설정 없을 경우 co-fetch.js의 coFetchCommon에서 perspective 상태에 따라 도메인을 바꿔줌)
-  return `${location.origin}/api/console/apis/${apiGroup}/${apiVersion}/${plural}?${query}`;
+  return `/api/console/apis/${apiGroup}/${apiVersion}/${plural}?${query}`;
 };
 
-const setSingleClusterBasePath = () => {
-  return new Promise((resolve, reject) => {
-    const url = ingressUrlWithLabelSelector({
-      'ingress.tmaxcloud.org/name': 'multicluster',
-    });
-    coFetchJSON(url)
-      .then(res => {
-        const { items } = res;
-        if (items?.length > 0) {
-          const ingress = items[0];
-          const host = ingress.spec?.rules?.[0]?.host;
-          if (!!host) {
-            window.SERVER_FLAGS.singleClusterBasePath = `https://${host}/`;
-          }
-        }
-        resolve(DoneMessage);
-      })
-      .catch(err => {
-        resolve(DoneMessage);
-      });
-  });
+const getIngressHost = async (label: string) => {
+  const url = ingressUrlWithLabelSelector({ [DEFAULT_INGRESS_LABEL_KEY]: label });
+  try {
+    const response = await coFetchJSON(url);
+    const { items } = response;
+    if (items?.length > 0) {
+      const host = items[0].spec?.rules?.[0]?.host;
+      if (host) {
+        return host;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+};
+
+export const getIngressUrl = async (label: string) => {
+  const host = await getIngressHost(label);
+  if (host) {
+    const port = getServicePort();
+    return `https://${host}${port}`;
+  }
+  return null;
+};
+
+const setSingleClusterBasePath = async () => {
+  const host = await getIngressHost('multicluster');
+  if (host) {
+    window.SERVER_FLAGS.singleClusterBasePath = `https://${host}/`;
+  }
 };
 
 export const setUrlFromIngresses = async () => {

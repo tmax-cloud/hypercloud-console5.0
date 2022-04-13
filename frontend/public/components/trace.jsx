@@ -6,6 +6,7 @@ import { SectionHeading } from './utils';
 import { coFetch } from '../co-fetch';
 import { coFetchJSON } from '@console/internal/co-fetch';
 import { CustomMenusMap } from '@console/internal/hypercloud/menu/menu-types';
+import { getIngressUrl } from './hypercloud/utils/ingress-utils';
 
 const DoneMessage = 'done';
 
@@ -21,13 +22,12 @@ export const TracePage = ({ namespace: namespace, name: name }) => {
 
   const [jaegerURL, setJaegerURL] = React.useState('');
 
-
   React.useEffect(() => {
     (async () => {
-      setJaegerURL(_.get(CustomMenusMap, 'Trace').url);
+      const url = await getIngressUrl('jaeger');
+      setJaegerURL(url);
     })();
   }, [jaegerURL]);
-
 
   React.useEffect(() => {
     if (name === 'jaeger-query' || name === 'istio-ingressgateway' || name === 'istio-egressgateway') {
