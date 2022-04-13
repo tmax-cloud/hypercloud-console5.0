@@ -10,17 +10,17 @@ import { selectorToString } from '@console/internal/module/k8s/selector';
 import { PerspectiveType } from '@console/internal/hypercloud/perspectives';
 import { setServicePort } from '@console/internal/actions/ui';
 import store from '@console/internal/redux';
+import { getPerspectiveMenus } from '@console/internal/components/nav/menus';
 
 const en = i18next.getFixedT('en');
 
-// TODO: hc-default-menus에서 찾도록 변경
 const INGRESS_LABEL_VALUES = [
-  { labelValue: 'hyperregistry', menuKey: CustomMenusMap.Harbor.kind, perspectives: [PerspectiveType.MASTER.toString()] },
-  { labelValue: 'argocd', menuKey: CustomMenusMap.ArgoCD.kind, perspectives: [PerspectiveType.MASTER.toString()] },
-  { labelValue: 'gitlab', menuKey: CustomMenusMap.Git.kind, perspectives: [PerspectiveType.MASTER.toString()] },
-  { labelValue: 'grafana', menuKey: CustomMenusMap.Grafana.kind, perspectives: [PerspectiveType.MASTER.toString()] },
-  { labelValue: 'kiali', menuKey: CustomMenusMap.Kiali.kind, perspectives: [PerspectiveType.DEVELOPER.toString()] },
-  { labelValue: 'kibana', menuKey: CustomMenusMap.Kibana.kind, perspectives: [PerspectiveType.MASTER.toString(), PerspectiveType.SINGLE.toString()] },
+  { labelValue: 'hyperregistry', menuKey: CustomMenusMap.Harbor.kind },
+  { labelValue: 'argocd', menuKey: CustomMenusMap.ArgoCD.kind },
+  { labelValue: 'gitlab', menuKey: CustomMenusMap.Git.kind },
+  { labelValue: 'grafana', menuKey: CustomMenusMap.Grafana.kind },
+  { labelValue: 'kiali', menuKey: CustomMenusMap.Kiali.kind },
+  { labelValue: 'kibana', menuKey: CustomMenusMap.Kibana.kind },
 ];
 
 export const getCmpListFetchUrl = () => {
@@ -74,10 +74,14 @@ const initializePort = async () => {
   store.dispatch(setServicePort(''));
 };
 
+const isMenuExist = (perspective: PerspectiveType, menuKey: string) => {
+  return getPerspectiveMenus(perspective).some(menu => menu.innerMenus?.includes(menuKey));
+};
+
 export const initializeMenuUrls = async (perspective: string) => {
   const promises = [];
   INGRESS_LABEL_VALUES.map(m => {
-    if (!m.perspectives || m.perspectives.includes(perspective)) {
+    if (isMenuExist(PerspectiveType[perspective], m.menuKey)) {
       promises.push(initializeMenuUrl(m.labelValue, m.menuKey));
     }
   });

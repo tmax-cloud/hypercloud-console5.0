@@ -89,7 +89,7 @@ const generateMenu = (perspective, data: any, isInnerMenu, t: TFunction, i18n: i
   );
 };
 
-export const basicMenusFactory = (perspective, canListNS) => {
+export const getPerspectiveMenus = (perspective: PerspectiveType) => {
   let menus = [];
   switch (perspective) {
     case PerspectiveType.MASTER:
@@ -114,6 +114,11 @@ export const basicMenusFactory = (perspective, canListNS) => {
       // Empty
       break;
   }
+  return menus;
+};
+
+export const basicMenusFactory = (perspective, canListNS) => {
+  const menus = getPerspectiveMenus(perspective);
   return (
     <Translation>
       {(t, { i18n }) => (
