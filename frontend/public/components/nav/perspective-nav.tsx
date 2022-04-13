@@ -42,7 +42,6 @@ const PerspectiveNav: React.FC<StateProps & DispatchProps> = ({ perspective, fla
 
     // 링크형 메뉴들의 주소 설정은 Ingress의 host주소 조회를 통해 설정. 마스터/싱글 클러스터 별로 URL 매핑.
     (async () => {
-      // TODO: singlecluster 일경우 콜 정상동작 하는지, 클러스터 드롭다운 변경시 정상동작하는지 테스트 필요
       await initializeMenuUrls(perspective);
     })();
   }, [perspective]);

@@ -9,6 +9,9 @@ import { getActiveCluster } from '../../../reducers/ui';
 import * as UIActions from '../../../actions/ui';
 import { coFetchJSON } from '../../../co-fetch';
 import { getId, getUserGroup } from '../../../hypercloud/auth';
+import { history } from '../../utils';
+import { initializeMenuUrls } from '../utils/menu-utils';
+import { getActivePerspective } from '../../../actions/ui';
 
 type clusterItemProps = {
   displayName: string;
@@ -41,8 +44,10 @@ const ClusterDropdown_: React.FC<ClusterDropdownProps & StateProps> = ({ setActi
 
       if (clusterName !== activeCluster) {
         setActiveCluster(clusterName);
-        window.location.reload();
-        // TODO: rerendering 고도화...
+        (async () => {
+          await initializeMenuUrls(getActivePerspective());
+        })();
+        history.push('/');
       }
 
       setClusterDropdownOpen(false);
