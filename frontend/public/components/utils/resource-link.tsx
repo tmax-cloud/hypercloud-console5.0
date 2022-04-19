@@ -80,11 +80,12 @@ export const ResourceLink = connectToModel(
     hideIcon,
     title,
     children,
+    customPath,
   }) => {
     if (!kind) {
       return null;
     }
-    const path = resourcePath(kind, name, namespace);
+    const path = customPath || resourcePath(kind, name, namespace);
     const value = displayName ? displayName : name;
     const classes = classNames('co-resource-item', className, {
       'co-resource-item--inline': inline,

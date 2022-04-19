@@ -53,11 +53,11 @@ const makeTableRow = (row: Rows) => {
 };
 
 export const DefaultListComponent: React.FC<DefaultListComponentProps> = props => {
-  const { header, row, customSorts } = props.tableProps;
+  const { header, row, customSorts, ariaLabel } = props.tableProps;
   const { t } = useTranslation();
   const headerFunc = makeTableHeader(header, t);
   const rowFunc = makeTableRow(row);
-  return <Table {...props} aria-label="Resource List" Header={headerFunc} Row={rowFunc} virtualize customSorts={customSorts} />;
+  return <Table {...props} aria-label={ariaLabel || 'Resource List'} Header={headerFunc} Row={rowFunc} virtualize customSorts={customSorts} />;
 };
 
 type Header = {
@@ -79,6 +79,7 @@ export type TableProps = {
   header: Header[];
   row: Rows;
   customSorts?: { [key: string]: any };
+  ariaLabel?: string;
 };
 
 type DefaultListComponentProps = {

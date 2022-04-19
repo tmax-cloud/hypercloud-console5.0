@@ -20,7 +20,7 @@ const MasterNavMenus = [
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels.storage,
-    innerMenus: [Models.PersistentVolumeModel.kind, Models.PersistentVolumeClaimModel.kind,Models.StorageClassModel.kind ],
+    innerMenus: [Models.PersistentVolumeModel.kind, Models.PersistentVolumeClaimModel.kind, Models.StorageClassModel.kind],
   },
   {
     menuType: MenuType.CONTAINER,
@@ -30,12 +30,12 @@ const MasterNavMenus = [
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels.authentications,
-    innerMenus: [ Models.ServiceAccountModel.kind,Models.RoleModel.kind, Models.RoleBindingModel.kind],
+    innerMenus: [Models.ServiceAccountModel.kind, Models.RoleModel.kind, Models.RoleBindingModel.kind],
   },
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels.management,
-    innerMenus: [ Models.ResourceQuotaModel.kind, Models.LimitRangeModel.kind, Models.CustomResourceDefinitionModel.kind,Models.PodSecurityPolicyModel.kind],
+    innerMenus: [Models.ResourceQuotaModel.kind, Models.LimitRangeModel.kind, Models.CustomResourceDefinitionModel.kind, Models.PodSecurityPolicyModel.kind],
   },
 ];
 
@@ -66,7 +66,7 @@ const DeveloperNavMenus = [
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels['ci/cd'],
-    innerMenus: [Models.TaskModel.kind, Models.ClusterTaskModel.kind, Models.TaskRunModel.kind, Models.PipelineModel.kind, Models.PipelineRunModel.kind,  Models.ApprovalModel.kind, Models.PipelineResourceModel.kind, Models.IntegrationJobModel.kind, Models.IntegrationConfigModel.kind, Models.ApplicationModel.kind],
+    innerMenus: [Models.TaskModel.kind, Models.ClusterTaskModel.kind, Models.TaskRunModel.kind, Models.PipelineModel.kind, Models.PipelineRunModel.kind, Models.ApprovalModel.kind, Models.PipelineResourceModel.kind, Models.IntegrationJobModel.kind, Models.IntegrationConfigModel.kind, Models.ApplicationModel.kind],
   },
   {
     menuType: MenuType.CONTAINER,
@@ -76,7 +76,7 @@ const DeveloperNavMenus = [
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels.kafka,
-    innerMenus: [Models.KafkaBrokerModel.kind, Models.KafkaRebalanceModel.kind, Models.KafkaMirrorMaker2Model.kind, Models.KafkaBridgeModel.kind, Models.KafkaConnectorModel.kind, Models.KafkaConnectModel.kind],
+    innerMenus: [Models.KafkaBrokerModel.kind, Models.KafkaRebalanceModel.kind, Models.KafkaMirrorMaker2Model.kind, Models.KafkaBridgeModel.kind, Models.KafkaConnectorModel.kind, Models.KafkaConnectModel.kind, CustomMenusMap.SchemaRegistry.kind],
   },
 ];
 
@@ -89,7 +89,7 @@ const MultiNavMenus = [
     menuType: MenuType.REGISTERED_MENU,
     kind: Models.TFApplyClaimModel.kind,
   },
-  // { MEMO : 추후 페더레이션 메뉴 활성화하려면 주석 처리 풀어주면 됨. 
+  // { MEMO : 추후 페더레이션 메뉴 활성화하려면 주석 처리 풀어주면 됨.
   //   menuType: MenuType.CONTAINER,
   //   label: MenuContainerLabels.federation,
   //   innerMenus: [
@@ -121,7 +121,7 @@ const SingleNavMenus = [
   {
     menuType: MenuType.CONTAINER,
     label: MenuContainerLabels.workload,
-    innerMenus: [Models.PodModel.kind, Models.DeploymentModel.kind, Models.StatefulSetModel.kind, Models.SecretModel.kind, Models.ConfigMapModel.kind, Models.CronJobModel.kind, Models.JobModel.kind, Models.DaemonSetModel.kind, Models.ReplicaSetModel.kind, Models.HorizontalPodAutoscalerModel.kind ],
+    innerMenus: [Models.PodModel.kind, Models.DeploymentModel.kind, Models.StatefulSetModel.kind, Models.SecretModel.kind, Models.ConfigMapModel.kind, Models.CronJobModel.kind, Models.JobModel.kind, Models.DaemonSetModel.kind, Models.ReplicaSetModel.kind, Models.HorizontalPodAutoscalerModel.kind],
   },
   {
     menuType: MenuType.CONTAINER,

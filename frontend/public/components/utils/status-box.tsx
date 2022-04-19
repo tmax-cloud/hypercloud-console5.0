@@ -49,9 +49,11 @@ LoadingBox.displayName = 'LoadingBox';
 export const EmptyBox: React.FC<EmptyBoxProps> = props => {
   const { t } = useTranslation();
   const { label, kind } = props;
+  // 스키마 레지스트리의 경우 모델 자체는 디플로이먼트이기 때문에, label을 강제로 스키마 레지스트리로 변경
+  const text = kind === 'schemaregistries resource list' ? t('COMMON:MSG_LNB_MENU_231') : label || kind;
   return (
     <Box>
-      <div className="text-center">{t('COMMON:MSG_COMMON_ERROR_MESSAGE_22', { something: label || kind })}</div>
+      <div className="text-center">{t('COMMON:MSG_COMMON_ERROR_MESSAGE_22', { something: text })}</div>
     </Box>
   );
 };
