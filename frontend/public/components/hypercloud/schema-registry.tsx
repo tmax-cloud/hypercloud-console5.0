@@ -1,15 +1,37 @@
 import * as React from 'react';
 import { K8sResourceKind, referenceForModel } from '../../module/k8s';
 import { DetailsPage, ListPage, DetailsPageProps } from '../factory';
-import { DetailsItem, KebabAction, detailsPage, Timestamp, navFactory, ResourceLink, ResourceSummary, SectionHeading, EmptyBox } from '../utils';
+import { DetailsItem, KebabAction, detailsPage, Timestamp, navFactory, ResourceLink, ResourceSummary, SectionHeading, EmptyBox, Kebab, ResourceKebab } from '../utils';
 import { DeploymentModel } from '../../models';
 import { useTranslation } from 'react-i18next';
 import { TableProps } from './utils/default-list-component';
+// import { deleteModal } from '../modals';
 
 const kind = DeploymentModel.kind;
 const plural = 'schemaregistries';
 
-const menuActions: KebabAction[] = []; // TODO: 액션 정의 필요
+const { ModifyLabels, ModifyAnnotations } = Kebab.factory;
+
+// TODO: 디플로이먼트 & 서비스 동시 수정 필요
+/*const Edit = (kind: K8sKind, obj: K8sResourceKind) => ({
+  label: 'COMMON:MSG_MAIN_ACTIONBUTTON_15**COMMON:MSG_LNB_MENU_238',
+  href: `/k8s/ns/${obj.metadata.namespace}/${plural}/${obj.metadata.name}/edit`,
+  accessReview: asAccessReview(kind, obj, 'update'),
+});*/
+
+// TODO: 디플로이먼트 & 서비스 동시 삭제 필요
+/*const Delete = (kind: K8sKind, obj: K8sResourceKind) => ({
+  label: 'COMMON:MSG_MAIN_ACTIONBUTTON_16**COMMON:MSG_LNB_MENU_238',
+  callback: () =>
+    deleteModal({
+      kind,
+      resource: obj,
+      title: 'COMMON:MSG_LNB_MENU_238',
+    }),
+  accessReview: asAccessReview(kind, obj, 'delete'),
+});*/
+
+const menuActions: KebabAction[] = [ModifyLabels, ModifyAnnotations];
 
 const tableProps: TableProps = {
   header: [
@@ -29,11 +51,11 @@ const tableProps: TableProps = {
       title: 'COMMON:MSG_MAIN_TABLEHEADER_12',
       sortField: 'metadata.creationTimestamp',
     },
-    // {
-    //   title: '',
-    //   transforms: null,
-    //   props: { className: Kebab.columnClass },
-    // },
+    {
+      title: '',
+      transforms: null,
+      props: { className: Kebab.columnClass },
+    },
   ],
   row: (obj: K8sResourceKind) => [
     {
@@ -49,10 +71,10 @@ const tableProps: TableProps = {
     {
       children: <Timestamp timestamp={obj.metadata.creationTimestamp} />,
     },
-    // {
-    //   className: Kebab.columnClass,
-    //   children: <ResourceKebab actions={menuActions} kind={kind} resource={obj} />,
-    // },
+    {
+      className: Kebab.columnClass,
+      children: <ResourceKebab actions={menuActions} kind={kind} resource={obj} />,
+    },
   ],
   EmptyMsg: () => <EmptyBox label={'COMMON:MSG_LNB_MENU_231'} />,
 };

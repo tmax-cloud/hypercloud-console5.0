@@ -41,8 +41,8 @@ class DeleteModal extends PromiseComponent {
     this.checked = !this.checked;
   }
   render() {
-    const { kind, resource, message, t } = this.props;
-    const resourceStringKey = kind.i18nInfo?.label ?? kind.label;
+    const { kind, resource, message, t, title } = this.props;
+    const resourceStringKey = title || (kind.i18nInfo?.label ?? kind.label);
     const ResourceName = () => <strong className="co-break-word">{resource.metadata.name}</strong>;
     const Namespace = () => <strong>{resource.metadata.namespace}</strong>;
     return (
