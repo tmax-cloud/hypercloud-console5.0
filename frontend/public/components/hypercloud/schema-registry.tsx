@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { K8sResourceKind, referenceForModel } from '../../module/k8s';
 import { DetailsPage, ListPage, DetailsPageProps } from '../factory';
-import { DetailsItem, KebabAction, detailsPage, Timestamp, navFactory, ResourceLink, ResourceSummary, SectionHeading } from '../utils';
+import { DetailsItem, KebabAction, detailsPage, Timestamp, navFactory, ResourceLink, ResourceSummary, SectionHeading, EmptyBox } from '../utils';
 import { DeploymentModel } from '../../models';
 import { useTranslation } from 'react-i18next';
 import { TableProps } from './utils/default-list-component';
@@ -54,7 +54,7 @@ const tableProps: TableProps = {
     //   children: <ResourceKebab actions={menuActions} kind={kind} resource={obj} />,
     // },
   ],
-  ariaLabel: 'schemaregistries resource list',
+  EmptyMsg: () => <EmptyBox label={'COMMON:MSG_LNB_MENU_231'} />,
 };
 
 const SchemaRegistriesDetails: React.FC<SchemaRegistriesDetailsProps> = ({ obj }) => {
