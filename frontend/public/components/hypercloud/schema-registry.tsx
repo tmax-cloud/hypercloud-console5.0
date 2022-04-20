@@ -69,12 +69,12 @@ const SchemaRegistriesDetails: React.FC<SchemaRegistriesDetailsProps> = ({ obj }
           </div>
           <div className="col-sm-6">
             <dl className="co-m-pane__details">
-              <DetailsItem label="이미지" obj={obj}>
+              <DetailsItem label={t('MULTI:MSG_DEVELOPER_SCHEMAREGISTRIES_SCHEMAREGISTRYDETAILS_TABDETAILS_1')} obj={obj}>
                 {obj.spec?.template?.spec?.containers?.map((container, index) => {
                   return <div key={`image-${index}`}>{container.image}</div>;
                 })}
               </DetailsItem>
-              <DetailsItem label="레플리카 수" obj={obj}>
+              <DetailsItem label={t('MULTI:MSG_DEVELOPER_SCHEMAREGISTRIES_SCHEMAREGISTRYDETAILS_TABDETAILS_3')} obj={obj}>
                 {obj.spec?.replicas}
               </DetailsItem>
             </dl>
