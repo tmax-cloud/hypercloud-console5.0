@@ -5,6 +5,7 @@ import { DetailsItem, KebabAction, detailsPage, Timestamp, navFactory, ResourceL
 import { DeploymentModel } from '../../models';
 import { useTranslation } from 'react-i18next';
 import { TableProps } from './utils/default-list-component';
+import { CreateSchemaRegistry } from '../hypercloud/form/schemaregistries/create-schemaregistry';
 // import { deleteModal } from '../modals';
 
 const kind = DeploymentModel.kind;
@@ -122,7 +123,7 @@ export const SchemaRegistriesDetailsPage: React.FC<DetailsPageProps> = props => 
       title={t('COMMON:MSG_LNB_MENU_238')}
       kind={kind}
       menuActions={menuActions}
-      pages={[details(detailsPage(SchemaRegistriesDetails)), editResource()]}
+      pages={[details(detailsPage(SchemaRegistriesDetails)), editResource(CreateSchemaRegistry)]}
       name={props.match.params.name}
       namespace={props.match.params.ns}
       resources={[

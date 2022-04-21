@@ -231,10 +231,9 @@ const AppContents_: React.FC<AppContentsProps> = ({ activePerspective }) => (
           <LazyRoute path="/k8s/cluster/clusterrolebindings/:name/edit" exact kind="ClusterRoleBinding" loader={() => import('./RBAC' /* webpackChunkName: "rbac" ).then(m => m.EditRoleBinding)} />
           */}
           <LazyRoute path="/k8s/ns/:ns/:plural/:name/attach-storage" exact loader={() => import('./storage/attach-storage' /* webpackChunkName: "attach-storage" */).then(m => m.AttachStorage)} />
-          <LazyRoute path="/k8s/all-namespaces/schemaregistries" exact loader={() => import('./hypercloud/schema-registry').then(m => m.SchemaRegistriesPage)} />
-          <LazyRoute path="/k8s/ns/:ns/schemaregistries" exact loader={() => import('./hypercloud/schema-registry').then(m => m.SchemaRegistriesPage)} />
-          <LazyRoute path="/k8s/ns/:ns/schemaregistries/:name" exact loader={() => import('./hypercloud/schema-registry').then(m => m.SchemaRegistriesDetailsPage)} />
-          <LazyRoute path="/k8s/ns/:ns/schemaregistries/:name/edit" exact loader={() => import('./hypercloud/form/schemaregistries/create-schemaregistry').then(m => m.CreateSchemaRegistry)} />
+          <LazyRoute path="/k8s/all-namespaces/schemaregistries" exact loader={() => import('./hypercloud/schema-registry' /* webpackChunkName: "schema-registry" */).then(m => m.SchemaRegistriesPage)} />
+          <LazyRoute path="/k8s/ns/:ns/schemaregistries" exact loader={() => import('./hypercloud/schema-registry' /* webpackChunkName: "schema-registry" */).then(m => m.SchemaRegistriesPage)} />
+          <LazyRoute path="/k8s/ns/:ns/schemaregistries/:name" loader={() => import('./hypercloud/schema-registry' /* webpackChunkName: "schema-registry" */).then(m => m.SchemaRegistriesDetailsPage)} />
           <LazyRoute path="/monitoring/alerts" exact loader={() => import('./monitoring' /* webpackChunkName: "monitoring" */).then(m => m.MonitoringUI)} />
           <LazyRoute path="/monitoring/alertrules" exact loader={() => import('./monitoring' /* webpackChunkName: "monitoring" */).then(m => m.MonitoringUI)} />
           <LazyRoute path="/monitoring/silences" exact loader={() => import('./monitoring' /* webpackChunkName: "monitoring" */).then(m => m.MonitoringUI)} />
