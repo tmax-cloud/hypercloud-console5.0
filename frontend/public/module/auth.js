@@ -1,17 +1,23 @@
 import * as _ from 'lodash-es';
 
-import { coFetch } from '../co-fetch';
+import { coFetch, coFetchJSON } from '../co-fetch';
 import { stripBasePath } from '../components/utils/link';
 
-const loginState = (key) => localStorage.getItem(key);
+const loginState = key => (localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null);
 
-const loginStateItem = (key) => loginState(key);
+const loginStateItem = key => loginState(key);
 
 const userID = 'userID';
 const name = 'name';
 const email = 'email';
+const groups = 'groups';
+const clearLocalStorageKeys = [userID, name, email, groups];
 
-const setNext = (next) => {
+// TODO: [YUNHEE] TEST 용
+window.SERVER_FLAGS.loginURL = '/oauth2/sign_in';
+window.SERVER_FLAGS.logoutURL = '/oauth2/sign_out';
+
+const setNext = next => {
   if (!next) {
     return;
   }
@@ -22,49 +28,34 @@ const setNext = (next) => {
     localStorage.setItem('next', path.startsWith('/error') ? '/' : path);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error(e);
+    console.error('Failed to next URL in localStorage', e);
   }
 };
 
-const clearLocalStorage = () => {
-  [userID, name, email].forEach((key) => {
+const clearLocalStorage = keys => {
+  keys.forEach(key => {
     try {
       localStorage.removeItem(key);
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error(e);
+      console.error('Failed to clear localStorage', e);
     }
   });
 };
 
 export const authSvc = {
-  userID: () => {
-    const id = loginStateItem(userID);
-    try {
-      return id && atob(id);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('error decoding userID', id, ':', e);
-    }
-    return id;
-  },
+  userID: () => loginStateItem(userID),
   name: () => loginStateItem(name),
   email: () => loginStateItem(email),
+  groups: () => loginStateItem(groups),
 
   // Avoid logging out multiple times if concurrent requests return unauthorized.
-  logout: _.once((next) => {
+  logout: _.once(next => {
     setNext(next);
-    clearLocalStorage();
+    clearLocalStorage(clearLocalStorageKeys);
     coFetch(window.SERVER_FLAGS.logoutURL, { method: 'POST' })
       // eslint-disable-next-line no-console
-      .catch((e) => console.error('Error logging out', e))
-      .then(() => {
-        if (window.SERVER_FLAGS.logoutRedirect && !next) {
-          // window.location = window.SERVER_FLAGS.logoutRedirect;
-        } else {
-          authSvc.login();
-        }
-      });
+      .catch(e => console.error('Error logging out', e));
   }),
 
   // Extra steps are needed if this is OpenShift to delete the user's access
@@ -83,7 +74,7 @@ export const authSvc = {
     return (
       coFetch('/api/openshift/delete-token', { method: 'POST' })
         // eslint-disable-next-line no-console
-        .catch((e) => console.error('Error deleting token', e))
+        .catch(e => console.error('Error deleting token', e))
     );
   },
 
@@ -92,11 +83,11 @@ export const authSvc = {
   // endpoint, otherwise the user will be logged in again immediately after
   // logging out.
   logoutKubeAdmin: () => {
-    clearLocalStorage();
+    clearLocalStorage(clearLocalStorageKeys);
     // First POST to the console server to clear the console session cookie.
     coFetch(window.SERVER_FLAGS.logoutURL, { method: 'POST' })
       // eslint-disable-next-line no-console
-      .catch((e) => console.error('Error logging out', e))
+      .catch(e => console.error('Error logging out', e))
       .then(() => {
         // We need to POST to the kube:admin logout URL. Since this is a
         // cross-origin request, use a hidden form to POST.
@@ -118,6 +109,28 @@ export const authSvc = {
   },
 
   login: () => {
-    // window.location = window.SERVER_FLAGS.loginURL;
+    coFetch(window.SERVER_FLAGS.loginURL, { method: 'POST' })
+      // eslint-disable-next-line no-console
+      .catch(e => console.error('Error logging in', e));
+  },
+
+  isLoggedIn: () => {
+    return new Promise(resolve => {
+      coFetch('/oauth2/auth')
+        .then(() => resolve(true))
+        .catch(resolve(false));
+    });
+  },
+
+  getUserInfo: () => {
+    coFetchJSON('/oauth2/userinfo')
+      .then(res => {
+        localStorage.setItem(userID, JSON.stringify(res.user));
+        localStorage.setItem(name, JSON.stringify(res.preferredUsername));
+        localStorage.setItem(email, JSON.stringify(res.email));
+        localStorage.setItem(groups, JSON.stringify(res.groups.filter(group => !group.startsWith('role:'))));
+      })
+      // eslint-disable-next-line no-console
+      .catch(e => console.error('Fail to get userinfo', e));
   },
 };

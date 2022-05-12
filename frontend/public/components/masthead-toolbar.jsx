@@ -284,8 +284,8 @@ class MastheadToolbarContents_ extends React.Component {
   }
 
   _renderMenu(mobile) {
-    const { flags, consoleLinks, keycloak, t } = this.props;
-    const username = !!keycloak.idTokenParsed.preferred_username ? keycloak.idTokenParsed.preferred_username : keycloak.idTokenParsed.email;
+    const { flags, consoleLinks, t } = this.props;
+    const username = authSvc.name();
     const { isUserDropdownOpen, isKebabDropdownOpen } = this.state;
     const additionalUserActions = this._getAdditionalActions(this._getAdditionalLinks(consoleLinks, 'UserMenu'));
     const helpActions = this._helpActions(this._getAdditionalActions(this._getAdditionalLinks(consoleLinks, 'HelpMenu')));
@@ -295,13 +295,12 @@ class MastheadToolbarContents_ extends React.Component {
 
     const openAccountConsole = e => {
       e.preventDefault();
-      window.open(keycloak.createAccountUrl());
+      // window.open(keycloak.createAccountUrl()); // TODO: [YUNHEE]
     };
 
     const logout = e => {
       e.preventDefault();
-      sessionStorage.clear();
-      keycloak.logout();
+      authSvc.logout();
     };
 
     userActions.push({
@@ -357,7 +356,7 @@ class MastheadToolbarContents_ extends React.Component {
     return <ApplicationLauncher aria-label="User menu" data-test="user-dropdown" className="co-app-launcher co-user-menu" onSelect={this._onUserDropdownSelect} onToggle={this._onUserDropdownToggle} isOpen={isUserDropdownOpen} items={this._renderApplicationItems(actions)} position="right" toggleIcon={userToggle} isGrouped />;
   }
   _renderLanguageMenu(mobile) {
-    const { flags, consoleLinks, keycloak, t } = this.props;
+    const { flags, consoleLinks, t } = this.props;
     const { isLanguageDropdownOpen } = this.state;
 
     const actions = [];
@@ -421,6 +420,7 @@ class MastheadToolbarContents_ extends React.Component {
   }
 
   _tokenRefresh = () => {
+    /* TODO: [YUNHEE]
     const { keycloak } = this.props;
     const curTime = new Date();
     const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
@@ -442,12 +442,12 @@ class MastheadToolbarContents_ extends React.Component {
       .catch(() => {
         // refresh token 없음
         console.log('Failed to refresh the token, or the session has expired');
-      });
+      });*/
   };
 
   render() {
     const { isApplicationLauncherDropdownOpen, isHelpDropdownOpen, showAboutModal, statuspageData } = this.state;
-    const { consoleLinks, drawerToggle, notificationsRead, canAccessNS, keycloak, t } = this.props;
+    const { consoleLinks, drawerToggle, notificationsRead, canAccessNS, t } = this.props;
     // TODO: notificatoin 기능 완료 되면 추가하기.
     const alertAccess = false; //canAccessNS && !!window.SERVER_FLAGS.prometheusBaseURL;
     return (
@@ -462,9 +462,9 @@ class MastheadToolbarContents_ extends React.Component {
                 ref={input => {
                   this.timerRef = input;
                 }}
-                logout={keycloak.logout}
+                // logout={authSvc.logout()}
+                logout={() => {}} // TODO: [YUNHEE]
                 tokenRefresh={this._tokenRefresh}
-                keycloak={keycloak}
               />
             </ToolbarItem>
             <ToolbarItem>
@@ -542,7 +542,7 @@ const MastheadToolbarContents = connect(mastheadToolbarStateToProps, {
   drawerToggle: UIActions.notificationDrawerToggleExpanded,
 })(connectToFlags(FLAGS.AUTH_ENABLED, FLAGS.CONSOLE_CLI_DOWNLOAD, FLAGS.OPENSHIFT)(withTranslation()(MastheadToolbarContents_)));
 
-export const MastheadToolbar = connectToFlags(FLAGS.CLUSTER_VERSION)(({ flags, keycloak }) => {
+export const MastheadToolbar = connectToFlags(FLAGS.CLUSTER_VERSION)(({ flags }) => {
   const resources = flags[FLAGS.CLUSTER_VERSION]
     ? [
         {
@@ -555,7 +555,7 @@ export const MastheadToolbar = connectToFlags(FLAGS.CLUSTER_VERSION)(({ flags, k
     : [];
   return (
     <Firehose resources={resources}>
-      <MastheadToolbarContents keycloak={keycloak} />
+      <MastheadToolbarContents />
     </Firehose>
   );
 });

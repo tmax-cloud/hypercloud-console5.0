@@ -11,19 +11,21 @@ export class ExpTimer extends React.Component {
     };
   }
   componentDidMount() {
+    /* TODO: [YUNHEE]
     const curTime = new Date();
     const { keycloak } = this.props;
     const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
     const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
     expTime = logoutTime;
-    timerID = window.setInterval(() => this.tick(), 1000);
+    timerID = window.setInterval(() => this.tick(), 1000); */
   }
   tokRefresh() {
+    /* TODO: [YUNHEE]
     const curTime = new Date();
     const { keycloak } = this.props;
     const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
     const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
-    expTime = logoutTime;
+    expTime = logoutTime;*/
   }
   componentWillUnmount() {
     // 타이머 등록 해제
