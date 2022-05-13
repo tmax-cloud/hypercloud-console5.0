@@ -8,7 +8,7 @@ import { featureReducerName } from '../../../reducers/features';
 import { getActiveCluster } from '../../../reducers/ui';
 import * as UIActions from '../../../actions/ui';
 import { coFetchJSON } from '../../../co-fetch';
-import { getId, getUserGroup } from '../../../hypercloud/auth';
+import { authSvc } from '../../../module/auth';
 
 type clusterItemProps = {
   displayName: string;
@@ -85,7 +85,7 @@ const ClusterDropdown_: React.FC<ClusterDropdownProps & StateProps> = ({ setActi
     if (clusters.length == 0 || isClusterDropdownOpen) {
       setLoaded(false);
       // MEMO : 마스터클러스터용 콜을 할 땐 location.origin 붙여줘야 함.
-      coFetchJSON(`${location.origin}/api/multi-hypercloud/clustermanagers/access?userId=${getId()}${getUserGroup()}`, 'GET')
+      coFetchJSON(`${location.origin}/api/multi-hypercloud/clustermanagers/access?${authSvc.getUserIdGroupQueryParam()}`, 'GET')
         .then(result => result.items)
         .then(res => {
           const clusterList: clusterItemProps[] = res.reduce((list, cluster) => {

@@ -21,7 +21,6 @@ import { yamlTemplates } from '../models/yaml-templates';
 import { definitionFor } from '../module/k8s/swagger';
 import YAMLEditor from '@console/shared/src/components/editor/YAMLEditor';
 import { withTranslation } from 'react-i18next';
-import { getIdToken } from '../hypercloud/auth';
 
 import { pluralToKind, isResourceSchemaBasedMenu, resourceSchemaBasedMenuMap } from './hypercloud/form';
 
@@ -99,7 +98,6 @@ export const EditYAML_ = connect(stateToProps)(
         }
         const xhrTest = new XMLHttpRequest();
         xhrTest.open('GET', url);
-        xhrTest.setRequestHeader('Authorization', `Bearer ${getIdToken()}`);
         xhrTest.onreadystatechange = () => {
           if (xhrTest.readyState == XMLHttpRequest.DONE && xhrTest.status == 200) {
             let template = xhrTest.response;

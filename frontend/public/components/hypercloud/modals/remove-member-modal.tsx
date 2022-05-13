@@ -5,14 +5,14 @@ import { ModalBody, ModalComponentProps, ModalSubmitFooter, ModalTitle, createMo
 import { HandlePromiseProps, withHandlePromise } from '../../utils';
 import { YellowExclamationTriangleIcon } from '@console/shared';
 import { coFetchJSON } from '../../../co-fetch';
-import { getId, getUserGroup } from '../../../hypercloud/auth';
+import { authSvc } from '../../../module/auth';
 import { useTranslation } from 'react-i18next';
 
 export const RemoveMemberModal = withHandlePromise((props: RemoveMemberModalProps) => {
   const { handlePromise, close, cancel, errorMessage, inProgress, rerenderPage } = props;
   const submit: React.FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault(); ///cluster/cho/remove_member/group/ck1-3?userId=kubernetes-admin&userGroup=hypercloud5
-    const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.member.Namespace}/clustermanagers/${props.member.Cluster}/remove_member/${props.member.Attribute}/${props.member.MemberId}?userId=${getId()}${getUserGroup()}`, 'POST');
+    const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.member.Namespace}/clustermanagers/${props.member.Cluster}/remove_member/${props.member.Attribute}/${props.member.MemberId}?${authSvc.getUserIdGroupQueryParam()}`, 'POST');
     handlePromise(promise).then(() => {
       close();
       rerenderPage(true);

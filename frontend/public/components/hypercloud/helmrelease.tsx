@@ -11,7 +11,6 @@ import { SectionHeading, Timestamp, ButtonBar, ResourceLink, Kebab, KebabOption,
 import { NavBar } from '@console/internal/components/utils/horizontal-nav';
 import { history } from '@console/internal/components/utils/router';
 import { LoadingInline } from '@console/internal/components/utils/status-box';
-import { getIdToken } from '@console/internal/hypercloud/auth';
 import { coFetchJSON } from '@console/internal/co-fetch';
 import { ResourceLabel } from '@console/internal/models/hypercloud/resource-plural';
 import { modelFor } from '@console/internal/module/k8s';
@@ -406,7 +405,7 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
         values: postValues,
       };
       coFetchJSON
-        .post(url, payload, { headers: { 'user-token': getIdToken() } })
+        .post(url, payload)
         .then(() => {
           history.goBack();
         })

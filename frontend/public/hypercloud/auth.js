@@ -1,3 +1,5 @@
+/* THIS FILE IS DEPRECATED */
+
 export const getId = function() {
   return sessionStorage.getItem('id');
 };

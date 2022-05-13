@@ -49,6 +49,16 @@ export const authSvc = {
   email: () => loginStateItem(email),
   groups: () => loginStateItem(groups),
 
+  getUserIdGroupQueryParam: () => {
+    const userIdParam = loginStateItem(name) ? `userId=${loginStateItem(name)}` : '';
+    const userGroupParam = loginStateItem(groups)
+      ? `&${loginStateItem(groups)
+          .map(group => `userGroup=${group}`)
+          .join('&')}`
+      : '';
+    return `${userIdParam}${userGroupParam}`;
+  },
+
   // Avoid logging out multiple times if concurrent requests return unauthorized.
   logout: _.once(next => {
     setNext(next);

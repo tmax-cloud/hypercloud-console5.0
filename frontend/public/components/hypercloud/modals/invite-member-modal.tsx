@@ -8,7 +8,8 @@ import { RadioGroup } from '@console/internal/components/radio';
 import { TextInput } from '@patternfly/react-core';
 import Select, { components } from 'react-select';
 import { coFetchJSON } from '../../../co-fetch';
-import { getId, getUserGroup, getAuthUrl, getAccessToken } from '../../../hypercloud/auth';
+import { getAccessToken } from '../../../hypercloud/auth';
+import { authSvc } from '../../../module/auth';
 import { UsersIcon, TimesIcon, SearchIcon, ExclamationCircleIcon } from '@patternfly/react-icons';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
@@ -131,10 +132,12 @@ export const InviteMemberModal = withHandlePromise((props: InviteMemberModalProp
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [showWarning, setShowWarning] = React.useState(false);
 
+  const hyperAuthUrl = `${window.SERVER_FLAGS.KeycloakAuthURL}/realms/${window.SERVER_FLAGS.KeycloakRealm}`;
   const members = _.map(props.existMembers, (value, key) => key);
   const groups = _.map(props.existGroups, (value, key) => key);
-  const membersUrl = members.reduce((acc, curr) => acc + `&except=${curr}`, `${getAuthUrl()}/user/list?token=${getAccessToken()}`);
-  const groupsUrl = groups.reduce((acc, curr) => acc + `&except=${curr}`, `${getAuthUrl()}/group/list?exceptDefault=true&token=${getAccessToken()}`);
+  // TODO: [YUNHEE] 콜 테스트 필요
+  const membersUrl = members.reduce((acc, curr) => acc + `&except=${curr}`, `${hyperAuthUrl}/user/list?token=${getAccessToken()}`);
+  const groupsUrl = groups.reduce((acc, curr) => acc + `&except=${curr}`, `${hyperAuthUrl}/group/list?exceptDefault=true&token=${getAccessToken()}`);
 
   const selectRef: React.RefObject<HTMLDivElement> = React.createRef();
 
@@ -227,7 +230,7 @@ export const InviteMemberModal = withHandlePromise((props: InviteMemberModalProp
     } else {
       // MEMO : user초대일 땐 member email, group초대일 땐 group name 만 넣어서 콜하면 됨
       const memberEmail = type === 'user' ? selectedMember.email : selectedMember.name;
-      const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.namespace}/clustermanagers/${props.clusterName}/member_invitation/${type}/${memberEmail}?userId=${getId()}${getUserGroup()}&remoteRole=${role}`, 'POST');
+      const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.namespace}/clustermanagers/${props.clusterName}/member_invitation/${type}/${memberEmail}?${authSvc.getUserIdGroupQueryParam()}&remoteRole=${role}`, 'POST');
       handlePromise(promise).then(() => {
         close();
         rerenderPage(true);

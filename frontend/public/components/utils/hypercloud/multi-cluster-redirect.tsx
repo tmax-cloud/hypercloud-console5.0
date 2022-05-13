@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ClusterManagerModel } from '@console/internal/models';
 import { coFetchJSON } from '@console/internal/co-fetch';
-import { getId, getUserGroup } from '@console/internal/hypercloud/auth';
+import { authSvc } from '@console/internal/module/auth';
 import { history } from '@console/internal/components/utils';
 
 export const MultiClusterRedirect = (props: MultiClusterRedirectProps) => {
@@ -13,7 +13,7 @@ export const MultiClusterRedirect = (props: MultiClusterRedirectProps) => {
   React.useEffect(() => {
     (async () => {
       try {
-        const url = `/api/hypercloud/namespaces/${match.params.ns}/${ClusterManagerModel.plural}/${match.params.clusterName}/member_invitation/accept?userId=${getId()}${getUserGroup()}`;
+        const url = `/api/hypercloud/namespaces/${match.params.ns}/${ClusterManagerModel.plural}/${match.params.clusterName}/member_invitation/accept?${authSvc.getUserIdGroupQueryParam()}`;
         await coFetchJSON(url);
       } catch {
       } finally {

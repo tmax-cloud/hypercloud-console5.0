@@ -5,9 +5,8 @@ import { selectorToString } from './selector';
 import { WSFactory } from '../ws-factory';
 import { PerspectiveType, isSingleClusterPerspective, getSingleClusterFullBasePath } from '@console/internal/hypercloud/perspectives';
 import { getActivePerspective, getActiveCluster } from '../../actions/ui';
-import { getId, getUserGroup } from '../../hypercloud/auth';
-import { resourceSchemaBasedMenuMap } from '../../components/hypercloud/form'
-
+import { authSvc } from '../../module/auth';
+import { resourceSchemaBasedMenuMap } from '../../components/hypercloud/form';
 
 const getDynamicProxyPath = cluster => {
   if (isSingleClusterPerspective()) {
@@ -20,7 +19,7 @@ const getDynamicProxyPath = cluster => {
 };
 
 /** @type {(model: K8sKind, cluster?: string, basePath?: string) => string} */
-export const getK8sAPIPath = ({ apiGroup = 'core', apiVersion}, cluster, basePath) => {
+export const getK8sAPIPath = ({ apiGroup = 'core', apiVersion }, cluster, basePath) => {
   const isLegacy = apiGroup === 'core' && apiVersion === 'v1';
 
   let p = basePath || getDynamicProxyPath(cluster);
@@ -40,7 +39,7 @@ export const getK8sAPIPath = ({ apiGroup = 'core', apiVersion}, cluster, basePat
 };
 
 /** @type {(model: K8sKind) => string} */
-const getClusterAPIPath = ({ apiGroup = 'core', apiVersion}, cluster) => {
+const getClusterAPIPath = ({ apiGroup = 'core', apiVersion }, cluster) => {
   const isLegacy = apiGroup === 'core' && apiVersion === 'v1';
   let p = multiClusterBasePath;
 
@@ -98,51 +97,50 @@ export const resourceClusterURL = (model, options) => {
       return `${k}=${v}`;
     });
     u += `?${q.join('&')}`;
-
   }
 
-  if(isCluster(model)) {
-    return `${u}?userId=${getId()}${getUserGroup()}&accessOnly=false`;
+  if (isCluster(model)) {
+    return `${u}?${authSvc.getUserIdGroupQueryParam()}&accessOnly=false`;
   }
-  return `${u}?userId=${getId()}${getUserGroup()}`;
-}
+  return `${u}?${authSvc.getUserIdGroupQueryParam()}`;
+};
 
 export const resourceApprovalURL = (model, options, approval) => {
-  return resourceURL(model, options).replace('cicd', 'cicdapi') + `/${approval}`
-}
+  return resourceURL(model, options).replace('cicd', 'cicdapi') + `/${approval}`;
+};
 
-const isCluster = (model) => {
-  if(model.kind === 'ClusterManager') {
+const isCluster = model => {
+  if (model.kind === 'ClusterManager') {
     return true;
   }
   return false;
-}
+};
 
-const isClusterClaim = (model) => {
-  if(model.kind === 'ClusterClaim') {
+const isClusterClaim = model => {
+  if (model.kind === 'ClusterClaim') {
     return true;
   }
   return false;
-}
+};
 
-const isNamespace = (model) => {
+const isNamespace = model => {
   return model.kind === 'Namespace';
-}
+};
 
-const isNamespaceClaim = (model) => {
+const isNamespaceClaim = model => {
   return model.kind === 'NamespaceClaim';
-}
+};
 
-const resourceNamespaceURL = (model) => {
+const resourceNamespaceURL = model => {
   if (isSingleClusterPerspective()) {
     // MEMO : 싱글클러스터의 경우 네임스페이스 조회콜은 kubernetes 콜로 보냄
     const plural = isNamespace(model) ? 'namespaces' : 'namespaceclaims';
     return `${getSingleClusterFullBasePath()}/api/kubernetes/api/v1/${plural}`;
   } else {
     const path = isNamespace(model) ? 'namespace' : 'namespaceClaim';
-    return `${document.location.origin}/api/hypercloud/${path}?userId=${getId()}${getUserGroup()}`;
+    return `${document.location.origin}/api/hypercloud/${path}?${authSvc.getUserIdGroupQueryParam()}`;
   }
-}
+};
 
 export const watchURL = (kind, options) => {
   const opts = options || {};
@@ -171,24 +169,21 @@ export const k8sCreate = (kind, data, opts = {}) => {
 
 export const k8sCreateUrl = (kind, data, opts = {}) => {
   return coFetchJSON.post(resourceURL(kind, opts), data);
-}
-
+};
 
 export const k8sUpdate = (kind, data, ns, name) => coFetchJSON.put(resourceURL(kind, { ns: ns || data.metadata.namespace, name: name || data.metadata.name }), data);
 
 export const k8sUpdateApproval = (kind, resource, approval, data, method = 'PUT') => {
   const url = resourceApprovalURL(
     kind,
-    Object.assign(
-      {
-        ns: resource.metadata.namespace,
-        name: resource.metadata.name,
-      },
-    ),
+    Object.assign({
+      ns: resource.metadata.namespace,
+      name: resource.metadata.name,
+    }),
     approval,
   );
 
-  switch(method) {
+  switch (method) {
     case 'PATCH': {
       return coFetchJSON.patch(url, data);
     }
@@ -196,20 +191,19 @@ export const k8sUpdateApproval = (kind, resource, approval, data, method = 'PUT'
       return coFetchJSON.put(url, data);
     }
   }
-}
+};
 
 export const k8sUpdateClaim = (kind, clusterClaim, admit, reason = '', nameSpace) => {
-
-  const resourceClusterURL = `api/multi-hypercloud/namespaces/${nameSpace}/clusterclaims/${clusterClaim}?userId=${getId()}${getUserGroup()}`;
+  const resourceClusterURL = `api/multi-hypercloud/namespaces/${nameSpace}/clusterclaims/${clusterClaim}?${authSvc.getUserIdGroupQueryParam()}`;
 
   const params = new URLSearchParams();
-  const queryParams = { admit: admit.toString(), reason, memberName: 'cho'};
+  const queryParams = { admit: admit.toString(), reason, memberName: 'cho' };
   _.each(queryParams, (value, key) => value && params.append(key, value.toString()));
 
   const url = `${resourceClusterURL}&${params.toString()}`;
 
   return coFetchJSON.put(url);
-}
+};
 
 export const k8sPatch = (kind, resource, data, opts = {}) => {
   const patches = _.compact(data);
@@ -233,12 +227,12 @@ export const k8sPatch = (kind, resource, data, opts = {}) => {
   );
 };
 
-export const k8sCreateSchema = (kind) => {
+export const k8sCreateSchema = kind => {
   const directory = resourceSchemaBasedMenuMap.get(kind)?.['directory'];
   const file = resourceSchemaBasedMenuMap.get(kind)?.['file'];
   const schemaUrl = `/api/resource/${directory}/${file}`;
   return coFetchJSON(`${schemaUrl}`, 'GET');
-}
+};
 
 export const k8sPatchByName = (kind, name, namespace, data, opts = {}) => k8sPatch(kind, { metadata: { name, namespace } }, data, opts);
 
@@ -256,14 +250,14 @@ export const k8sList = (kind, params = {}, raw = false, options = {}) => {
 
   let isMultiCluster = isCluster(kind) || isClusterClaim(kind);
   const _isNamespace = isNamespace(kind) || isNamespaceClaim(kind);
-  let listURL = isMultiCluster ? resourceClusterURL(kind, {ns: params.ns}) : _isNamespace ? resourceNamespaceURL(kind) : resourceURL(kind, { ns: params.ns });
-  
+  let listURL = isMultiCluster ? resourceClusterURL(kind, { ns: params.ns }) : _isNamespace ? resourceNamespaceURL(kind) : resourceURL(kind, { ns: params.ns });
+
   //if(localStorage.getItem('bridge/last-perspective') === PerspectiveType.SINGLE) {
-  if(sessionStorage.getItem('bridge/last-perspective') === PerspectiveType.SINGLE) {
+  if (sessionStorage.getItem('bridge/last-perspective') === PerspectiveType.SINGLE) {
     return coFetchJSON(`${listURL}?${query}`, 'GET', options).then(result => (raw ? result : result.items));
   }
 
-  const url = listURL.includes('?') ? `${listURL}&${query}` : `${listURL}?${query}`
+  const url = listURL.includes('?') ? `${listURL}&${query}` : `${listURL}?${query}`;
   return coFetchJSON(url, 'GET', options).then(result => (raw ? result : result.items));
 };
 

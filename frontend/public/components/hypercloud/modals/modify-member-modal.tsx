@@ -6,7 +6,7 @@ import { HandlePromiseProps, withHandlePromise } from '../../utils';
 import { Section } from '../utils/section';
 import { RadioGroup } from '@console/internal/components/radio';
 import { coFetchJSON } from '../../../co-fetch';
-import { getId, getUserGroup } from '../../../hypercloud/auth';
+import { authSvc } from '../../../module/auth';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 
@@ -31,7 +31,7 @@ export const ModifyMemberModal = withHandlePromise((props: ModifyMemberModalProp
 
   const submit: React.FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
-    const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.member.Namespace}/clustermanagers/${props.member.Cluster}/update_role/${props.member.Attribute}/${props.member.MemberId}?userId=${getId()}${getUserGroup()}&remoteRole=${role}`, 'PUT');
+    const promise = coFetchJSON(`/api/multi-hypercloud/namespaces/${props.member.Namespace}/clustermanagers/${props.member.Cluster}/update_role/${props.member.Attribute}/${props.member.MemberId}?${authSvc.getUserIdGroupQueryParam()}&remoteRole=${role}`, 'PUT');
     handlePromise(promise).then(() => {
       close();
       rerenderPage(true);

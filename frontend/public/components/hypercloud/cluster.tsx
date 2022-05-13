@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { Status } from '@console/shared';
 import { coFetchJSON } from '@console/internal/co-fetch';
-import { getId, getUserGroup } from '@console/internal/hypercloud/auth';
+import { authSvc } from '@console/internal/module/auth';
 import { K8sResourceKind, K8sKind } from '../../module/k8s';
 import { DetailsPage, ListPage } from '../factory';
 import { DetailsItem, Kebab, KebabAction, detailsPage, ResourceKebab, ResourceLink, ResourceSummary, SectionHeading, Timestamp } from '../utils';
@@ -180,7 +180,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => {
 
   React.useEffect(() => {
     const fetchMembers = async () => {
-      const url = `/api/hypercloud/namespaces/${cluster.metadata.namespace}/clustermanagers/${cluster.metadata.name}/member/invited?userId=${getId()}${getUserGroup()}`;
+      const url = `/api/hypercloud/namespaces/${cluster.metadata.namespace}/clustermanagers/${cluster.metadata.name}/member/invited?${authSvc.getUserIdGroupQueryParam()}`;
       try {
         const data = await coFetchJSON(url);
         setMembers(data);
@@ -194,7 +194,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ obj: cluster }) => {
 
   React.useEffect(() => {
     const fetchGroups = async () => {
-      const url = `/api/hypercloud/namespaces/${cluster.metadata.namespace}/clustermanagers/${cluster.metadata.name}/member/group?userId=${getId()}${getUserGroup()}`;
+      const url = `/api/hypercloud/namespaces/${cluster.metadata.namespace}/clustermanagers/${cluster.metadata.name}/member/group?${authSvc.getUserIdGroupQueryParam()}`;
       try {
         const data = await coFetchJSON(url);
         setGroups(data);

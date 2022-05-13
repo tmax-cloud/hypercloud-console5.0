@@ -12,7 +12,7 @@ import { history } from '../utils';
 import ClusterDropdown from '../hypercloud/nav/cluster-dropdown';
 import { useTranslation } from 'react-i18next';
 import { coFetchJSON } from '../../co-fetch';
-import { getId, getUserGroup } from '../../hypercloud/auth';
+import { authSvc } from '../../module/auth';
 
 type StateProps = {
   activePerspective: string;
@@ -30,7 +30,7 @@ const NavHeader_: React.FC<NavHeaderProps & StateProps> = ({ setActivePerspectiv
 
   React.useEffect(() => {
     if (isPerspectiveDropdownOpen) {
-      coFetchJSON(`${location.origin}/api/multi-hypercloud/clustermanagers/access?userId=${getId()}${getUserGroup()}`, 'GET').then(res => (!res.items?.length ? setIsClusterExist(false) : setIsClusterExist(true)));
+      coFetchJSON(`${location.origin}/api/multi-hypercloud/clustermanagers/access?${authSvc.getUserIdGroupQueryParam()}`, 'GET').then(res => (!res.items?.length ? setIsClusterExist(false) : setIsClusterExist(true)));
     }
   }, [isPerspectiveDropdownOpen]);
 

@@ -8,7 +8,7 @@ import { Table, TableHeader, TableBody, sortable, SortByDirection, IRow } from '
 import { CaretDownIcon, UsersIcon } from '@patternfly/react-icons';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
-import { getId, getUserGroup } from '../../hypercloud/auth';
+import { authSvc } from '../../module/auth';
 import { coFetchJSON } from '../../co-fetch';
 
 const ownerData = (owner, t?: TFunction) => [
@@ -191,7 +191,7 @@ export const MembersPage = props => {
 
   React.useEffect(() => {
     shouldRerender === true && setShouldRerender(false);
-    coFetchJSON(`/api/multi-hypercloud/namespaces/${props.namespace}/clustermanagers/${props.clusterName}/member?userId=${getId()}${getUserGroup()}`, 'GET')
+    coFetchJSON(`/api/multi-hypercloud/namespaces/${props.namespace}/clustermanagers/${props.clusterName}/member?${authSvc.getUserIdGroupQueryParam()}`, 'GET')
       .then(res => {
         let idx = _.findIndex(res, (mem: RowMemberData) => mem.Status === 'owner');
         idx >= 0 && setOwner(res[idx]);
@@ -203,7 +203,7 @@ export const MembersPage = props => {
       });
   }, [shouldRerender]);
 
-  const isOwner = props.owner === getId();
+  const isOwner = props.owner === authSvc.name();
   const { t } = useTranslation();
   return (
     <>

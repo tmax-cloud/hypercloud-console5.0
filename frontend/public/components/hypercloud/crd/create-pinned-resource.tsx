@@ -17,7 +17,6 @@ import { OperandYAML } from '@console/operator-lifecycle-manager/src/components/
 import { DEFAULT_K8S_SCHEMA } from '@console/operator-lifecycle-manager/src/components/operand/const';
 import { prune } from '@console/shared/src/components/dynamic-form/utils';
 import { pluralToKind, isResourceSchemaBasedMenu, resourceSchemaBasedMenuMap } from '../form';
-import { getIdToken } from '../../../hypercloud/auth';
 import { getK8sAPIPath } from '@console/internal/module/k8s/resource.js';
 import { ResourceLabel } from '../../../models/hypercloud/resource-plural';
 import { useTranslation } from 'react-i18next';
@@ -111,7 +110,6 @@ export const CreateDefault: React.FC<CreateDefaultProps> = ({ initialEditorType,
       }
       const xhrTest = new XMLHttpRequest();
       xhrTest.open('GET', url);
-      xhrTest.setRequestHeader('Authorization', `Bearer ${getIdToken()}`);
       xhrTest.onreadystatechange = function() {
         if (xhrTest.readyState == XMLHttpRequest.DONE && xhrTest.status == 200) {
           let template = xhrTest.response;

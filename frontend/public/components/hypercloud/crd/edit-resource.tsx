@@ -16,7 +16,6 @@ import { OperandYAML } from '@console/operator-lifecycle-manager/src/components/
 import { FORM_HELP_TEXT, YAML_HELP_TEXT, DEFAULT_K8S_SCHEMA } from '@console/operator-lifecycle-manager/src/components/operand/const';
 import { prune } from '@console/shared/src/components/dynamic-form/utils';
 import { pluralToKind, isResourceSchemaBasedMenu, isCreateManual, resourceSchemaBasedMenuMap } from '../form';
-import { getIdToken } from '../../../hypercloud/auth';
 import { getK8sAPIPath } from '@console/internal/module/k8s/resource.js';
 import { AsyncComponent } from '../../utils/async';
 import { isSaveButtonDisabled } from '../utils/button-state';
@@ -39,7 +38,6 @@ export const EditDefault: React.FC<EditDefaultProps> = ({ initialEditorType, loa
     }
     const xhrObj = new XMLHttpRequest();
     xhrObj.open('GET', url);
-    xhrObj.setRequestHeader('Authorization', `Bearer ${getIdToken()}`);
     xhrObj.onreadystatechange = function() {
       const { readyState, status } = xhrObj;
       const isOK = readyState === XMLHttpRequest.DONE && status === 200;

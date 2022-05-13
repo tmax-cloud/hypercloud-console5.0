@@ -10,7 +10,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { TextFilter } from '../factory';
 import { Dropdown, Box, Timestamp, PageHeading } from '../utils';
 import { coFetchJSON, coFetch } from '../../co-fetch';
-import { getId, getUserGroup } from '../../hypercloud/auth';
+import { authSvc } from '../../module/auth';
 import { setQueryArgument, getQueryArgument, removeQueryArgument } from '../utils/router.ts';
 import { k8sGet } from '@console/internal/module/k8s';
 import { withTranslation } from 'react-i18next';
@@ -294,7 +294,7 @@ class AuditPage_ extends React.Component {
       });
     }
     this.setState({ action: Actions.all }); // 액션 초기화
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', resource, 'namespace', this.state.namespace, 'status', this.state.status.value, 'verb', Actions.all.value, 'code', this.state.code.value);
     this.fetch(uri);
   }
@@ -302,7 +302,7 @@ class AuditPage_ extends React.Component {
   onChangeAction_(action) {
     this.setState({ action: action !== Actions.all.value ? this.state.actionList.find(item => action === item.value) : Actions.all });
     this.setState({ offset: 0 });
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', this.state.resourceType.value, 'namespace', this.state.namespace, 'status', this.state.status.value, 'verb', action, 'code', this.state.code.value);
     this.fetch(uri);
   }
@@ -310,7 +310,7 @@ class AuditPage_ extends React.Component {
   onChangeStatus_(status) {
     this.setState({ status: status !== Statuses.all.value ? this.statuslist.find(item => status === item.value) : Statuses.all });
     this.setState({ offset: 0 });
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', this.state.resourceType.value, 'namespace', this.state.namespace, 'status', status, 'verb', this.state.action.value, 'code', this.state.code.value);
     this.fetch(uri);
   }
@@ -318,7 +318,7 @@ class AuditPage_ extends React.Component {
   onChangeCode_(code) {
     this.setState({ code: code !== Codes.all.value ? this.codeList.find(item => code === item.value) : Codes.all });
     this.setState({ offset: 0 });
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', this.state.resourceType.value, 'namespace', this.state.namespace, 'status', this.state.status.value, 'verb', this.state.action.value, 'code', code);
     this.fetch(uri);
   }
@@ -332,7 +332,7 @@ class AuditPage_ extends React.Component {
 
     this.setState({ offset: 0 });
 
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${date.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${date.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
 
     date_.setDate(date_.getDate() + 7);
     if (date_ < this.state.end || date > this.state.end) {
@@ -356,7 +356,7 @@ class AuditPage_ extends React.Component {
 
     this.setState({ offset: 0 });
 
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&endTime=${date.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&endTime=${date.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
 
     date_.setDate(date_.getDate() - 7);
     if (date_ <= this.state.start) {
@@ -377,7 +377,7 @@ class AuditPage_ extends React.Component {
       textFilter: '',
     });
 
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=${e.selected * 100}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=${e.selected * 100}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', this.state.resourceType.value, 'namespace', this.state.namespace, 'status', this.state.status.value, 'verb', this.state.action.value, 'code', this.state.code.value);
     this.fetch(uri);
   }
@@ -394,7 +394,7 @@ class AuditPage_ extends React.Component {
       offset: 0,
     });
 
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeUri(uri, 'resource', this.state.resourceType.value, 'namespace', this.state.namespace, 'status', this.state.status.value, 'verb', this.state.action.value, 'code', this.state.code.value);
 
     coFetchJSON(uri).then(response => {
@@ -425,7 +425,7 @@ class AuditPage_ extends React.Component {
         status: Statuses.all,
         code: Codes.all,
       });
-      let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+      let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=0&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
       uri = this.makeSearchQuery(uri);
       if (namespace === undefined) {
         // all namespace
@@ -452,7 +452,7 @@ class AuditPage_ extends React.Component {
     const namespace = _.get(this.props, 'match.params.ns');
     await this.getResourceList();
     this.setState({ namespace: namespace });
-    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=${this.state.offset}&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&userId=${getId()}${getUserGroup()}`;
+    let uri = `${document.location.origin}/api/webhook/audit?limit=100&offset=${this.state.offset}&startTime=${this.state.start.getTime() / 1000}&endTime=${this.state.end.getTime() / 1000}&${authSvc.getUserIdGroupQueryParam()}`;
     uri = this.makeSearchQuery(uri);
     if (namespace === undefined) {
       // all namespace
