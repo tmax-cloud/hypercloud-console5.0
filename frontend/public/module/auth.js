@@ -13,10 +13,6 @@ const email = 'email';
 const groups = 'groups';
 const clearLocalStorageKeys = [userID, name, email, groups];
 
-// TODO: [YUNHEE] TEST 용
-window.SERVER_FLAGS.loginURL = '/oauth2/sign_in';
-window.SERVER_FLAGS.logoutURL = '/oauth2/sign_out';
-
 const setNext = next => {
   if (!next) {
     return;
@@ -50,9 +46,10 @@ export const authSvc = {
   groups: () => loginStateItem(groups),
 
   getUserIdGroupQueryParam: () => {
-    const userIdParam = loginStateItem(name) ? `userId=${loginStateItem(name)}` : '';
-    const userGroupParam = loginStateItem(groups)
-      ? `&${loginStateItem(groups)
+    const userIdParam = authSvc.name() ? `userId=${authSvc.name()}` : '';
+    const userGroupParam = authSvc.groups()
+      ? `&${authSvc
+          .groups()
           .map(group => `userGroup=${group}`)
           .join('&')}`
       : '';
@@ -61,9 +58,10 @@ export const authSvc = {
 
   // Avoid logging out multiple times if concurrent requests return unauthorized.
   logout: _.once(next => {
+    const logoutUrl = window.SERVER_FLAGS.logoutURL ? window.SERVER_FLAGS.logoutURL : '/oauth2/sign_out'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
     setNext(next);
     clearLocalStorage(clearLocalStorageKeys);
-    coFetch(window.SERVER_FLAGS.logoutURL, { method: 'POST' })
+    coFetch(logoutUrl, { method: 'POST' })
       // eslint-disable-next-line no-console
       .catch(e => console.error('Error logging out', e));
   }),
@@ -119,7 +117,8 @@ export const authSvc = {
   },
 
   login: () => {
-    coFetch(window.SERVER_FLAGS.loginURL, { method: 'POST' })
+    const loginUrl = window.SERVER_FLAGS.loginURL ? window.SERVER_FLAGS.loginURL : '/oauth2/sign_in'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
+    coFetch(loginUrl, { method: 'POST' })
       // eslint-disable-next-line no-console
       .catch(e => console.error('Error logging in', e));
   },
@@ -142,5 +141,26 @@ export const authSvc = {
       })
       // eslint-disable-next-line no-console
       .catch(e => console.error('Fail to get userinfo', e));
+  },
+
+  getRealmUrl: () => {
+    if (window.SERVER_FLAGS.KeycloakAuthURL) {
+      if (window.SERVER_FLAGS.KeycloakAuthURL.charAt(window.SERVER_FLAGS.KeycloakAuthURL.length - 1) == '/') {
+        return `${window.SERVER_FLAGS.KeycloakAuthURL}realms/${encodeURIComponent(window.SERVER_FLAGS.KeycloakRealm)}`;
+      } else {
+        return `${window.SERVER_FLAGS.KeycloakAuthURL}/realms/${encodeURIComponent(window.SERVER_FLAGS.KeycloakRealm)}`;
+      }
+    } else {
+      return undefined;
+    }
+  },
+
+  createAccountUrl: () => {
+    const realm = authSvc.getRealmUrl();
+    let url = undefined;
+    if (realm) {
+      url = `${realm}/account?referrer=${encodeURIComponent(window.SERVER_FLAGS.KeycloakClientId)}&referrer_uri=${encodeURIComponent(location.href)}`;
+    }
+    return url;
   },
 };

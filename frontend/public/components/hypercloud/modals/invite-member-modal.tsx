@@ -132,12 +132,11 @@ export const InviteMemberModal = withHandlePromise((props: InviteMemberModalProp
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [showWarning, setShowWarning] = React.useState(false);
 
-  const hyperAuthUrl = `${window.SERVER_FLAGS.KeycloakAuthURL}/realms/${window.SERVER_FLAGS.KeycloakRealm}`;
   const members = _.map(props.existMembers, (value, key) => key);
   const groups = _.map(props.existGroups, (value, key) => key);
   // TODO: [YUNHEE] 콜 테스트 필요
-  const membersUrl = members.reduce((acc, curr) => acc + `&except=${curr}`, `${hyperAuthUrl}/user/list?token=${getAccessToken()}`);
-  const groupsUrl = groups.reduce((acc, curr) => acc + `&except=${curr}`, `${hyperAuthUrl}/group/list?exceptDefault=true&token=${getAccessToken()}`);
+  const membersUrl = members.reduce((acc, curr) => acc + `&except=${curr}`, `${authSvc.getRealmUrl()}/user/list?token=${getAccessToken()}`);
+  const groupsUrl = groups.reduce((acc, curr) => acc + `&except=${curr}`, `${authSvc.getRealmUrl()}/group/list?exceptDefault=true&token=${getAccessToken()}`);
 
   const selectRef: React.RefObject<HTMLDivElement> = React.createRef();
 

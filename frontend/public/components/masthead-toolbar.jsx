@@ -295,7 +295,7 @@ class MastheadToolbarContents_ extends React.Component {
 
     const openAccountConsole = e => {
       e.preventDefault();
-      // window.open(keycloak.createAccountUrl()); // TODO: [YUNHEE]
+      window.open(authSvc.createAccountUrl());
     };
 
     const logout = e => {
