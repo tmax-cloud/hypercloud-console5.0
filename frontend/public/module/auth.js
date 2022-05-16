@@ -124,23 +124,20 @@ export const authSvc = {
   },
 
   isLoggedIn: () => {
+    const url = window.SERVER_FLAGS.requestAuthURL ? window.SERVER_FLAGS.requestAuthURL : '/oauth2/auth'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
     return new Promise(resolve => {
-      coFetch('/oauth2/auth')
+      coFetch(url)
         .then(() => resolve(true))
         .catch(resolve(false));
     });
   },
 
-  getUserInfo: () => {
-    coFetchJSON('/oauth2/userinfo')
-      .then(res => {
-        localStorage.setItem(userID, JSON.stringify(res.user));
-        localStorage.setItem(name, JSON.stringify(res.preferredUsername));
-        localStorage.setItem(email, JSON.stringify(res.email));
-        localStorage.setItem(groups, JSON.stringify(res.groups.filter(group => !group.startsWith('role:'))));
-      })
-      // eslint-disable-next-line no-console
-      .catch(e => console.error('Fail to get userinfo', e));
+  updateLocalStorage: userJSON => {
+    const { user, preferredUsername, email, groups } = userJSON;
+    localStorage.setItem(userID, JSON.stringify(user));
+    localStorage.setItem(name, JSON.stringify(preferredUsername));
+    localStorage.setItem(email, JSON.stringify(email));
+    localStorage.setItem(groups, JSON.stringify(groups.filter(group => !group.startsWith('role:'))));
   },
 
   getRealmUrl: () => {

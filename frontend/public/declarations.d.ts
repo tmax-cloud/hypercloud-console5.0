@@ -31,6 +31,8 @@ declare interface Window {
     prometheusBaseURL: string;
     prometheusTenancyBaseURL: string;
     requestTokenURL: string;
+    requestAuthURL: string;
+    requestUserInfoURL: string;
     alertManagerPublicURL: string;
     grafanaPublicURL: string;
     prometheusPublicURL: string;

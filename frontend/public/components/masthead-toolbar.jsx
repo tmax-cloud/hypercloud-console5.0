@@ -43,6 +43,7 @@ class MastheadToolbarContents_ extends React.Component {
       isLanguageDropdownOpen: false,
       isKebabDropdownOpen: false,
       statuspageData: null,
+      username: null,
       isKubeAdmin: false,
       showAboutModal: false,
     };
@@ -67,6 +68,16 @@ class MastheadToolbarContents_ extends React.Component {
     this._tokenRefresh = this._tokenRefresh.bind(this);
   }
 
+  componentDidMount() {
+    this._updateUser();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!_.isEqual(this.props.user, prevProps.user)) {
+      this._updateUser();
+    }
+  }
+
   _getStatuspageData(statuspageID) {
     fetch(`https://${statuspageID}.statuspage.io/api/v2/summary.json`, {
       headers: { Accept: 'application/json' },
@@ -85,7 +96,7 @@ class MastheadToolbarContents_ extends React.Component {
       this.setState({ username: authSvc.name() });
     }
     this.setState({
-      username: _.get(user, 'fullName') || _.get(user, 'metadata.name', ''),
+      username: _.get(user, 'preferredUsername') || _.get(user, 'metadata.name', ''),
       isKubeAdmin: _.get(user, 'metadata.name') === 'kube:admin',
     });
   }
@@ -285,10 +296,13 @@ class MastheadToolbarContents_ extends React.Component {
 
   _renderMenu(mobile) {
     const { flags, consoleLinks, t } = this.props;
-    const username = authSvc.name();
-    const { isUserDropdownOpen, isKebabDropdownOpen } = this.state;
+    const { isUserDropdownOpen, isKebabDropdownOpen, username } = this.state;
     const additionalUserActions = this._getAdditionalActions(this._getAdditionalLinks(consoleLinks, 'UserMenu'));
     const helpActions = this._helpActions(this._getAdditionalActions(this._getAdditionalLinks(consoleLinks, 'HelpMenu')));
+
+    if (!username) {
+      return null;
+    }
 
     const actions = [];
     const userActions = [];

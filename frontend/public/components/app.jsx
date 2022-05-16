@@ -64,10 +64,6 @@ class App extends React.PureComponent {
     window.removeEventListener('resize', this._onResize);
   }
 
-  componentDidMount() {
-    authSvc.getUserInfo();
-  }
-
   componentDidUpdate(prevProps) {
     const props = this.props;
     // Prevent infinite loop in case React Router decides to destroy & recreate the component (changing key)
