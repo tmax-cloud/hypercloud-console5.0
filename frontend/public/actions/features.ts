@@ -198,16 +198,15 @@ const detectLoggingURL = dispatch =>
   );
 
 const detectUser = dispatch => {
-  const url = window.SERVER_FLAGS.requestUserInfoURL ? window.SERVER_FLAGS.requestUserInfoURL : '/oauth2/userinfo'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
-  coFetchJSON(url).then(
+  /*coFetchJSON('api/kubernetes/apis/user.openshift.io/v1/users/~').then(
+    user => {
+      dispatch(setUser(user));
+    },*/
+  coFetchJSON('/oauth2/userinfo').then(
     res => {
       authSvc.updateLocalStorage(res);
       dispatch(setUser(res));
     },
-    /*coFetchJSON('api/kubernetes/apis/user.openshift.io/v1/users/~').then(
-    user => {
-      dispatch(setUser(user));
-    },*/
     err => {
       if (!_.includes([401, 403, 404, 500], _.get(err, 'response.status'))) {
         setTimeout(() => detectUser(dispatch), 15000);

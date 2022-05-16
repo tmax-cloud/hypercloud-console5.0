@@ -192,14 +192,12 @@ if ('serviceWorker' in navigator) {
 
 render(
   <Provider store={store}>
-    <AuthProvider onLogin={authSvc.login()}>
-      <Router history={history} basename={window.SERVER_FLAGS.basePath}>
-        <Switch>
-          <Route path="/terminal" component={CloudShellTab} />
-          <Route path="/" component={App} />
-        </Switch>
-      </Router>
-    </AuthProvider>
+    <Router history={history} basename={window.SERVER_FLAGS.basePath}>
+      <Switch>
+        <Route path="/terminal" component={CloudShellTab} />
+        <Route path="/" component={App} />
+      </Switch>
+    </Router>
   </Provider>,
   document.getElementById('app'),
 );

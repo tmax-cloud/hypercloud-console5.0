@@ -58,12 +58,14 @@ export const authSvc = {
 
   // Avoid logging out multiple times if concurrent requests return unauthorized.
   logout: _.once(next => {
-    const logoutUrl = window.SERVER_FLAGS.logoutURL ? window.SERVER_FLAGS.logoutURL : '/oauth2/sign_out'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
     setNext(next);
     clearLocalStorage(clearLocalStorageKeys);
-    coFetch(logoutUrl, { method: 'POST' })
-      // eslint-disable-next-line no-console
-      .catch(e => console.error('Error logging out', e));
+    let redirectUrl = '';
+    const realm = authSvc.getRealmUrl();
+    if (realm) {
+      redirectUrl = `${realm}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(location.href)}`;
+      window.location = `${location.origin}/oauth2/sign_out?rd=${redirectUrl}`;
+    }
   }),
 
   // Extra steps are needed if this is OpenShift to delete the user's access
@@ -117,27 +119,16 @@ export const authSvc = {
   },
 
   login: () => {
-    const loginUrl = window.SERVER_FLAGS.loginURL ? window.SERVER_FLAGS.loginURL : '/oauth2/sign_in'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
-    coFetch(loginUrl, { method: 'POST' })
+    coFetch('/oauth2/sign_in')
       // eslint-disable-next-line no-console
       .catch(e => console.error('Error logging in', e));
   },
 
-  isLoggedIn: () => {
-    const url = window.SERVER_FLAGS.requestAuthURL ? window.SERVER_FLAGS.requestAuthURL : '/oauth2/auth'; // TODO [YUNHEE]: 서버플래그 추가되면 예외 처리 삭제
-    return new Promise(resolve => {
-      coFetch(url)
-        .then(() => resolve(true))
-        .catch(resolve(false));
-    });
-  },
-
   updateLocalStorage: userJSON => {
-    const { user, preferredUsername, email, groups } = userJSON;
-    localStorage.setItem(userID, JSON.stringify(user));
-    localStorage.setItem(name, JSON.stringify(preferredUsername));
-    localStorage.setItem(email, JSON.stringify(email));
-    localStorage.setItem(groups, JSON.stringify(groups.filter(group => !group.startsWith('role:'))));
+    localStorage.setItem(userID, JSON.stringify(userJSON.user));
+    localStorage.setItem(name, JSON.stringify(userJSON.preferredUsername));
+    localStorage.setItem(email, JSON.stringify(userJSON.email));
+    localStorage.setItem(groups, JSON.stringify(userJSON.groups.filter(group => !group.startsWith('role:'))));
   },
 
   getRealmUrl: () => {
