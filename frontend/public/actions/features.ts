@@ -6,7 +6,7 @@ import { GroupModel, SelfSubjectAccessReviewModel, UserModel } from '../models';
 // import { k8sBasePath, ClusterVersionKind, k8sCreate } from '../module/k8s';
 import { k8sBasePath, k8sCreate } from '../module/k8s';
 import { receivedResources } from './k8s';
-import { coFetchJSON } from '../co-fetch';
+import { coFetch, coFetchJSON } from '../co-fetch';
 import { MonitoringRoutes } from '../reducers/monitoring';
 import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
@@ -202,13 +202,22 @@ const detectUser = dispatch => {
     user => {
       dispatch(setUser(user));
     },*/
-  coFetchJSON('/oauth2/userinfo').then(
+  coFetch('/oauth2/auth').then(
     res => {
-      authSvc.updateLocalStorage(res);
-      dispatch(setUser(res));
+      const user = {
+        userID: res.headers.get('x-auth-request-user'),
+        name: res.headers.get('x-auth-request-preferred-username'),
+        email: res.headers.get('x-auth-request-email'),
+        groups: res.headers.get('x-auth-request-groups'),
+        token: res.headers.get('x-auth-request-access-token'),
+      };
+      authSvc.updateLocalStorage(user);
+      dispatch(setUser(user));
     },
     err => {
-      if (!_.includes([401, 403, 404, 500], _.get(err, 'response.status'))) {
+      if (_.get(err, 'response.status') === 401) {
+        authSvc.login();
+      } else if (!_.includes([403, 404, 500], _.get(err, 'response.status'))) {
         setTimeout(() => detectUser(dispatch), 15000);
       }
     },

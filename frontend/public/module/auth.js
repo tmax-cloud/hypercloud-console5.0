@@ -11,7 +11,8 @@ const userID = 'userID';
 const name = 'name';
 const email = 'email';
 const groups = 'groups';
-const clearLocalStorageKeys = [userID, name, email, groups];
+const token = 'token';
+const clearLocalStorageKeys = [userID, name, email, groups, token];
 
 const setNext = next => {
   if (!next) {
@@ -125,10 +126,11 @@ export const authSvc = {
   },
 
   updateLocalStorage: userJSON => {
-    localStorage.setItem(userID, JSON.stringify(userJSON.user));
-    localStorage.setItem(name, JSON.stringify(userJSON.preferredUsername));
+    localStorage.setItem(userID, JSON.stringify(userJSON.userID));
+    localStorage.setItem(name, JSON.stringify(userJSON.name));
     localStorage.setItem(email, JSON.stringify(userJSON.email));
-    localStorage.setItem(groups, JSON.stringify(userJSON.groups.filter(group => !group.startsWith('role:'))));
+    localStorage.setItem(groups, JSON.stringify(userJSON.groups.split(',').filter(group => !group.startsWith('role:'))));
+    localStorage.setItem(token, JSON.stringify(userJSON.token));
   },
 
   getRealmUrl: () => {
