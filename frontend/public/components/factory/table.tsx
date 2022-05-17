@@ -166,7 +166,7 @@ const sorts = {
         framework = curPredictor;
       }
     });
-    return (isvc?.spec?.predictor[framework]?.storageUri) ? 'N' : 'Y';
+    return isvc?.spec?.predictor[framework]?.storageUri ? 'N' : 'Y';
   },
   TrainedModelPhase: instance => {
     let phase = '';
@@ -184,7 +184,7 @@ const sorts = {
     }
   },
   HelmReleaseStatusReducer: Helmreleases => HelmReleaseStatusReducer(Helmreleases),
-  helmResourcesNumber: Helmreleases => Helmreleases?.objects ? Object.keys(Helmreleases?.objects).length : 0,
+  helmResourcesNumber: Helmreleases => (Helmreleases?.objects ? Object.keys(Helmreleases?.objects).length : 0),
 };
 
 const stateToProps = ({ UI }, { customSorts = {}, data = [], defaultSortField = 'metadata.name', defaultSortFunc = undefined, defaultSortOrder = SortByDirection.asc, filters = {}, loaded = false, reduxID = null, reduxIDs = null, staticFilters = [{}], rowFilters = [] }) => {
@@ -360,7 +360,7 @@ export type TableProps = {
   reduxIDs?: string[];
   label?: string;
   expandable?: boolean;
-  expandableRows?: (...args) => any[];
+  expandableRows?: (...args) => any;
 };
 
 type TablePropsFromState = {};
