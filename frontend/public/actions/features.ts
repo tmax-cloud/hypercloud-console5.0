@@ -6,11 +6,12 @@ import { GroupModel, SelfSubjectAccessReviewModel, UserModel } from '../models';
 // import { k8sBasePath, ClusterVersionKind, k8sCreate } from '../module/k8s';
 import { k8sBasePath, k8sCreate } from '../module/k8s';
 import { receivedResources } from './k8s';
-import { coFetchJSON } from '../co-fetch';
+import { coFetch, coFetchJSON } from '../co-fetch';
 import { MonitoringRoutes } from '../reducers/monitoring';
 import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
 import { setUser, setConsoleLinks } from './common';
+import { decodeIdToken, setIdToken, updateUserSessionStorage } from '@console/internal/hypercloud/auth';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
 
 export enum ActionType {
@@ -196,9 +197,20 @@ const detectLoggingURL = dispatch =>
     },
   );
 
-const detectUser = dispatch =>
+const detectUser = dispatch => {
+  /* oauth2-proxy auth 사용함에 따라 openshift user call 주석 처리
   coFetchJSON('api/kubernetes/apis/user.openshift.io/v1/users/~').then(
     user => {
+      dispatch(setUser(user));
+    },
+  );*/
+  coFetch('/oauth2/auth').then(
+    res => {
+      const idToken = res.headers.get('authorization').replace('Bearer ', '');
+      setIdToken(idToken);
+      const decodeToken = decodeIdToken();
+      const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
+      updateUserSessionStorage(user);
       dispatch(setUser(user));
     },
     err => {
@@ -207,6 +219,7 @@ const detectUser = dispatch =>
       }
     },
   );
+};
 
 const detectConsoleLinks = dispatch =>
   coFetchJSON('api/kubernetes/apis/console.openshift.io/v1/consolelinks').then(
@@ -244,7 +257,7 @@ export const detectFeatures = () => (dispatch: Dispatch) =>
     detectOpenShift,
     detectCanCreateProject,
     detectClusterVersion,
-    // detectUser,
+    detectUser,
     // detectLoggingURL,
     // detectConsoleLinks,
     ...ssarCheckActions,

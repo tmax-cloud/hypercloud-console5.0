@@ -39,7 +39,10 @@ const setSingleClusterBasePath = () => {
   });
 };
 
-export const setUrlFromIngresses = async () => {
-  await setSingleClusterBasePath();
-  await initializationForMenu();
+export const setUrlFromIngresses = () => {
+  return new Promise<void>(async resolve => {
+    await setSingleClusterBasePath();
+    await initializationForMenu();
+    resolve();
+  });
 };

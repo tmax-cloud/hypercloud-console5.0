@@ -26,9 +26,6 @@ import '../style.scss';
 import './hypercloud/utils/langs/i18n';
 //PF4 Imports
 import { Page } from '@patternfly/react-core';
-// import Keycloak from 'keycloak-js';
-import keycloak from '../hypercloud/keycloak';
-import { setAccessToken, setIdToken, setId, resetLoginState } from '../hypercloud/auth';
 import { initializationForMenu } from '@console/internal/components/hypercloud/utils/menu-utils';
 import { setUrlFromIngresses } from '@console/internal/components/hypercloud/utils/ingress-utils';
 import { isMasterClusterPerspective } from '@console/internal/hypercloud/perspectives';
@@ -137,7 +134,7 @@ class App extends React.PureComponent {
       <>
         <Helmet titleTemplate={`%s · ${productName}`} defaultTitle={productName} />
         <ConsoleNotifier location="BannerTop" />
-        <Page header={<Masthead keycloak={keycloak} onNavToggle={this._onNavToggle} />} sidebar={<Navigation isNavOpen={isNavOpen} onNavSelect={this._onNavSelect} onPerspectiveSelected={this._onNavSelect} onClusterSelected={this._onNavSelect} isMasterPerspective={isMasterClusterPerspective()} />}>
+        <Page header={<Masthead onNavToggle={this._onNavToggle} />} sidebar={<Navigation isNavOpen={isNavOpen} onNavSelect={this._onNavSelect} onPerspectiveSelected={this._onNavSelect} onClusterSelected={this._onNavSelect} isMasterPerspective={isMasterClusterPerspective()} />}>
           <ConnectedNotificationDrawer isDesktop={isDrawerInline} onDrawerChange={this._onNotificationDrawerToggle}>
             <AppContents />
           </ConnectedNotificationDrawer>
@@ -150,107 +147,55 @@ class App extends React.PureComponent {
   }
 }
 
-keycloak
-  .init({
-    onLoad: 'check-sso',
-    checkLoginIframe: false,
-  })
-  .then(authorization => {
-    if (!authorization) {
-      keycloak.login();
-      return;
+const startDiscovery = () => store.dispatch(watchAPIServices());
+// Load cached API resources from localStorage to speed up page load.
+getCachedResources()
+  .then(resources => {
+    if (resources) {
+      store.dispatch(receivedResources(resources));
     }
-    
-    setIdToken(keycloak.idToken);
-    setAccessToken(keycloak.token);
-    setId(keycloak.idTokenParsed.preferred_username);
-    
-    setUrlFromIngresses().then(() => {
-      const startDiscovery = () => store.dispatch(watchAPIServices());
-      // Load cached API resources from localStorage to speed up page load.
-      getCachedResources()
-        .then(resources => {
-          if (resources) {
-            store.dispatch(receivedResources(resources));
-          }
-          // Still perform discovery to refresh the cache.
-          startDiscovery();
-        })
-        .catch(startDiscovery);
-
-      store.dispatch(detectFeatures());
-
-      // Global timer to ensure all <Timestamp> components update in sync
-      setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
-
-      fetchEventSourcesCrd();
-
-      // Fetch swagger on load if it's stale.
-      fetchSwagger();
-
-      // Used by GUI tests to check for unhandled exceptions
-      window.windowError = false;
-      window.onerror = window.onunhandledrejection = e => {
-        // eslint-disable-next-line no-console
-        console.error('Uncaught error', e);
-        window.windowError = e || true;
-      };
-
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-          .getRegistrations()
-          .then(registrations => registrations.forEach(reg => reg.unregister()))
-          // eslint-disable-next-line no-console
-          .catch(e => console.warn('Error unregistering service workers', e));
-      }
-
-      render(
-        <Provider store={store}>
-          <Router history={history} basename={window.SERVER_FLAGS.basePath}>
-            <Switch>
-              <Route path="/terminal" component={CloudShellTab} />
-              <Route path="/" component={App} />
-            </Switch>
-          </Router>
-        </Provider>,
-        document.getElementById('app'),
-      );
-    });
+    // Still perform discovery to refresh the cache.
+    startDiscovery();
   })
-  .catch(error => {
-    // render(<div>{!!error ? error : 'Failed to initialize Keycloak'}</div>, document.getElementById('app'));
-    render(
-      <div className="co-m-pane__body">
-        <h1 className="co-m-pane__heading co-m-pane__heading--center">Oh no! Something went wrong.</h1>
-        <label htmlFor="description">Description: </label>
-        <p>{!!error ? error.stack : 'Failed to initialize keycloak'}</p>
-      </div>,
-      document.getElementById('app'),
-    );
-  });
+  .catch(startDiscovery);
 
-keycloak.onReady = function() {
-  console.log('[keycloak] onReady');
+store.dispatch(detectFeatures());
+
+// Global timer to ensure all <Timestamp> components update in sync
+setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
+
+fetchEventSourcesCrd();
+
+// Fetch swagger on load if it's stale.
+fetchSwagger();
+
+// Ingress의 host 주소 조회를 통해 링크형 메뉴 주소 설정
+setUrlFromIngresses();
+
+// Used by GUI tests to check for unhandled exceptions
+window.windowError = false;
+window.onerror = window.onunhandledrejection = e => {
+  // eslint-disable-next-line no-console
+  console.error('Uncaught error', e);
+  window.windowError = e || true;
 };
-keycloak.onAuthSuccess = function() {
-  console.log('[keycloak] onAuthSuccess');
-};
-keycloak.onAuthError = function() {
-  console.log('[keycloak] onAuthError');
-};
-keycloak.onAuthRefreshSuccess = function() {
-  console.log('[keycloak] onAuthRefreshSuccess');
-};
-keycloak.onAuthRefreshError = function() {
-  console.log('[keycloak] onAuthRefreshError');
-};
-keycloak.onAuthLogout = function() {
-  console.log('[keycloak] onAuthLogout');
-  keycloak.logout();
-  resetLoginState();
-};
-keycloak.onTokenExpired = function() {
-  console.log('[keycloak] onTokenExpired ');
-  keycloak.logout();
-  resetLoginState();
-};
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .getRegistrations()
+    .then(registrations => registrations.forEach(reg => reg.unregister()))
+    // eslint-disable-next-line no-console
+    .catch(e => console.warn('Error unregistering service workers', e));
+}
+
+render(
+  <Provider store={store}>
+    <Router history={history} basename={window.SERVER_FLAGS.basePath}>
+      <Switch>
+        <Route path="/terminal" component={CloudShellTab} />
+        <Route path="/" component={App} />
+      </Switch>
+    </Router>
+  </Provider>,
+  document.getElementById('app'),
+);
