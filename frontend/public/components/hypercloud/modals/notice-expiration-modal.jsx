@@ -30,7 +30,7 @@ class NoticeExpirationModal extends Component {
   tick() {
     this.setState({ time: Math.floor(this.state.time - 1) });
     if (Math.floor(this.state.time) === 0) {
-      // this._logout(); // TODO: [YUNHEE]
+      this._logout();
     }
   }
   _logout(e) {

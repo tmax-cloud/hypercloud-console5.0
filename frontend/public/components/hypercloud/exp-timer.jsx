@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { NoticeExpirationModal_ } from './modals/notice-expiration-modal';
+import { getLogoutTime } from '../../hypercloud/auth';
+
 let timerID = 0;
 let expTime = 0;
 
@@ -8,27 +10,30 @@ export class ExpTimer extends React.Component {
     super(props);
     this.state = {
       expText: null,
+      tokenExpTime: null,
     };
   }
+
   componentDidMount() {
-    /* TODO: [YUNHEE]
-    const curTime = new Date();
-    const { keycloak } = this.props;
-    const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
-    const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
-    expTime = logoutTime;
-    timerID = window.setInterval(() => this.tick(), 1000);
-    */
+    this.resetTimer();
   }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.tokenExpTime !== prevProps.tokenExpTime) {
+      clearInterval(timerID);
+      this.resetTimer();
+    }
+  }
+
+  resetTimer() {
+    expTime = getLogoutTime();
+    timerID = setInterval(() => this.tick(), 1000);
+  }
+
   tokRefresh() {
-    /* TODO: [YUNHEE]
-    const curTime = new Date();
-    const { keycloak } = this.props;
-    const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
-    const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
-    expTime = logoutTime;
-    */
+    expTime = getLogoutTime();
   }
+
   componentWillUnmount() {
     // 타이머 등록 해제
     window.clearInterval(timerID);

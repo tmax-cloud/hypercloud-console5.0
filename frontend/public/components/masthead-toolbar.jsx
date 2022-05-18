@@ -17,7 +17,7 @@ import { AboutModal } from './about-modal';
 import { clusterVersionReference, getReportBugLink } from '../module/k8s/cluster-settings';
 import * as redhatLogoImg from '../imgs/logos/redhat.svg';
 import { ExpTimer } from './hypercloud/exp-timer';
-import { createAccountUrl, logout as logOut } from '../hypercloud/auth';
+import { createAccountUrl, getTokenExpTime, logout as _logout } from '../hypercloud/auth';
 import { withTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { HyperCloudManualLink } from './utils';
@@ -314,7 +314,7 @@ class MastheadToolbarContents_ extends React.Component {
 
     const logout = e => {
       e.preventDefault();
-      logOut();
+      _logout();
     };
 
     userActions.push({
@@ -477,8 +477,9 @@ class MastheadToolbarContents_ extends React.Component {
                 ref={input => {
                   this.timerRef = input;
                 }}
-                logout={() => {}} // TODO: [YUNHEE]
+                logout={_logout}
                 tokenRefresh={this._tokenRefresh}
+                tokenExpTime={getTokenExpTime()}
               />
             </ToolbarItem>
             <ToolbarItem>
