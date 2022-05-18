@@ -1,9 +1,20 @@
+import * as _ from 'lodash-es';
+import { setUser } from '@console/internal/actions/common';
+
 export const getId = function() {
   return sessionStorage.getItem('id');
 };
 
+const getGroups = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('groups'));
+  } catch (error) {
+    return null;
+  }
+};
+
 export const getUserGroup = function() {
-  let usergroups = getParsedAccessToken().group;
+  const usergroups = getGroups();
   let result = '';
   if (usergroups?.length > 0) {
     result = '&' + usergroups.map(cur => `userGroup=${cur}`).join('&');
@@ -12,7 +23,20 @@ export const getUserGroup = function() {
 };
 
 export const getAuthUrl = function() {
-  return getParsedAccessToken().iss || '';
+  return decodeIdToken()?.iss || '';
+};
+
+export const createAccountUrl = () => {
+  const realm = getAuthUrl();
+  let url;
+  if (realm) {
+    url = `${realm}/account?referrer=${encodeURIComponent(window.SERVER_FLAGS.KeycloakClientId)}&referrer_uri=${encodeURIComponent(location.href)}`;
+  }
+  return url;
+};
+
+export const getTokenExpTime = () => {
+  return decodeIdToken()?.exp;
 };
 
 export const setIdToken = function(token) {
@@ -44,11 +68,14 @@ export const resetLoginState = function() {
   return;
 };
 
-export const getParsedAccessToken = function() {
+const decodeIdToken = () => {
   const token = getIdToken();
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(
+  if (!token) {
+    return null;
+  }
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
     atob(base64)
       .split('')
       .map(function(c) {
@@ -59,3 +86,37 @@ export const getParsedAccessToken = function() {
 
   return JSON.parse(jsonPayload);
 };
+
+const updateUserSessionStorage = userJSON => {
+  sessionStorage.setItem('id', userJSON.id);
+  sessionStorage.setItem('email', userJSON.email);
+  sessionStorage.setItem('groups', JSON.stringify(userJSON.groups));
+};
+
+export const dispatchUser = (idToken, dispatch) => {
+  setIdToken(idToken);
+  const decodeToken = decodeIdToken();
+  const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
+  updateUserSessionStorage(user);
+  dispatch(setUser(user));
+};
+
+export const getLogoutTime = () => {
+  const expTime = getTokenExpTime();
+  if (!expTime) {
+    return 0;
+  }
+  const curTime = new Date();
+  const tokenExpTime = new Date(expTime * 1000);
+  return (tokenExpTime.getTime() - curTime.getTime()) / 1000;
+};
+
+// 여러번 로그아웃되지 않도록 함
+export const logout = _.once(() => {
+  const realm = getAuthUrl();
+  if (realm) {
+    resetLoginState();
+    const redirectUrl = `${realm}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(location.href)}`;
+    window.location = `${location.origin}/oauth2/sign_out?rd=${redirectUrl}`;
+  }
+});

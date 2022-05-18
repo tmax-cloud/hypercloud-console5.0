@@ -118,28 +118,18 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
 
   if (!!getIdToken()) {
     allOptions.headers.Authorization = 'Bearer ' + getIdToken();
-    const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
-
-    // return fetch promise directly if timeout <= 0
-    if (timeout < 1) {
-      return fetchPromise;
-    }
-
-    const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
-
-    // Initiate both the fetch promise and a timeout promise
-    return Promise.race([fetchPromise, timeoutPromise]);
-  } else {
-    // return fetch promise directly if timeout <= 0
-    if (timeout < 1) {
-      return fetchPromise;
-    }
-
-    const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
-
-    // Initiate both the fetch promise and a timeout promise
-    return Promise.race([timeoutPromise]);
   }
+  const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
+
+  // return fetch promise directly if timeout <= 0
+  if (timeout < 1) {
+    return fetchPromise;
+  }
+
+  const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
+
+  // Initiate both the fetch promise and a timeout promise
+  return Promise.race([fetchPromise, timeoutPromise]);
 };
 
 const parseJson = response => response.json();
