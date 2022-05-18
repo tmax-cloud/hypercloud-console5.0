@@ -11,7 +11,7 @@ import { K8sResourceKind, PodKind, NodeKind } from '../module/k8s';
 import { allModels } from '../module/k8s/k8s-models';
 import { detectFeatures, clearSSARFlags } from './features';
 import { OverviewSpecialGroup } from '../components/overview/constants';
-import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
+import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks, setIdToken, setRefreshToken } from './common';
 
 export enum ActionType {
   DismissOverviewDetails = 'dismissOverviewDetails',
@@ -62,6 +62,8 @@ export enum ActionType {
   SetNodeMetrics = 'setNodeMetrics',
   SetPinnedResources = 'setPinnedResources',
   SetActiveCluster = 'setActiveCluster',
+  SetIdToken = 'setIdToken',
+  SetRefreshToken = 'setRefreshToken',
 }
 
 type MetricValuesByName = {
@@ -186,7 +188,7 @@ export const setActiveNamespace = (namespace: string = '') => {
     }
     // remember the most recently-viewed project, which is automatically
     // selected when returning to the console
-   // localStorage.setItem(LAST_NAMESPACE_NAME_LOCAL_STORAGE_KEY, namespace);
+    // localStorage.setItem(LAST_NAMESPACE_NAME_LOCAL_STORAGE_KEY, namespace);
     sessionStorage.setItem(LAST_NAMESPACE_NAME_LOCAL_STORAGE_KEY, namespace);
   }
 
@@ -331,6 +333,9 @@ export const setPodMetrics = (podMetrics: PodMetrics) => action(ActionType.SetPo
 export const setNamespaceMetrics = (namespaceMetrics: NamespaceMetrics) => action(ActionType.SetNamespaceMetrics, { namespaceMetrics });
 export const setNodeMetrics = (nodeMetrics: NodeMetrics) => action(ActionType.SetNodeMetrics, { nodeMetrics });
 
+export const getIdToken = (): string => store.getState().UI.get('idToken');
+export const getRefereshToken = (): string => store.getState().UI.get('refreshToken');
+
 // TODO(alecmerdler): Implement all actions using `typesafe-actions` and add them to this export
 const uiActions = {
   setCurrentLocation,
@@ -383,6 +388,8 @@ const uiActions = {
   notificationDrawerToggleRead,
   setPinnedResources,
   setActiveCluster,
+  setIdToken,
+  setRefreshToken,
 };
 
 export type UIAction = Action<typeof uiActions>;

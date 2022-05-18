@@ -10,8 +10,8 @@ import { coFetch, coFetchJSON } from '../co-fetch';
 import { MonitoringRoutes } from '../reducers/monitoring';
 import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
-import { setUser, setConsoleLinks } from './common';
-import { decodeIdToken, setIdToken, updateUserSessionStorage } from '@console/internal/hypercloud/auth';
+import { setUser, setConsoleLinks, setIdToken } from './common';
+import { decodeIdToken, updateUserSessionStorage } from '@console/internal/hypercloud/auth';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
 
 export enum ActionType {
@@ -207,7 +207,7 @@ const detectUser = dispatch => {
   coFetch('/oauth2/auth').then(
     res => {
       const idToken = res.headers.get('authorization').replace('Bearer ', '');
-      setIdToken(idToken);
+      dispatch(setIdToken(idToken));
       const decodeToken = decodeIdToken();
       const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
       updateUserSessionStorage(user);

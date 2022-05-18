@@ -1,4 +1,6 @@
 import * as _ from 'lodash-es';
+import { coFetch } from '@console/internal/co-fetch';
+import { getIdToken as _getIdToken, getRefereshToken as _getRefreshToken } from '@console/internal/actions/ui';
 
 export const getId = function() {
   return sessionStorage.getItem('id');
@@ -25,13 +27,12 @@ export const getAuthUrl = function() {
   return decodeIdToken().iss || '';
 };
 
-export const setIdToken = function(token) {
-  sessionStorage.setItem('idToken', token);
-  return;
+export const getIdToken = () => {
+  return _getIdToken();
 };
 
-export const getIdToken = function() {
-  return sessionStorage.getItem('idToken');
+export const getRefreshToken = () => {
+  return _getRefreshToken();
 };
 
 export const setAccessToken = function(token) {

@@ -332,6 +332,12 @@ export default (state: UIState, action: UIAction): UIState => {
     case ActionType.SetActiveCluster:
       return state.set('activeCluster', action.payload.cluster);
 
+    case ActionType.SetIdToken:
+      return state.set('idToken', action.payload.idToken);
+
+    case ActionType.SetRefreshToken:
+      return state.set('refreshToken', action.payload.refreshToken);
+
     default:
       break;
   }
