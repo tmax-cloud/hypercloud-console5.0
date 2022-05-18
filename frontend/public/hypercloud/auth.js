@@ -1,6 +1,7 @@
 import * as _ from 'lodash-es';
 import { coFetch } from '@console/internal/co-fetch';
 import { getIdToken as _getIdToken, getRefereshToken as _getRefreshToken } from '@console/internal/actions/ui';
+import { setUser, setIdToken } from '@console/internal/actions/common';
 
 export const getId = function() {
   return sessionStorage.getItem('id');
@@ -24,7 +25,11 @@ export const getUserGroup = function() {
 };
 
 export const getAuthUrl = function() {
-  return decodeIdToken().iss || '';
+  return decodeIdToken()?.iss || '';
+};
+
+export const getTokenExpTime = () => {
+  return decodeIdToken()?.exp;
 };
 
 export const getIdToken = () => {
@@ -50,18 +55,20 @@ export const resetLoginState = function() {
   return;
 };
 
-export const updateUserSessionStorage = userJSON => {
+const updateUserSessionStorage = userJSON => {
   sessionStorage.setItem('id', userJSON.id);
   sessionStorage.setItem('email', userJSON.email);
   sessionStorage.setItem('groups', JSON.stringify(userJSON.groups));
-  // TODO [YUNHEE]: accessToken, refreshToken 정보 필요
 };
 
-export const decodeIdToken = function() {
-  const token = getIdToken();
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(
+const decodeIdToken = idToken => {
+  const token = idToken || getIdToken();
+  if (!token) {
+    return null;
+  }
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
     atob(base64)
       .split('')
       .map(function(c) {
@@ -71,6 +78,25 @@ export const decodeIdToken = function() {
   );
 
   return JSON.parse(jsonPayload);
+};
+
+export const dispatchUser = (idToken, dispatch) => {
+  // TODO [YUNHEE]: accessToken, refreshToken 정보 필요
+  dispatch(setIdToken(idToken));
+  const decodeToken = decodeIdToken();
+  const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
+  updateUserSessionStorage(user);
+  dispatch(setUser(user));
+};
+
+export const getLogoutTime = () => {
+  const expTime = getTokenExpTime();
+  if (!expTime) {
+    return 0;
+  }
+  const curTime = new Date();
+  const tokenExpTime = new Date(expTime * 1000);
+  return (tokenExpTime.getTime() - curTime.getTime()) / 1000;
 };
 
 export const createAccountUrl = () => {
