@@ -164,7 +164,7 @@ store.dispatch(detectFeatures());
 // Global timer to ensure all <Timestamp> components update in sync
 setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
 
-fetchEventSourcesCrd();
+// fetchEventSourcesCrd(); // 작성 이유 알 수 없음. '/api/console/knative-event-sources' 콜 사용하지 않기에 주석 처리
 
 // Fetch swagger on load if it's stale.
 fetchSwagger();

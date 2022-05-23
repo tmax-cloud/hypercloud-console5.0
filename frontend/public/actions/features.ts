@@ -12,7 +12,7 @@ import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
 import { setConsoleLinks } from './common';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
-import { dispatchUser } from '../hypercloud/auth';
+import { dispatchUser, logout } from '../hypercloud/auth';
 
 export enum ActionType {
   SetFlag = 'setFlag',
@@ -215,7 +215,9 @@ const detectUser = dispatch => {
       dispatchUser(idToken, dispatch);
     },
     err => {
-      if (!_.includes([401, 403, 404, 500], _.get(err, 'response.status'))) {
+      if (_.get(err, 'response.status') === 401) {
+        logout();
+      } else if (!_.includes([403, 404, 500], _.get(err, 'response.status'))) {
         setTimeout(() => detectUser(dispatch), 15000);
       }
     },

@@ -102,13 +102,10 @@ export const dispatchUser = (idToken, dispatch) => {
 };
 
 export const getLogoutTime = () => {
-  const expTime = getTokenExpTime();
-  if (!expTime) {
-    return 0;
-  }
   const curTime = new Date();
-  const tokenExpTime = new Date(expTime * 1000);
-  return (tokenExpTime.getTime() - curTime.getTime()) / 1000;
+  const tokenExpTime = new Date((getTokenExpTime() || 0) * 1000);
+  const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
+  return logoutTime < 0 ? 0 : logoutTime;
 };
 
 // 여러번 로그아웃되지 않도록 함
