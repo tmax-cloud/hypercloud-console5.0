@@ -1,6 +1,8 @@
 import * as _ from 'lodash-es';
 import { setUser } from '@console/internal/actions/common';
 
+export const REQUEST_USERINFO_URL = '/oauth2/auth';
+
 export const getId = function() {
   return sessionStorage.getItem('id');
 };

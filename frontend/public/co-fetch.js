@@ -1,6 +1,6 @@
 import * as _ from 'lodash-es';
 import 'whatwg-fetch';
-import { getIdToken } from './hypercloud/auth';
+import { getIdToken, REQUEST_USERINFO_URL } from './hypercloud/auth';
 import { authSvc } from './module/auth';
 import store from './redux';
 import keycloak from './hypercloud/keycloak';
@@ -10,6 +10,9 @@ const initDefaults = {
   headers: {},
   credentials: 'same-origin',
 };
+
+// id token을 사용하지 않는 url
+const withoutTokenUrls = [REQUEST_USERINFO_URL];
 
 // TODO: url can be url or path, but shouldLogout only handles paths
 export const shouldLogout = url => {
@@ -116,20 +119,26 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
     delete allOptions.headers['X-CSRFToken'];
   }
 
-  if (!!getIdToken()) {
-    allOptions.headers.Authorization = 'Bearer ' + getIdToken();
+  if (!!getIdToken() || withoutTokenUrls.includes(url)) {
+    if (!withoutTokenUrls.includes(url)) {
+      allOptions.headers.Authorization = 'Bearer ' + getIdToken();
+    }
+
+    const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
+
+    // return fetch promise directly if timeout <= 0
+    if (timeout < 1) {
+      return fetchPromise;
+    }
+
+    const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
+
+    // Initiate both the fetch promise and a timeout promise
+    return Promise.race([fetchPromise, timeoutPromise]);
+  } else {
+    const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
+    return Promise.race([timeoutPromise]);
   }
-  const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
-
-  // return fetch promise directly if timeout <= 0
-  if (timeout < 1) {
-    return fetchPromise;
-  }
-
-  const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
-
-  // Initiate both the fetch promise and a timeout promise
-  return Promise.race([fetchPromise, timeoutPromise]);
 };
 
 const parseJson = response => response.json();

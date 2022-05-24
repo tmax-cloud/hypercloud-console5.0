@@ -12,7 +12,7 @@ import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
 import { setConsoleLinks } from './common';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
-import { dispatchUser, logout } from '../hypercloud/auth';
+import { dispatchUser, logout, REQUEST_USERINFO_URL } from '../hypercloud/auth';
 
 export enum ActionType {
   SetFlag = 'setFlag',
@@ -209,7 +209,7 @@ const detectUser = dispatch => {
       }
     },
   );*/
-  coFetch('/oauth2/auth').then(
+  coFetch(REQUEST_USERINFO_URL).then(
     res => {
       const idToken = res.headers.get('authorization').replace('Bearer ', '');
       dispatchUser(idToken, dispatch);
