@@ -35,18 +35,21 @@ export class ExpTimer extends React.Component {
     this.setState({ expText: expText });
   }
   tick() {
-    // 모달 띄우기 전에 이미 세션 시간이 만료된 경우, 로그아웃 처리
-    if (!document.getElementById('notice-expiration-modal-content') && expTime === 0) {
-      clearInterval(timerID);
-      this.props.logout();
-    }
     if (expTime > 0) {
       expTime -= 1;
+      if (Math.floor(expTime) === 60) {
+        NoticeExpirationModal_({ logout: this.props.logout, tokenRefresh: this.props.tokenRefresh, time: expTime });
+      }
+      this.expFormat();
+    } else {
+      // 모달 띄우기 전에 이미 세션 시간이 만료된 경우, 로그아웃 처리
+      if (!document.getElementById('notice-expiration-modal-content')) {
+        clearInterval(timerID);
+        this.props.logout();
+      } else {
+        clearInterval(timerID); // 세션 만료된 후 타이머 등록 해제
+      }
     }
-    if (Math.floor(expTime) === 60) {
-      NoticeExpirationModal_({ logout: this.props.logout, tokenRefresh: this.props.tokenRefresh, time: expTime });
-    }
-    this.expFormat();
   }
   render() {
     const { expText } = this.state;
