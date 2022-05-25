@@ -6,13 +6,12 @@ import { GroupModel, SelfSubjectAccessReviewModel, UserModel } from '../models';
 // import { k8sBasePath, ClusterVersionKind, k8sCreate } from '../module/k8s';
 import { k8sBasePath, k8sCreate } from '../module/k8s';
 import { receivedResources } from './k8s';
-import { coFetch, coFetchJSON } from '../co-fetch';
+import { coFetchJSON } from '../co-fetch';
 import { MonitoringRoutes } from '../reducers/monitoring';
 import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
-import { setConsoleLinks } from './common';
+import { setConsoleLinks, setUser } from './common';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
-import { dispatchUser, logout, REQUEST_USERINFO_URL } from '../hypercloud/auth';
 
 export enum ActionType {
   SetFlag = 'setFlag',
@@ -198,26 +197,12 @@ const detectLoggingURL = dispatch =>
   );
 
 const detectUser = dispatch => {
-  /* oauth2-proxy auth 사용함에 따라 openshift user call 주석 처리
   coFetchJSON('api/kubernetes/apis/user.openshift.io/v1/users/~').then(
     user => {
       dispatch(setUser(user));
     },
     err => {
       if (!_.includes([401, 403, 404, 500], _.get(err, 'response.status'))) {
-        setTimeout(() => detectUser(dispatch), 15000);
-      }
-    },
-  );*/
-  coFetch(REQUEST_USERINFO_URL).then(
-    res => {
-      const accessToken = res.headers.get('x-auth-request-access-token');
-      dispatchUser(accessToken, dispatch);
-    },
-    err => {
-      if (_.get(err, 'response.status') === 401) {
-        logout();
-      } else if (!_.includes([403, 404, 500], _.get(err, 'response.status'))) {
         setTimeout(() => detectUser(dispatch), 15000);
       }
     },
@@ -260,7 +245,7 @@ export const detectFeatures = () => (dispatch: Dispatch) =>
     detectOpenShift,
     detectCanCreateProject,
     detectClusterVersion,
-    detectUser,
+    // detectUser,
     // detectLoggingURL,
     // detectConsoleLinks,
     ...ssarCheckActions,

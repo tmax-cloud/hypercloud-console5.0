@@ -3,7 +3,6 @@ import 'whatwg-fetch';
 import { getAccessToken, REQUEST_USERINFO_URL } from './hypercloud/auth';
 import { authSvc } from './module/auth';
 import store from './redux';
-import keycloak from './hypercloud/keycloak';
 import { isSingleClusterPerspective, getSingleClusterFullBasePath } from './hypercloud/perspectives';
 
 const initDefaults = {
@@ -40,7 +39,6 @@ const validateStatus = (response, url) => {
 
   if (response.status === 401) {
     //authSvc.logout(window.location.pathname);
-    //keycloak.logout();
     // return response.json().then(json => {
     //   const error = new Error(json.message || 'Authorization failed.');
     //   error.response = response;

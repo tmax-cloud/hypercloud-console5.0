@@ -30,6 +30,7 @@ import { initializationForMenu } from '@console/internal/components/hypercloud/u
 import { setUrlFromIngresses } from '@console/internal/components/hypercloud/utils/ingress-utils';
 import { isMasterClusterPerspective } from '@console/internal/hypercloud/perspectives';
 import Chatbot from './hypercloud/chatbot';
+import { detectUser, logout } from '@console/internal/hypercloud/auth';
 
 const breakpointMD = 768;
 const NOTIFICATION_DRAWER_BREAKPOINT = 1800;
@@ -147,55 +148,73 @@ class App extends React.PureComponent {
   }
 }
 
-const startDiscovery = () => store.dispatch(watchAPIServices());
-// Load cached API resources from localStorage to speed up page load.
-getCachedResources()
-  .then(resources => {
-    if (resources) {
-      store.dispatch(receivedResources(resources));
+detectUser()
+  .then(authenticated => {
+    if (!authenticated) {
+      logout();
+      return;
     }
-    // Still perform discovery to refresh the cache.
-    startDiscovery();
+
+    const startDiscovery = () => store.dispatch(watchAPIServices());
+    // Load cached API resources from localStorage to speed up page load.
+    getCachedResources()
+      .then(resources => {
+        if (resources) {
+          store.dispatch(receivedResources(resources));
+        }
+        // Still perform discovery to refresh the cache.
+        startDiscovery();
+      })
+      .catch(startDiscovery);
+
+    store.dispatch(detectFeatures());
+
+    // Global timer to ensure all <Timestamp> components update in sync
+    setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
+
+    // fetchEventSourcesCrd(); // 작성 이유 알 수 없음. '/api/console/knative-event-sources' 콜 사용하지 않기에 주석 처리
+
+    // Fetch swagger on load if it's stale.
+    fetchSwagger();
+
+    // Ingress의 host 주소 조회를 통해 링크형 메뉴 주소 설정
+    setUrlFromIngresses();
+
+    // Used by GUI tests to check for unhandled exceptions
+    window.windowError = false;
+    window.onerror = window.onunhandledrejection = e => {
+      // eslint-disable-next-line no-console
+      console.error('Uncaught error', e);
+      window.windowError = e || true;
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then(registrations => registrations.forEach(reg => reg.unregister()))
+        // eslint-disable-next-line no-console
+        .catch(e => console.warn('Error unregistering service workers', e));
+    }
+
+    render(
+      <Provider store={store}>
+        <Router history={history} basename={window.SERVER_FLAGS.basePath}>
+          <Switch>
+            <Route path="/terminal" component={CloudShellTab} />
+            <Route path="/" component={App} />
+          </Switch>
+        </Router>
+      </Provider>,
+      document.getElementById('app'),
+    );
   })
-  .catch(startDiscovery);
-
-store.dispatch(detectFeatures());
-
-// Global timer to ensure all <Timestamp> components update in sync
-setInterval(() => store.dispatch(UIActions.updateTimestamps(Date.now())), 10000);
-
-// fetchEventSourcesCrd(); // 작성 이유 알 수 없음. '/api/console/knative-event-sources' 콜 사용하지 않기에 주석 처리
-
-// Fetch swagger on load if it's stale.
-fetchSwagger();
-
-// Ingress의 host 주소 조회를 통해 링크형 메뉴 주소 설정
-setUrlFromIngresses();
-
-// Used by GUI tests to check for unhandled exceptions
-window.windowError = false;
-window.onerror = window.onunhandledrejection = e => {
-  // eslint-disable-next-line no-console
-  console.error('Uncaught error', e);
-  window.windowError = e || true;
-};
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .getRegistrations()
-    .then(registrations => registrations.forEach(reg => reg.unregister()))
-    // eslint-disable-next-line no-console
-    .catch(e => console.warn('Error unregistering service workers', e));
-}
-
-render(
-  <Provider store={store}>
-    <Router history={history} basename={window.SERVER_FLAGS.basePath}>
-      <Switch>
-        <Route path="/terminal" component={CloudShellTab} />
-        <Route path="/" component={App} />
-      </Switch>
-    </Router>
-  </Provider>,
-  document.getElementById('app'),
-);
+  .catch(error => {
+    render(
+      <div className="co-m-pane__body">
+        <h1 className="co-m-pane__heading co-m-pane__heading--center">Oh no! Something went wrong.</h1>
+        <label htmlFor="description">Description: </label>
+        <p>{!!error ? error.stack : 'Failed to login'}</p>
+      </div>,
+      document.getElementById('app'),
+    );
+  });

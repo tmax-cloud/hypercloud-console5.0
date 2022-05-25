@@ -1,4 +1,6 @@
 import * as _ from 'lodash-es';
+import store from '../redux';
+import { coFetch } from '../co-fetch';
 import { setUser } from '@console/internal/actions/common';
 
 export const REQUEST_USERINFO_URL = '/oauth2/auth';
@@ -86,12 +88,35 @@ const updateUserSessionStorage = userJSON => {
   sessionStorage.setItem('groups', JSON.stringify(userJSON.groups));
 };
 
-export const dispatchUser = (accessToken, dispatch) => {
-  setAccessToken(accessToken);
+const dispatchUser = () => {
   const decodeToken = decodeAccessToken();
   const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
   updateUserSessionStorage(user);
-  dispatch(setUser(user));
+  store.dispatch(setUser(user));
+};
+
+export const detectUser = () => {
+  return new Promise((resolve, reject) => {
+    coFetch(REQUEST_USERINFO_URL).then(
+      res => {
+        const accessToken = res.headers.get('x-auth-request-access-token');
+        if (!accessToken) {
+          resolve(false);
+        } else {
+          setAccessToken(accessToken);
+          dispatchUser();
+          resolve(true);
+        }
+      },
+      err => {
+        if (_.get(err, 'response.status') === 401) {
+          resolve(false);
+        } else {
+          reject(err);
+        }
+      },
+    );
+  });
 };
 
 export const getLogoutTime = () => {
@@ -106,7 +131,7 @@ export const logout = _.once(() => {
   const realm = getAuthUrl();
   if (realm) {
     resetLoginState();
-    const redirectUrl = `${realm}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(location.href)}`;
+    const redirectUrl = `${realm}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(location.origin)}`;
     window.location = `${location.origin}/oauth2/sign_out?rd=${redirectUrl}`;
   }
 });
