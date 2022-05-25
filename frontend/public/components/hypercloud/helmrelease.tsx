@@ -22,6 +22,7 @@ import { deleteModal } from '../modals';
 import { TableProps } from './utils/default-list-component';
 import { ListPage } from '../factory';
 import { CustomMenusMap } from '@console/internal/hypercloud/menu/menu-types';
+import { getQueryArgument } from '../utils';
 
 const helmHost: string = (CustomMenusMap as any).Helm.url;
 
@@ -335,9 +336,13 @@ type HelmreleasesFormProps = {
 export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
   const { t } = useTranslation();
   const { defaultValue, namespace } = props;
-  const chartName = defaultValue ? defaultValue.chart.metadata.name : '';
+  const queryChartName = getQueryArgument('chartName');  
+  const queryVersion = getQueryArgument('chartVersion');
+  const queryChartRepo = getQueryArgument('chartRepo');
+  const queryUrl = getQueryArgument('chartUrl');
+  const chartName = queryChartName ? queryChartName : defaultValue ? defaultValue.chart.metadata.name : '';
   const releaseName = defaultValue ? defaultValue.name : '';
-  const version = defaultValue ? defaultValue.chart.metadata.version : '';
+  const version = queryVersion? queryVersion : defaultValue ? defaultValue.chart.metadata.version : '';
   const values = defaultValue ? defaultValue.chart.values : null;
 
   const [loading, setLoading] = React.useState(false);
@@ -350,6 +355,8 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [entries, setEntries] = React.useState([]);
   const [chartNameList, setChartNameList] = React.useState({});
+
+  const noEntryMessageTest = 'This chart is not on the server';
 
   React.useEffect(() => {
     const fetchHelmChart = async () => {
@@ -376,19 +383,24 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
       });
     };
     fetchHelmChart();
+    if (queryVersion) setPostVersion(queryVersion);
+    if (queryUrl) setPostPackageURL(queryUrl);
+    if (queryChartName) setValues(queryChartRepo , queryChartName);
   }, []);
 
-  const setValues = (selection: string) => {
+  const setValues = (repoName: string, chartName: string) => {
     const getChartValues = () => {
-      const url = `${helmHost}/helm/charts/${selection}`;
-      coFetchJSON(url)
-        .then(res => {
-          setPostValues(safeDump(res.values));
-        })
-        .catch(e => {
-          setProgress(false);
-          setErrorMessage(`error : ${e.json.error}\ndescription : ${e.json.description}`);
-        });
+      const url = repoName ? `${helmHost}/helm/charts/${repoName}_${chartName}` : null;
+      if (url !== null) {
+        coFetchJSON(url)
+          .then(res => {
+            setPostValues(safeDump(res.values));
+          })
+          .catch(e => {
+            setProgress(false);
+            setErrorMessage(`error : ${e.json.error}\ndescription : ${e.json.description}`);
+          });
+      }
     };
     getChartValues();
   };
@@ -426,17 +438,12 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
   };
   const updateChartName = (selection: string) => {
     setSelectChartName(selection);
-    setPostVersion(
-      entries.filter(e => {
-        if (e.name === chartNameList[selection]) return true;
-      })[0].version,
-    );
-    setPostPackageURL(
-      entries.filter(e => {
-        if (e.name === chartNameList[selection]) return true;
-      })[0].urls[0],
-    );
-    setValues(selection);
+    const selectedEntry = entries.filter(e => {
+      if (e.name === chartNameList[selection]) return true;
+    })[0];
+    setPostVersion(selectedEntry ? selectedEntry.version : noEntryMessageTest);
+    setPostPackageURL(selectedEntry ? selectedEntry.urls[0] : noEntryMessageTest);
+    setValues(selectedEntry ? selectedEntry.repo?.name : null, selection);
   };
 
   return (
@@ -445,24 +452,29 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
         <ButtonBar inProgress={inProgress} errorMessage={errorMessage}>
           <form className="co-m-pane__body-group co-m-pane__form" method="post" action={`${helmHost}/helm/repos`}>
             <Section label={t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_1')} id="releaseName" isRequired={true}>
-              <input className="pf-c-form-control" id="releaseName" name="releaseName" defaultValue={releaseName} onChange={updatePostReleaseName} disabled={defaultValue} />
+              {defaultValue ? <p>{releaseName}</p> : <input className="pf-c-form-control" id="releaseName" name="releaseName" defaultValue={releaseName} onChange={updatePostReleaseName} disabled={defaultValue} />}
             </Section>
             <Section label={t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_2')} id="chartName" isRequired={true}>
-              <Dropdown
-                name="chartName"
-                className="btn-group"
-                title={selectChartName || t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_3')}
-                items={chartNameList} // (필수)
-                required={true}
-                onChange={updateChartName}
-                buttonClassName="dropdown-btn" // 선택된 아이템 보여주는 button (title) 부분 className
-                itemClassName="dropdown-item" // 드롭다운 아이템 리스트 전체의 className - 각 row를 의미하는 것은 아님
-              />
+              {defaultValue ? (
+                <p>{selectChartName}</p>
+              ) : (
+                <Dropdown
+                  name="chartName"
+                  className="btn-group"
+                  title={selectChartName || t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_3')}
+                  items={chartNameList} // (필수)
+                  required={true}
+                  onChange={updateChartName}
+                  buttonClassName="dropdown-btn" // 선택된 아이템 보여주는 button (title) 부분 className
+                  itemClassName="dropdown-item" // 드롭다운 아이템 리스트 전체의 className - 각 row를 의미하는 것은 아님
+                  disabled={defaultValue}
+                />
+              )}
             </Section>
             {selectChartName && (
               <>
                 <Section label={t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_4')} id="Package URL">
-                  <div>{postPackageURL ? postPackageURL : 'This chart is not on the server'}</div>
+                  <div>{postPackageURL}</div>
                 </Section>
                 <Section label={t('SINGLE:MSG_HELMRELEASES_CREATEFORM_DIV2_6')} id="version">
                   <div>{postVersion}</div>

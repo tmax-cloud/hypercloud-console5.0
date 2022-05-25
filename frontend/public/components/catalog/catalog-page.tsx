@@ -18,7 +18,7 @@ import { coFetch, coFetchJSON } from '../../co-fetch';
 import { useTranslation, withTranslation } from 'react-i18next';
 import * as noResourceImg from '../../imgs/hypercloud/img_no_resource.svg';
 import { Link } from 'react-router-dom';
-import { ingressUrlWithLabelSelector } from '@console/internal/components/hypercloud/utils/ingress-utils';
+import { CustomMenusMap } from '@console/internal/hypercloud/menu/menu-types';
 
 export const CatalogPageType = {
   SERVICE_INSTANCE: 'ServiceInstance',
@@ -280,7 +280,7 @@ export const CatalogListPage = withTranslation()(
               markdownDescription,
               customProperties: customProperties(t),
               // hypercloud
-              href: `/helmreleases/ns/${currentNamespace}/~new`,
+              href: `/helmreleases/ns/${currentNamespace}/~new?chartName=${chartName}&chartVersion=${chartVersion}&chartRepo=${chart.repo.name}&chartUrl=${chart.repo.url}`,
               // openshift
               // href: `/catalog/helm-install?chartName=${chartName}&chartURL=${encodedChartURL}&preselected-ns=${currentNamespace}`,
               documentationUrl: chart.home,
@@ -407,21 +407,7 @@ export const Catalog = connectToFlags<CatalogProps>(
 
   React.useEffect(() => {
     const fetchHelmChart = async () => {
-      let serverURL = '';
-      await coFetchJSON(
-        ingressUrlWithLabelSelector({
-          'ingress.tmaxcloud.org/name': 'helm-apiserver',
-        }),
-      ).then(res => {
-        const { items } = res;
-        if (items?.length > 0) {
-          const ingress = items[0];
-          const host = ingress.spec?.rules?.[0]?.host;
-          if (!!host) {
-            serverURL = `https://${host}/helm/charts`;
-          }
-        }
-      });
+      const serverURL = (CustomMenusMap as any).Helm.url + '/helm/charts';
       await coFetch(serverURL).then(async res => {
         const yaml = await res.text();
         const json = safeLoad(yaml);
