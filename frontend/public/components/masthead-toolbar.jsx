@@ -17,7 +17,7 @@ import { AboutModal } from './about-modal';
 import { clusterVersionReference, getReportBugLink } from '../module/k8s/cluster-settings';
 import * as redhatLogoImg from '../imgs/logos/redhat.svg';
 import { ExpTimer } from './hypercloud/exp-timer';
-import { createAccountUrl, getTokenExpTime, logout as _logout } from '../hypercloud/auth';
+import { createAccountUrl, logout as _logout } from '../hypercloud/auth';
 import { withTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { HyperCloudManualLink } from './utils';
@@ -479,10 +479,8 @@ class MastheadToolbarContents_ extends React.Component {
                 }}
                 logout={_logout}
                 tokenRefresh={this._tokenRefresh}
-                tokenExpTime={getTokenExpTime()}
               />
             </ToolbarItem>
-            {/* TODO: [YUNHEE] 토큰 연장 로직 추가
             <ToolbarItem>
               <Badge
                 key={1}
@@ -492,7 +490,7 @@ class MastheadToolbarContents_ extends React.Component {
               >
                 {t('COMMON:MSG_GNB_SESSION_1')}
               </Badge>
-            </ToolbarItem> */}
+            </ToolbarItem>
             <SystemStatusButton statuspageData={statuspageData} />
             <ToolbarItem className="hidden-xs">{this._renderLanguageMenu(false)}</ToolbarItem>
             <ToolbarItem>

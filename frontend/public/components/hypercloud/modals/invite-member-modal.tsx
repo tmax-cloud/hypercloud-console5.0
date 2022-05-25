@@ -133,7 +133,6 @@ export const InviteMemberModal = withHandlePromise((props: InviteMemberModalProp
 
   const members = _.map(props.existMembers, (value, key) => key);
   const groups = _.map(props.existGroups, (value, key) => key);
-  // TODO: [YUNHEE] 콜 테스트 필요
   const membersUrl = members.reduce((acc, curr) => acc + `&except=${curr}`, `${getAuthUrl()}/user/list?token=${getAccessToken()}`);
   const groupsUrl = groups.reduce((acc, curr) => acc + `&except=${curr}`, `${getAuthUrl()}/group/list?exceptDefault=true&token=${getAccessToken()}`);
 

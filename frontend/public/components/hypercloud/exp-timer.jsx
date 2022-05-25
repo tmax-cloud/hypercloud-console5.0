@@ -10,21 +10,9 @@ export class ExpTimer extends React.Component {
     super(props);
     this.state = {
       expText: null,
-      tokenExpTime: null,
     };
   }
   componentDidMount() {
-    this.resetTimer();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.tokenExpTime !== prevProps.tokenExpTime) {
-      clearInterval(timerID);
-      this.resetTimer();
-    }
-  }
-
-  resetTimer() {
     expTime = getLogoutTime();
     timerID = setInterval(() => this.tick(), 1000);
   }

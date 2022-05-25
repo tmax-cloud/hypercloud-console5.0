@@ -196,7 +196,7 @@ const detectLoggingURL = dispatch =>
     },
   );
 
-const detectUser = dispatch => {
+const detectUser = dispatch =>
   coFetchJSON('api/kubernetes/apis/user.openshift.io/v1/users/~').then(
     user => {
       dispatch(setUser(user));
@@ -207,7 +207,6 @@ const detectUser = dispatch => {
       }
     },
   );
-};
 
 const detectConsoleLinks = dispatch =>
   coFetchJSON('api/kubernetes/apis/console.openshift.io/v1/consolelinks').then(

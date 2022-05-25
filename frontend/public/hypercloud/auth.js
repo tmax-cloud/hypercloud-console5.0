@@ -39,10 +39,6 @@ export const createAccountUrl = () => {
   return url;
 };
 
-export const getTokenExpTime = () => {
-  return decodeAccessToken()?.exp;
-};
-
 export const setAccessToken = function(token) {
   sessionStorage.setItem('accessToken', token);
   return;
@@ -121,7 +117,7 @@ export const detectUser = () => {
 
 export const getLogoutTime = () => {
   const curTime = new Date();
-  const tokenExpTime = new Date((getTokenExpTime() || 0) * 1000);
+  const tokenExpTime = new Date((decodeAccessToken()?.exp || 0) * 1000);
   const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
   return logoutTime < 0 ? 0 : logoutTime;
 };
