@@ -10,7 +10,7 @@ import { coFetchJSON } from '../co-fetch';
 import { MonitoringRoutes } from '../reducers/monitoring';
 import { setMonitoringURL } from './monitoring';
 import * as plugins from '../plugins';
-import { setConsoleLinks, setUser } from './common';
+import { setUser, setConsoleLinks } from './common';
 // import { setClusterID, setCreateProjectMessage, setUser, setConsoleLinks } from './common';
 
 export enum ActionType {
