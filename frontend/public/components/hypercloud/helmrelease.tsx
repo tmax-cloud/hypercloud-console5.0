@@ -11,7 +11,7 @@ import { SectionHeading, Timestamp, ButtonBar, ResourceLink, Kebab, KebabOption,
 import { NavBar } from '@console/internal/components/utils/horizontal-nav';
 import { history } from '@console/internal/components/utils/router';
 import { LoadingInline } from '@console/internal/components/utils/status-box';
-import { getIdToken } from '@console/internal/hypercloud/auth';
+import { getAccessToken } from '@console/internal/hypercloud/auth';
 import { coFetchJSON } from '@console/internal/co-fetch';
 import { ResourceLabel } from '@console/internal/models/hypercloud/resource-plural';
 import { modelFor } from '@console/internal/module/k8s';
@@ -336,13 +336,13 @@ type HelmreleasesFormProps = {
 export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
   const { t } = useTranslation();
   const { defaultValue, namespace } = props;
-  const queryChartName = getQueryArgument('chartName');  
+  const queryChartName = getQueryArgument('chartName');
   const queryVersion = getQueryArgument('chartVersion');
   const queryChartRepo = getQueryArgument('chartRepo');
   const queryUrl = getQueryArgument('chartUrl');
   const chartName = queryChartName ? queryChartName : defaultValue ? defaultValue.chart.metadata.name : '';
   const releaseName = defaultValue ? defaultValue.name : '';
-  const version = queryVersion? queryVersion : defaultValue ? defaultValue.chart.metadata.version : '';
+  const version = queryVersion ? queryVersion : defaultValue ? defaultValue.chart.metadata.version : '';
   const values = defaultValue ? defaultValue.chart.values : null;
 
   const [loading, setLoading] = React.useState(false);
@@ -385,7 +385,7 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
     fetchHelmChart();
     if (queryVersion) setPostVersion(queryVersion);
     if (queryUrl) setPostPackageURL(queryUrl);
-    if (queryChartName) setValues(queryChartRepo , queryChartName);
+    if (queryChartName) setValues(queryChartRepo, queryChartName);
   }, []);
 
   const setValues = (repoName: string, chartName: string) => {
@@ -418,7 +418,7 @@ export const HelmreleasesForm: React.FC<HelmreleasesFormProps> = props => {
         values: postValues,
       };
       coFetchJSON
-        .post(url, payload, { headers: { 'user-token': getIdToken() } })
+        .post(url, payload, { headers: { 'user-token': getAccessToken() } })
         .then(() => {
           history.goBack();
         })

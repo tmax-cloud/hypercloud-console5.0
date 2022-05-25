@@ -25,7 +25,7 @@ export const getUserGroup = function() {
 };
 
 export const getAuthUrl = function() {
-  return decodeIdToken()?.iss || '';
+  return decodeAccessToken()?.iss || '';
 };
 
 export const createAccountUrl = () => {
@@ -38,16 +38,7 @@ export const createAccountUrl = () => {
 };
 
 export const getTokenExpTime = () => {
-  return decodeIdToken()?.exp;
-};
-
-export const setIdToken = function(token) {
-  sessionStorage.setItem('idToken', token);
-  return;
-};
-
-export const getIdToken = function() {
-  return sessionStorage.getItem('idToken');
+  return decodeAccessToken()?.exp;
 };
 
 export const setAccessToken = function(token) {
@@ -70,8 +61,8 @@ export const resetLoginState = function() {
   return;
 };
 
-const decodeIdToken = () => {
-  const token = getIdToken();
+const decodeAccessToken = () => {
+  const token = getAccessToken();
   if (!token) {
     return null;
   }
@@ -95,9 +86,9 @@ const updateUserSessionStorage = userJSON => {
   sessionStorage.setItem('groups', JSON.stringify(userJSON.groups));
 };
 
-export const dispatchUser = (idToken, dispatch) => {
-  setIdToken(idToken);
-  const decodeToken = decodeIdToken();
+export const dispatchUser = (accessToken, dispatch) => {
+  setAccessToken(accessToken);
+  const decodeToken = decodeAccessToken();
   const user = { id: decodeToken.preferred_username, email: decodeToken.email, groups: decodeToken.groups };
   updateUserSessionStorage(user);
   dispatch(setUser(user));

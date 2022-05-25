@@ -211,8 +211,8 @@ const detectUser = dispatch => {
   );*/
   coFetch(REQUEST_USERINFO_URL).then(
     res => {
-      const idToken = res.headers.get('authorization').replace('Bearer ', '');
-      dispatchUser(idToken, dispatch);
+      const accessToken = res.headers.get('x-auth-request-access-token');
+      dispatchUser(accessToken, dispatch);
     },
     err => {
       if (_.get(err, 'response.status') === 401) {

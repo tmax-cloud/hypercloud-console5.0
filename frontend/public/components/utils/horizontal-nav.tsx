@@ -20,7 +20,7 @@ import { useExtensions, HorizontalNavTab, isHorizontalNavTab } from '@console/pl
 import { EditDefaultPage } from '../hypercloud/crd/edit-resource';
 import { CustomResourceDefinitionModel } from '@console/internal/models';
 import { pluralToKind, isResourceSchemaBasedMenu, isCreateManual, resourceSchemaBasedMenuMap } from '../hypercloud/form';
-import { getIdToken } from '../../hypercloud/auth';
+import { getAccessToken } from '../../hypercloud/auth';
 import { getK8sAPIPath } from '@console/internal/module/k8s/resource.js';
 import { useTranslation } from 'react-i18next';
 import { Metering } from '../hypercloud/metering';
@@ -267,7 +267,7 @@ const HorizontalNav_ = React.memo((props: HorizontalNavProps) => {
       }
       const xhrTest = new XMLHttpRequest();
       xhrTest.open('GET', url);
-      xhrTest.setRequestHeader('Authorization', `Bearer ${getIdToken()}`);
+      xhrTest.setRequestHeader('Authorization', `Bearer ${getAccessToken()}`);
       xhrTest.onreadystatechange = function() {
         if (xhrTest.readyState == XMLHttpRequest.DONE && xhrTest.status == 200) {
           let template = xhrTest.response;
