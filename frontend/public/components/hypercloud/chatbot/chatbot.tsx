@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { getIngressUrl } from './utils/ingress-utils';
+import { getIngressUrl } from '../utils/ingress-utils';
+import { Action } from './action';
+import { EventType } from './types';
 
 const INJECTION_URL = '/assets/modules/channel-web/inject.js';
 const INJECTION_ID = 'hypercloud-console-chatbot';
@@ -42,7 +44,8 @@ const Chatbot = () => {
   };
 
   const chatbotEventListener = (message: MessageEvent) => {
-    switch (message.data.name) {
+    const { data } = message;
+    switch (data?.name) {
       case 'webchatLoaded':
         // Triggered when the webchat is loaded and ready to be opened
         break;
@@ -68,6 +71,10 @@ const Chatbot = () => {
         });
         break;
       default:
+        if (data?.payload?.type === EventType.QUICK_REPLY) {
+          const action = Action.createActionHandler(data);
+          action.execute();
+        }
         break;
     }
   };
@@ -111,6 +118,10 @@ export interface Config {
   extraStylesheet?: string;
   /** Defaults to 'true' */
   showConversationsButton?: boolean;
+  /** 레이아웃 높이 조절하는 버튼 활성화 유무
+   * Defaults to 'true'
+   */
+  showResizeLayoutHeightButton?: boolean;
   /** Defaults to 'false' */
   showUserName?: boolean;
   /** Defaults to 'false' */

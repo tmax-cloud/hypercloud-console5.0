@@ -30,7 +30,7 @@ import { detectUser, logout } from '../hypercloud/auth';
 import { initializationForMenu } from '@console/internal/components/hypercloud/utils/menu-utils';
 import { setUrlFromIngresses } from '@console/internal/components/hypercloud/utils/ingress-utils';
 import { isMasterClusterPerspective } from '@console/internal/hypercloud/perspectives';
-import Chatbot from './hypercloud/chatbot';
+import Chatbot from './hypercloud/chatbot/chatbot';
 
 const breakpointMD = 768;
 const NOTIFICATION_DRAWER_BREAKPOINT = 1800;
