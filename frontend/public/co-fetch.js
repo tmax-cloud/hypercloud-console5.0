@@ -1,15 +1,17 @@
 import * as _ from 'lodash-es';
 import 'whatwg-fetch';
-import { getIdToken } from './hypercloud/auth';
+import { getAccessToken, REQUEST_USERINFO_URL } from './hypercloud/auth';
 import { authSvc } from './module/auth';
 import store from './redux';
-import keycloak from './hypercloud/keycloak';
 import { isSingleClusterPerspective, getSingleClusterFullBasePath } from './hypercloud/perspectives';
 
 const initDefaults = {
   headers: {},
   credentials: 'same-origin',
 };
+
+// id token을 사용하지 않는 url
+const withoutTokenUrls = [REQUEST_USERINFO_URL];
 
 // TODO: url can be url or path, but shouldLogout only handles paths
 export const shouldLogout = url => {
@@ -37,7 +39,6 @@ const validateStatus = (response, url) => {
 
   if (response.status === 401) {
     //authSvc.logout(window.location.pathname);
-    //keycloak.logout();
     // return response.json().then(json => {
     //   const error = new Error(json.message || 'Authorization failed.');
     //   error.response = response;
@@ -116,8 +117,10 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
     delete allOptions.headers['X-CSRFToken'];
   }
 
-  if (!!getIdToken()) {
-    allOptions.headers.Authorization = 'Bearer ' + getIdToken();
+  if (!!getAccessToken() || withoutTokenUrls.includes(url)) {
+    if (!withoutTokenUrls.includes(url)) {
+      allOptions.headers.Authorization = 'Bearer ' + getAccessToken();
+    }
     const fetchPromise = fetch(url, allOptions).then(response => validateStatus(response, url));
 
     // return fetch promise directly if timeout <= 0
@@ -130,14 +133,7 @@ export const coFetch = (url, options = {}, timeout = 60000) => {
     // Initiate both the fetch promise and a timeout promise
     return Promise.race([fetchPromise, timeoutPromise]);
   } else {
-    // return fetch promise directly if timeout <= 0
-    if (timeout < 1) {
-      return fetchPromise;
-    }
-
     const timeoutPromise = new Promise((unused, reject) => setTimeout(() => reject(new TimeoutError(url, timeout)), timeout));
-
-    // Initiate both the fetch promise and a timeout promise
     return Promise.race([timeoutPromise]);
   }
 };

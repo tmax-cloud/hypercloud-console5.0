@@ -4,7 +4,7 @@
  *
  */
 /* eslint-disable no-console */
-import { getIdToken } from '../hypercloud/auth';
+import { getAccessToken } from '../hypercloud/auth';
 import { PerspectiveType } from '@console/internal/hypercloud/perspectives';
 import { getActivePerspective, getActiveCluster } from '../actions/ui';
 import { isSingleClusterPerspective } from '@console/internal/hypercloud/perspectives';
@@ -34,11 +34,11 @@ function createURL(host, path) {
   }
 
   if (path) {
-    if (!!getIdToken()) {
+    if (!!getAccessToken()) {
       if (path.indexOf('?') !== -1) {
-        url += path + '&token=' + getIdToken();
+        url += path + '&token=' + getAccessToken();
       } else {
-        url += path + '?token=' + getIdToken();
+        url += path + '?token=' + getAccessToken();
       }
     } else {
       url += path;
