@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { K8sResourceKind } from 'public/module/k8s';
-import { ConsoleYAMLSampleTestModel } from '../../models';
+import { ConsoleYAMLSampleModel } from '../../models';
 import { Kebab, KebabAction, ResourceKebab, ResourceLink, Timestamp } from '../utils';
 import { TableProps } from './utils/default-list-component';
 import { ListPage } from '../factory';
 
 
 
-const kind = ConsoleYAMLSampleTestModel.kind;
+const kind = ConsoleYAMLSampleModel.kind;
 
-const menuActions: KebabAction[] = [...Kebab.getExtensionsActionsForKind(ConsoleYAMLSampleTestModel), ...Kebab.factory.common];
+const menuActions: KebabAction[] = [...Kebab.getExtensionsActionsForKind(ConsoleYAMLSampleModel), ...Kebab.factory.common];
 
 const tableProps: TableProps = {
   header: [
@@ -18,12 +18,12 @@ const tableProps: TableProps = {
       sortField: 'metadata.name',
     },
     {
-      title: 'COMMON:MSG_MAIN_TABLEHEADER_2',
-      sortField: 'metadata.namespace',
-    },
-    {
       title: 'COMMON:MSG_MAIN_TABLEHEADER_12',
       sortField: 'metadata.creationTimestamp',
+    },
+    {
+      title: '타켓리소스',
+      sortField: 'spec.targetResource.kind',
     },
     {
       title: '',
@@ -36,11 +36,10 @@ const tableProps: TableProps = {
       children: <ResourceLink kind={kind} name={obj.metadata.name} namespace={obj.metadata.namespace} title={obj.metadata.uid} />,
     },
     {
-      className: 'co-break-word',
-      children: <ResourceLink kind="Namespace" name={obj.metadata.namespace} title={obj.metadata.namespace} />,
+      children: <Timestamp timestamp={obj.metadata.creationTimestamp} />,
     },
     {
-      children: <Timestamp timestamp={obj.metadata.creationTimestamp} />,
+      children: obj.spec.targetResource.kind,
     },
     {
       className: Kebab.columnClass,

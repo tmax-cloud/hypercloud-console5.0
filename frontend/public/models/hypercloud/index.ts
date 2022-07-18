@@ -1754,3 +1754,26 @@ export const ConsoleYAMLSampleTestModel: K8sKind = {
     labelPlural: 'COMMON:MSG_LNB_MENU_243',
   },
 };
+
+export const ConsoleYAMLSampleModel: K8sKind = {
+  label: 'Console YAML Sample',
+  labelPlural: 'Console YAML Samples',
+  apiVersion: 'v1',
+  apiGroup: 'console.tmax.io',
+  plural: 'consoleyamlsamples',
+  abbr: 'CYS',
+  namespaced: false,
+  kind: 'ConsoleYAMLSample',
+  id: 'consoleyamlsample',
+  // crd: true,
+  menuInfo: {
+    visible: true,
+    type: MenuLinkType.ResourceNSLink,
+    defaultLabel: 'COMMON:MSG_LNB_MENU_242',
+    isMultiOnly: false,
+  },
+  i18nInfo: {
+    label: 'COMMON:MSG_LNB_MENU_242',
+    labelPlural: 'COMMON:MSG_LNB_MENU_242',
+  },
+};
