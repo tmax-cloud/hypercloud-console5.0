@@ -1733,3 +1733,24 @@ export const KafkaConnectModel: K8sKind = {
     labelPlural: 'COMMON:MSG_LNB_MENU_230',
   },
 };
+
+export const ConsoleYAMLSampleTestModel: K8sKind = {
+  label: 'Console YAML Sample Test',
+  labelPlural: 'Console YAML Samples Test',
+  apiVersion: 'v1',
+  apiGroup: 'console.tmax.io',
+  plural: 'consoleyamlsamplestest',
+  abbr: 'CYST',
+  namespaced: false,
+  kind: 'ConsoleYAMLSampleTest',
+  id: 'consoleyamlsampletest',
+  menuInfo: {
+    visible: true,
+    type: MenuLinkType.ResourceNSLink,
+    isMultiOnly: false,
+  },
+  i18nInfo: {
+    label: 'COMMON:MSG_LNB_MENU_243',
+    labelPlural: 'COMMON:MSG_LNB_MENU_243',
+  },
+};

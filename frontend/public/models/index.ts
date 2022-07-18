@@ -1185,5 +1185,15 @@ export const ConsoleYAMLSampleModel: K8sKind = {
   namespaced: false,
   kind: 'ConsoleYAMLSample',
   id: 'consoleyamlsample',
-  crd: true,
+  // crd: true,
+  menuInfo: {
+    visible: true,
+    type: MenuLinkType.ResourceNSLink,
+    defaultLabel: 'COMMON:MSG_LNB_MENU_242',
+    isMultiOnly: false,
+  },
+  i18nInfo: {
+    label: 'COMMON:MSG_LNB_MENU_242',
+    labelPlural: 'COMMON:MSG_LNB_MENU_242',
+  },
 };

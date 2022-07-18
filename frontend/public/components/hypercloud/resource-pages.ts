@@ -83,6 +83,7 @@ import {
   KafkaBridgeModel,
   KafkaConnectorModel,
   KafkaConnectModel,
+  ConsoleYAMLSampleTestModel,
 } from '../../models';
 
 type ResourceMapKey = GroupVersionKind | string;
@@ -251,4 +252,5 @@ export const hyperCloudListPages = ImmutableMap<ResourceMapKey, ResourceMapValue
   .set(referenceForModel(KafkaMirrorMaker2Model), () => import('./kafkamirrormaker2' /* webpackChunkName: "kafkamirrormaker2" */).then(m => m.KafkaMirrorMaker2sPage))
   .set(referenceForModel(KafkaBridgeModel), () => import('./kafkabridge' /* webpackChunkName: "kafkabridge" */).then(m => m.KafkaBridgesPage))
   .set(referenceForModel(KafkaConnectorModel), () => import('./kafka-connector' /* webpackChunkName: "kafka-connector" */).then(m => m.KafkaConnectorsPage))
-  .set(referenceForModel(KafkaConnectModel), () => import('./kafka-connect' /* webpackChunkName: "kafka-connect" */).then(m => m.KafkaConnectsPage));
+  .set(referenceForModel(KafkaConnectModel), () => import('./kafka-connect' /* webpackChunkName: "kafka-connect" */).then(m => m.KafkaConnectsPage))
+  .set(referenceForModel(ConsoleYAMLSampleTestModel), () => import('./console-yaml-samples-test' /* webpackChunkName: "console-yaml-samples-test" */).then(m => m.ConsoleYAMLSampleTestPage));
