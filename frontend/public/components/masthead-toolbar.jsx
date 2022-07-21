@@ -17,7 +17,7 @@ import { AboutModal } from './about-modal';
 import { clusterVersionReference, getReportBugLink } from '../module/k8s/cluster-settings';
 import * as redhatLogoImg from '../imgs/logos/redhat.svg';
 import { ExpTimer } from './hypercloud/exp-timer';
-import { createAccountUrl, logout as _logout } from '../hypercloud/auth';
+import { createAccountUrl, logout as _logout, tokenRefresh } from '../hypercloud/auth';
 import { withTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { HyperCloudManualLink } from './utils';
@@ -434,30 +434,13 @@ class MastheadToolbarContents_ extends React.Component {
   }
 
   _tokenRefresh = () => {
-    /* TODO: [YUNHEE] 토큰 연장 로직에 keycloak 제거
-    const { keycloak } = this.props;
-    const curTime = new Date();
-    const tokenExpTime = new Date((keycloak.idTokenParsed.exp + keycloak.timeSkew) * 1000);
-    const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
-    keycloak
-      .updateToken(Math.ceil(logoutTime))
-      .then(refreshed => {
-        console.log('refreshed', refreshed);
-        if (refreshed) {
-          // TODO: 토큰 설정
-          setIdToken(keycloak.idToken);
-          setAccessToken(keycloak.token);
-          this.timerRef.tokRefresh();
-        } else {
-          // expired time > 60
-          console.log('Token is still valid');
-        }
+    tokenRefresh()
+      .then(() => {
+        this.timerRef.tokRefresh();
       })
       .catch(() => {
-        // refresh token 없음
         console.log('Failed to refresh the token, or the session has expired');
       });
-       */
   };
 
   render() {

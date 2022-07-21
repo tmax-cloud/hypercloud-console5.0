@@ -26,7 +26,7 @@ import '../style.scss';
 import './hypercloud/utils/langs/i18n';
 //PF4 Imports
 import { Page } from '@patternfly/react-core';
-import { detectUser, logout } from '../hypercloud/auth';
+import { detectUser } from '../hypercloud/auth';
 import { initializationForMenu } from '@console/internal/components/hypercloud/utils/menu-utils';
 import { setUrlFromIngresses } from '@console/internal/components/hypercloud/utils/ingress-utils';
 import { isMasterClusterPerspective } from '@console/internal/hypercloud/perspectives';
@@ -149,12 +149,7 @@ class App extends React.PureComponent {
 }
 
 detectUser()
-  .then(authenticated => {
-    if (!authenticated) {
-      logout();
-      return;
-    }
-
+  .then(() => {
     const startDiscovery = () => store.dispatch(watchAPIServices());
     // Load cached API resources from localStorage to speed up page load.
     getCachedResources()

@@ -22,6 +22,10 @@ export class ExpTimer extends React.Component {
     window.clearInterval(timerID);
   }
 
+  tokRefresh() {
+    expTime = getLogoutTime();
+  }
+
   expFormat() {
     let temp = Math.floor(expTime);
     const sec = temp % 60;
