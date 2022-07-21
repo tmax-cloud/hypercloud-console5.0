@@ -149,7 +149,10 @@ class App extends React.PureComponent {
 }
 
 detectUser()
-  .then(() => {
+  .then(async () => {
+    // Ingress의 host 주소 조회를 통해 링크형 메뉴 주소 설정
+    await setUrlFromIngresses();
+
     const startDiscovery = () => store.dispatch(watchAPIServices());
     // Load cached API resources from localStorage to speed up page load.
     getCachedResources()
