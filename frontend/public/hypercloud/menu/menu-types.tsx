@@ -164,12 +164,12 @@ export const CustomMenusMap: CustomMenus = {
     url: '',
     isMultiOnly: false,
   },
-  Kibana: {
-    kind: 'Kibana',
+  OpenSearch: {
+    kind: 'OpenSearch',
     visible: true,
     type: MenuLinkType.NewTabLink,
     defaultLabel: 'COMMON:MSG_LNB_MENU_99',
-    url: `${document.location.origin}/api/kibana/`,
+    url: '',
     isMultiOnly: false,
   },
   Git: {
@@ -247,8 +247,8 @@ export const CustomMenusMap: CustomMenus = {
     href: '/helmcharts',
     isMultiOnly: false,
   },
-  HelmReleases: {
-    kind: 'HelmReleases',
+  HelmRelease: {
+    kind: 'HelmRelease',
     visible: true,
     type: MenuLinkType.HrefLink,
     defaultLabel: 'COMMON:MSG_LNB_MENU_204',

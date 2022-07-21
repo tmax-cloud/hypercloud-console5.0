@@ -172,9 +172,6 @@ detectUser()
     // Fetch swagger on load if it's stale.
     fetchSwagger();
 
-    // Ingress의 host 주소 조회를 통해 링크형 메뉴 주소 설정
-    setUrlFromIngresses();
-
     // Used by GUI tests to check for unhandled exceptions
     window.windowError = false;
     window.onerror = window.onunhandledrejection = e => {
