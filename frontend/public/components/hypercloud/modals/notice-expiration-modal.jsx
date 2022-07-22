@@ -29,7 +29,7 @@ class NoticeExpirationModal extends Component {
 
   tick() {
     this.setState({ time: Math.floor(this.state.time - 1) });
-    if (Math.floor(this.state.time) === 0) {
+    if (Math.floor(this.state.time) < 1) {
       this._logout();
     }
   }
