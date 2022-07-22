@@ -62,7 +62,7 @@ export const getAccessToken = function() {
 */
 
 // 로그아웃 시 사용
-export const resetLoginState = function() {
+const resetLoginState = () => {
   clearSessionStorageKeys.forEach(key => {
     try {
       sessionStorage.removeItem(key);
@@ -97,8 +97,7 @@ const decodeAccessToken = () => {
 const fetchUserinfo = async () => {
   try {
     const res = await coFetchJSON(REQUEST_TOKEN_INFO_URL);
-    const { sessionInfo, token } = res;
-    return { sessionInfo, token };
+    return res;
   } catch (err) {
     console.error('Failed to fetch user info ', err);
     return null;
@@ -108,7 +107,7 @@ const fetchUserinfo = async () => {
 const fetchTokenExpireTime = async () => {
   try {
     const res = await coFetchJSON(REQUEST_TOKEN_INFO_URL);
-    return res?.token?.exp;
+    return res?.exp;
   } catch (err) {
     console.error('Failed to fetch token expiration time ', err);
     return null;
@@ -119,6 +118,10 @@ const refreshToken = async () => {
   try {
     const res = await coFetchJSON(REQUEST_TOKEN_REFRESH_URL);
   } catch (error) {
+    if (_.includes([401, 500], _.get(error, 'response.status'))) {
+      console.error('Failed to refresh the token. The session has expired ', error);
+      logout();
+    }
     console.error('Failed to refresh the token ', error);
   }
 };
@@ -129,7 +132,7 @@ export const tokenRefresh = () => {
       await refreshToken();
       const _expireTime = await fetchTokenExpireTime();
       if (!_expireTime) {
-        console.error('Failed to get token expiration time ');
+        reject('Failed to get token expiration time');
         return;
       }
       sessionStorage.setItem(expireTime, _expireTime);
@@ -150,12 +153,11 @@ export const detectUser = () => {
         return;
       }
       resetLoginState();
-      const { token } = info;
-      sessionStorage.setItem(id, token?.preferred_username);
-      sessionStorage.setItem(email, token?.email);
-      sessionStorage.setItem(groups, JSON.stringify(token?.groups));
-      sessionStorage.setItem(accountUrl, token?.iss);
-      sessionStorage.setItem(expireTime, token?.exp);
+      sessionStorage.setItem(id, info?.preferred_username);
+      sessionStorage.setItem(email, info?.email);
+      sessionStorage.setItem(groups, JSON.stringify(info?.groups));
+      sessionStorage.setItem(accountUrl, info?.iss);
+      sessionStorage.setItem(expireTime, info?.exp);
       store.dispatch(setUser({ id: sessionStorage.getItem(id), email: sessionStorage.getItem(email), groups: sessionStorage.getItem(groups) }));
       resolve();
     } catch (error) {
@@ -165,8 +167,12 @@ export const detectUser = () => {
 };
 
 export const getLogoutTime = () => {
+  const exp = sessionStorage.getItem(expireTime);
+  if (!exp) {
+    return 0;
+  }
   const curTime = new Date();
-  const tokenExpTime = new Date((sessionStorage.getItem(expireTime) || 0) * 1000);
+  const tokenExpTime = new Date((exp - 1) * 1000);
   const logoutTime = (tokenExpTime.getTime() - curTime.getTime()) / 1000;
   return logoutTime < 0 ? 0 : logoutTime;
 };

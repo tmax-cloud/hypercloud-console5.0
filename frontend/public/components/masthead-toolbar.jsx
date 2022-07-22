@@ -439,7 +439,7 @@ class MastheadToolbarContents_ extends React.Component {
         this.timerRef.tokRefresh();
       })
       .catch(() => {
-        console.log('Failed to refresh the token, or the session has expired');
+        console.error('Failed to refresh the token, or the session has expired');
       });
   };
 
