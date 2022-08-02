@@ -9,7 +9,7 @@ import './_servicebinding.scss';
  * TO. 김승현 연구원님
  * auto 옵션일 때 namespace, kind, resources 항목들을 get 해오는 방법은
  * "namespace"는 네임스페이스 콜 (/api/hypercloud/namespace/) 요청해서 Hypercloud 내 존재하는 네임스페이스 가져오면 되고,
- * "kind"는 module/k8s/k8s-models.ts 에서 allModels()해서 kind 값들 가져오면 되고,
+ * "kind" 조회는 미정 (서버담당자와 논의),
  * "resources"는 선택한 namespace, kind에 해당되는 리소스가 있는지 k8s 콜을 날려서 리스트업 하시면 될 것 같습니다.
  */
 
