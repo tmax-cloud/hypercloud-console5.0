@@ -3,8 +3,9 @@ import store from '../redux';
 import { coFetchJSON } from '../co-fetch';
 import { setUser } from '@console/internal/actions/common';
 
-export const REQUEST_TOKEN_REFRESH_URL = '/oauth2/token';
-export const REQUEST_TOKEN_INFO_URL = '/oauth2/tokeninfo';
+const REQUEST_LOGOUT_URL = '/oauth2/sign_out';
+const REQUEST_TOKEN_REFRESH_URL = '/oauth2/token';
+const REQUEST_TOKEN_INFO_URL = '/oauth2/tokeninfo';
 
 export const REQUEST_ACCOUNT_USERS_URL = '/oauth2/user/list';
 export const REQUEST_ACCOUNT_GROUPS_URL = '/oauth2/group/list';
@@ -37,7 +38,7 @@ export const getUserGroup = function() {
 };
 
 export const getAuthUrl = function() {
-  return sessionStorage.getItem(accountUrl);
+  return sessionStorage.getItem(accountUrl) || `${window.SERVER_FLAGS.KeycloakAuthURL}/realms/${window.SERVER_FLAGS.KeycloakRealm}`;
 };
 
 export const createAccountUrl = () => {
@@ -187,6 +188,6 @@ export const logout = _.once(() => {
   if (realm) {
     resetLoginState();
     const redirectUrl = `${realm}/protocol/openid-connect/logout?redirect_uri=${encodeURIComponent(location.origin)}`;
-    window.location = `${location.origin}/oauth2/sign_out?rd=${redirectUrl}`;
+    window.location = `${location.origin}${REQUEST_LOGOUT_URL}?rd=${redirectUrl}`;
   }
 });
