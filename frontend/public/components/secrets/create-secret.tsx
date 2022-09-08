@@ -123,7 +123,7 @@ export const withSecretForm = (SubForm, modal?: boolean) =>
           inProgress: false,
           type: defaultSecretType,
           stringData: _.mapValues(_.get(props.obj, 'data'), value => {
-            return value ? Base64.decode(value) : '';
+            return value ? value : '';
           }),
           disableForm: false,
         };
@@ -262,7 +262,7 @@ export const ImageSecretForm = withTranslation()(
   class ImageSecretForm extends React.Component<ImageSecretFormProps, ImageSecretFormState> {
     constructor(props) {
       super(props);
-      const data = this.props.isCreate ? { '.dockerconfigjson': '{}' } : this.props.stringData;
+      const data = this.props.isCreate ? { '.dockerconfigjson': '{}' } : { '.dockerconfigjson': Base64.decode(this.props.stringData['.dockerconfigjson']) };
       let parsedData;
       try {
         parsedData = _.mapValues(data, JSON.parse);
@@ -485,11 +485,11 @@ export const CreateConfigSubform = withTranslation()(
         const parsedAuth = _.isEmpty(decodedAuth) ? _.fill(Array(2), '') : _.split(decodedAuth, ':');
         imageSecretArray.push({
           entry: {
-            address: k,
-            username: _.get(v, 'username', parsedAuth[0]),
-            password: _.get(v, 'password', parsedAuth[1]),
-            email: _.get(v, 'email', ''),
-            auth: _.get(v, 'auth', ''),
+            address: Base64.encode(k),
+            username: Base64.encode(_.get(v, 'username', parsedAuth[0])),
+            password: Base64.encode(_.get(v, 'password', parsedAuth[1])),
+            email: Base64.encode(_.get(v, 'email', '')),
+            auth: Base64.encode(_.get(v, 'auth', '')),
           },
           uid: _.get(v, 'uid', _.uniqueId()),
         });
