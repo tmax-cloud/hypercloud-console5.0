@@ -163,7 +163,8 @@ export const withSecretForm = (SubForm, modal?: boolean) =>
         const { metadata } = this.state.secret;
         this.setState({ inProgress: true });
         // IMS 290316: 사용자가 직접 값을 인코딩해서 시크릿을 생성하도록 수정
-        const newSecret = _.assign({}, this.state.secret, { data: this.state.stringData }, { type: this.state.type });
+        const saveData = this.state.type === SecretType.dockerconfigjson ? _.mapValues(this.state.stringData, value => Base64.encode(value)) : this.state.stringData;
+        const newSecret = _.assign({}, this.state.secret, { data: saveData }, { type: this.state.type });
         (this.props.isCreate ? k8sCreate(SecretModel, newSecret) : k8sUpdate(SecretModel, newSecret, metadata.namespace, newSecret.metadata.name)).then(
           secret => {
             this.setState({ inProgress: false });
@@ -486,11 +487,11 @@ export const CreateConfigSubform = withTranslation()(
         const parsedAuth = _.isEmpty(decodedAuth) ? _.fill(Array(2), '') : _.split(decodedAuth, ':');
         imageSecretArray.push({
           entry: {
-            address: Base64.encode(k),
-            username: Base64.encode(_.get(v, 'username', parsedAuth[0])),
-            password: Base64.encode(_.get(v, 'password', parsedAuth[1])),
-            email: Base64.encode(_.get(v, 'email', '')),
-            auth: Base64.encode(_.get(v, 'auth', '')),
+            address: k,
+            username: _.get(v, 'username', parsedAuth[0]),
+            password: _.get(v, 'password', parsedAuth[1]),
+            email: _.get(v, 'email', ''),
+            auth: _.get(v, 'auth', ''),
           },
           uid: _.get(v, 'uid', _.uniqueId()),
         });
