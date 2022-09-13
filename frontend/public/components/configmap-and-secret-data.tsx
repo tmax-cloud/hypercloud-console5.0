@@ -28,17 +28,12 @@ export const ConfigMapBinaryData: React.FC<DownloadValueProps> = ({ data }) => {
   const dl = [];
   Object.keys(data || {})
     .sort()
-    .forEach((k) => {
+    .forEach(k => {
       const value = data[k];
       dl.push(<dt key={`${k}-k`}>{k}</dt>);
       dl.push(
         <dd key={`${k}-v`}>
-          <Button
-            className="pf-m-link--align-left"
-            type="button"
-            onClick={() => downloadBinary(k, value)}
-            variant="link"
-          >
+          <Button className="pf-m-link--align-left" type="button" onClick={() => downloadBinary(k, value)} variant="link">
             Save File
           </Button>
         </dd>,
@@ -52,7 +47,7 @@ export const ConfigMapData: React.FC<ConfigMapDataProps> = ({ data, label }) => 
   const dl = [];
   Object.keys(data || {})
     .sort()
-    .forEach((k) => {
+    .forEach(k => {
       const value = data[k];
       dl.push(<dt key={`${k}-k`}>{k}</dt>);
       dl.push(
@@ -75,18 +70,18 @@ export const SecretValue: React.FC<SecretValueProps> = ({ value, reveal, encoded
 };
 SecretValue.displayName = 'SecretValue';
 
-export const SecretData: React.FC<SecretDataProps> = ({ data, title = 'Data' }) => {
+export const SecretData: React.FC<SecretDataProps> = ({ data, title = 'Data', encoded }) => {
   const { t } = useTranslation();
   const [reveal, setReveal] = React.useState(false);
 
   const dl = [];
   Object.keys(data || {})
     .sort()
-    .forEach((k) => {
+    .forEach(k => {
       dl.push(<dt key={`${k}-k`}>{k}</dt>);
       dl.push(
         <dd key={`${k}-v`}>
-          <SecretValue value={data[k]} reveal={reveal} />
+          <SecretValue value={data[k]} reveal={reveal} encoded={encoded} />
         </dd>,
       );
     });
@@ -95,12 +90,7 @@ export const SecretData: React.FC<SecretDataProps> = ({ data, title = 'Data' }) 
     <>
       <SectionHeading text={t('COMMON:MSG_DETAILS_TABDETAILS_DATA_1')}>
         {dl.length ? (
-          <Button
-            type="button"
-            onClick={() => setReveal(!reveal)}
-            variant="link"
-            className="pf-m-link--align-right"
-          >
+          <Button type="button" onClick={() => setReveal(!reveal)} variant="link" className="pf-m-link--align-right">
             {reveal ? (
               <>
                 <EyeSlashIcon className="co-icon-space-r" />
@@ -143,4 +133,5 @@ type SecretValueProps = {
 type SecretDataProps = {
   data: KeyValueData;
   title?: string;
+  encoded?: boolean;
 };

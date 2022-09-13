@@ -91,7 +91,7 @@ const SecretDetails = ({ obj: secret }) => {
         <ResourceSummary resource={secret} />
       </div>
       <div className="co-m-pane__body">
-        <SecretData data={secret.data} type={secret.type} />
+        <SecretData data={secret.data} type={secret.type} encoded={false} />
       </div>
     </>
   );

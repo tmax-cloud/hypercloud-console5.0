@@ -123,7 +123,7 @@ export const withSecretForm = (SubForm, modal?: boolean) =>
           inProgress: false,
           type: defaultSecretType,
           stringData: _.mapValues(_.get(props.obj, 'data'), value => {
-            return value ? value : '';
+            return value || ''; // IMS 290316: 디코딩된 값으로 보이지 않도록 수정
           }),
           disableForm: false,
         };
@@ -162,7 +162,8 @@ export const withSecretForm = (SubForm, modal?: boolean) =>
         e.preventDefault();
         const { metadata } = this.state.secret;
         this.setState({ inProgress: true });
-        const newSecret = _.assign({}, this.state.secret, { stringData: this.state.stringData }, { type: this.state.type });
+        // IMS 290316: 사용자가 직접 값을 인코딩해서 시크릿을 생성하도록 수정
+        const newSecret = _.assign({}, this.state.secret, { data: this.state.stringData }, { type: this.state.type });
         (this.props.isCreate ? k8sCreate(SecretModel, newSecret) : k8sUpdate(SecretModel, newSecret, metadata.namespace, newSecret.metadata.name)).then(
           secret => {
             this.setState({ inProgress: false });
