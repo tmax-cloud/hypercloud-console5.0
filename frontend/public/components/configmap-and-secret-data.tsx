@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Base64 } from 'js-base64';
 import { saveAs } from 'file-saver';
 import { EyeIcon, EyeSlashIcon } from '@patternfly/react-icons';
 import { Button } from '@patternfly/react-core';
@@ -65,8 +66,9 @@ export const SecretValue: React.FC<SecretValueProps> = ({ value, reveal, encoded
     return <span className="text-muted">No value</span>;
   }
 
-  const visibleValue = reveal ? value : <MaskedData />;
-  return <CopyToClipboard value={value} visibleValue={visibleValue} />;
+  const decodedValue = encoded ? Base64.decode(value) : value;
+  const visibleValue = reveal ? decodedValue : <MaskedData />;
+  return <CopyToClipboard value={decodedValue} visibleValue={visibleValue} />;
 };
 SecretValue.displayName = 'SecretValue';
 
