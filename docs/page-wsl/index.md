@@ -30,12 +30,12 @@ description: WSL2를 사용한 Linux 개발환경 구축방법 가이드입니�
 2. WSL: Ubuntu에 연결(Status bar 좌측 초록색 버튼)
 3. WSL: Ubuntu에 “Node Extension Pack” 확장 프로그램을 설치
 
-- HyperCloud 개발 환경 구축 ([hypercloud console GitHub](https://github.com/tmax-cloud/console))
+- HyperCloud 개발 환경 구축 ([hypercloud console GitHub](https://github.com/tmax-cloud/hypercloud-console5.0))
 
   1. git clone
 
      ```shell
-     git clone https://github.com/tmax-cloud/console console
+     git clone https://github.com/tmax-cloud/hypercloud-console5.0 console
      ```
 
      (폴더 위치: /home/${user}/)

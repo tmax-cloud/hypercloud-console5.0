@@ -2,4 +2,4 @@
 
 ### Docs Page
 
-https://tmax-cloud.github.io/console/
+https://tmax-cloud.github.io/hypercloud-console5.0/
