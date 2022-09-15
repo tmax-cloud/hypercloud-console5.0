@@ -21,7 +21,7 @@
 title: HyperCloud 5.1
 domain: tmax-cloud.github.io      # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
 url: https://tmax-cloud.github.io/  # the base hostname and protocol for your site, e.g. http://example.com
-baseurl: /console/
+baseurl: /hypercloud-console5.0/
 
 # Build settings
 remote_theme: pages-themes/cayman@v0.2.0
