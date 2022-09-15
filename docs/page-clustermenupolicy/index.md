@@ -4,7 +4,7 @@ title: Cluster Menu Policy 사용 가이드
 description: Cluster Menu Policy 사용 가이드입니다.
 ---
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)
 
 # 📘 Cluster Menu Policy 사용 가이드
 
@@ -12,8 +12,8 @@ description: Cluster Menu Policy 사용 가이드입니다.
 
 CR 내용수정을 통해 클러스터 환경의 메뉴구성을 설정할 수 있는 리소스이다.
 
-- [ClusterMenuPolicy CRD YAML](https://raw.githubusercontent.com/tmax-cloud/console/hc-dev-v5.1/docs/page-clustermenupolicy/yaml/ClusterMenuPolicy_CRD.yaml)
-- [기본 메뉴구성 Sample YAML](https://raw.githubusercontent.com/tmax-cloud/console/hc-dev-v5.1/docs/page-clustermenupolicy/yaml/cmp-default-menus-sample.yaml)
+- [ClusterMenuPolicy CRD YAML](https://raw.githubusercontent.com/tmax-cloud/hypercloud-console5.0/hc-dev-v5.1/docs/page-clustermenupolicy/yaml/ClusterMenuPolicy_CRD.yaml)
+- [기본 메뉴구성 Sample YAML](https://raw.githubusercontent.com/tmax-cloud/hypercloud-console5.0/hc-dev-v5.1/docs/page-clustermenupolicy/yaml/cmp-default-menus-sample.yaml)
 
 ## Spec 간단 설명
 
@@ -180,4 +180,4 @@ CR 내용수정을 통해 클러스터 환경의 메뉴구성을 설정할 수 �
 - 액션에서 '활성화'를 클릭 후 화면 새로고침 시 해당 CR이 클러스터환경에 적용되어 LNB구성에 내용이 반영된다.
   [![image](images/cmp_activate.png)](images/cmp_activate.png)
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)

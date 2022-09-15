@@ -4,7 +4,7 @@ title: Linux 개발 환경 구축 가이드
 description: WSL2를 사용한 Linux 개발환경 구축방법 가이드입니다.
 ---
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)
 
 # 📕 Linux 개발 환경 구축 (WSL2)
 
