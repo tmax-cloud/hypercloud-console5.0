@@ -4,7 +4,7 @@ title: Console YAML Samples 사용 가이드
 description: Console YAML Samples 사용 가이드입니다.
 ---
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)
 
 # 📗 Console YAML Samples 사용 가이드
 
@@ -72,4 +72,4 @@ spec:
 2. sidebar 에서 확인
   [![image](figure/9.consoleYAMLsamples_Check.png)](figure/9.consoleYAMLsamples_Check.png)
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)

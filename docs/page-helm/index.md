@@ -4,7 +4,7 @@ title: HELM
 description: Helm 관련 가이드입니다.
 ---
 
-[< Home](/console/)
+[< Home](/hypercloud-console5.0/)
 
 # 📙 Helm Documentations
 
