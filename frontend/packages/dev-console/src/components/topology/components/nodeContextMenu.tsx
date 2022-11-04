@@ -4,7 +4,7 @@ import { history, KebabItem, KebabOption, KebabMenuOption, kebabOptionsToMenu, i
 import { workloadActions } from '../actions/workloadActions';
 // import { groupActions } from '../actions/groupActions';
 import { nodeActions } from '../actions/nodeActions';
-import { graphActions } from '../actions/graphActions';
+// import { graphActions } from '../actions/graphActions';
 // import { TopologyApplicationObject } from '../topology-types';
 import { regroupActions } from '../actions/regroupActions';
 
@@ -48,7 +48,9 @@ export const groupContextMenu = (element: Node, connectorSource?: Node) => {
 };
 export const nodeContextMenu = (element: Node) => createMenuItems(kebabOptionsToMenu(nodeActions(element.getData())));
 
-export const graphContextMenu = (graph: Graph, connectorSource?: Node) => createMenuItems(kebabOptionsToMenu(graphActions(graph.getData(), connectorSource)));
+// export const graphContextMenu = (graph: Graph, connectorSource?: Node) => createMenuItems(kebabOptionsToMenu(graphActions(graph.getData(), connectorSource)));
+// MEMO : 그래프 우클릭시 나오는 kebab메뉴 임시로 [] 처리함.
+export const graphContextMenu = (graph: Graph, connectorSource?: Node) => createMenuItems([]);
 
 export const regroupContextMenu = (element: Node) => createMenuItems(kebabOptionsToMenu(regroupActions(element)));
 
