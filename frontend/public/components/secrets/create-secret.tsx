@@ -123,7 +123,7 @@ export const withSecretForm = (SubForm, modal?: boolean) =>
           inProgress: false,
           type: defaultSecretType,
           stringData: _.mapValues(_.get(props.obj, 'data'), value => {
-            return value ? Base64.decode(value) : '';
+            return value;
           }),
           disableForm: false,
         };
@@ -975,7 +975,7 @@ const KeyValueEntryForm = withTranslation()(
           </div>
           <div className="form-group">
             <div>
-              <DroppableFileInput onChange={this.onValueChange} inputFileData={this.state.value} id={`${this.props.id}-value`} label={t('SINGLE:MSG_SECRETS_CREATEKEYVALUESECRET_DIV2_4')} inputFieldHelpText={t('SINGLE:MSG_SECRETS_CREATEKEYVALUESECRET_DIV2_6')} />
+              <DroppableFileInput onChange={this.onValueChange} inputFileData={this.state.value} id={`${this.props.id}-value`} textareaFieldHelpText={t('SINGLE:MSG_SECRETS_CREATEFORM_DIV2_1')} label={t('SINGLE:MSG_SECRETS_CREATEKEYVALUESECRET_DIV2_4')} inputFieldHelpText={t('SINGLE:MSG_SECRETS_CREATEKEYVALUESECRET_DIV2_6')} />
             </div>
           </div>
         </div>
