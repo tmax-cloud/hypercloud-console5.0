@@ -110,7 +110,7 @@ spec:
           if (BUILD_MODE == 'PATCH') {
             def number = (PATCH_VER as int) -1
             PATCH_VER = number.toString()
-            HOTFIX_VER = "2" // 임시로 2로함 배포 후 바로 0으로 수정하기
+            HOTFIX_VER = "0" 
             PRE_VER = "${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}.${HOTFIX_VER}"
           } else if (BUILD_MODE == 'HOTFIX') {
             def hotfix_number = (HOTFIX_VER as int) - 1
