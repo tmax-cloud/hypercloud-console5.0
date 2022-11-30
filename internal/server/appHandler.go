@@ -40,6 +40,8 @@ type App struct {
 	PrometheusTenancyBaseURL string `json:"prometheusTenancyBaseURL"`
 	AlertManagerBaseURL      string `json:"alertManagerBaseURL"`
 
+	KubeAPIServerURL string `json:"kubeAPIServerURL"`
+	
 	logger zerolog.Logger
 }
 

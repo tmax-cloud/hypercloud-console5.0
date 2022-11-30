@@ -403,6 +403,7 @@ func NewConsoleCommand() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVar(&app.ChatbotEmbed, "app.chatbotEmbed", false, "when true, enable chatbot")
 	rootCmd.PersistentFlags().BoolVar(&app.ReleaseMode, "app.releaseMode", true, "when true, use jwt token given by keycloak")
 	rootCmd.PersistentFlags().StringVar(&app.CustomProductName, "app.customProductName", "hypercloud", "prduct name for console | default hypercloud")
+	rootCmd.PersistentFlags().StringVar(&app.KubeAPIServerURL, "app.kubeAPIServerURL", "https://kubernetes.default.svc", "kube api server url")
 
 	rootCmd.PersistentFlags().StringVar(&logInfo.LogLevel, "logInfo.logLevel", "info", "trace | debug | info | warn | crit, default info")
 	rootCmd.PersistentFlags().StringVar(&logInfo.LogType, "logInfo.logType", "pretty", "json | pretty , default pretty")
