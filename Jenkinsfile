@@ -148,10 +148,10 @@ spec:
       steps {
         withCredentials([string(credentialsId: "${USER_TOKEN}", variable: 'GITHUB_ACCESS_TOKEN')]) { 
           sh """
-            git push https://${GITHUB_ACCESS_TOKEN}@github.com/tmax-cloud/hypercloud-console5.0.git HEAD:${BRANCH} --tags
+            git push https://${GITHUB_ACCESS_TOKEN}@github.com/tmax-cloud/hypercloud-console5.0.git ${BRANCH}:${BRANCH} --tags
             git add -A
             git commit -m 'Added changelog and updated history'
-            git push https://${GITHUB_ACCESS_TOKEN}@github.com/tmax-cloud/hypercloud-console5.0.git HEAD:${BRANCH}
+            git push https://${GITHUB_ACCESS_TOKEN}@github.com/tmax-cloud/hypercloud-console5.0.git ${BRANCH}:${BRANCH}
           """        
         }
         emailext (
