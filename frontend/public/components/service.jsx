@@ -8,6 +8,7 @@ import { DetailsItem, Kebab, LabelList, ResourceIcon, ResourceKebab, ResourceLin
 import { ServiceModel } from '../models';
 import { useTranslation } from 'react-i18next';
 import { TracePage } from './trace'
+import { isSingleClusterPerspective } from '@console/internal/hypercloud/perspectives';
 
 export const menuActions = [Kebab.factory.ModifyPodSelector, ...Kebab.getExtensionsActionsForKind(ServiceModel), ...Kebab.factory.common];
 
@@ -236,12 +237,22 @@ const TraceTab = props => {
 };
 
 const { details, pods, editResource } = navFactory;
-const ServicesDetailsPage = props => <DetailsPage {...props} menuActions={menuActions} pages={[details(Details), editResource(), pods(),
-{
-  href: 'trace',
-  name: 'COMMON:MSG_DETAILS_TABTRACE_1',
-  component: TraceTab,
-},]} />;
+const ServicesDetailsPage = props => (
+  <DetailsPage
+    {...props}
+    menuActions={menuActions}
+    pages={[
+      details(Details),
+      editResource(),
+      pods(),
+      {
+        href: 'trace',
+        name: 'COMMON:MSG_DETAILS_TABTRACE_1',
+        component: TraceTab,
+      },
+    ]}
+  />
+);
 
 const ServicesList = props => {
   const { t } = useTranslation();
