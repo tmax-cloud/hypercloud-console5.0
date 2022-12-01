@@ -60,7 +60,7 @@ spec:
         git branch: "${BRANCH}", credentialsId: "${USER_NAME}", url: 'https://github.com/tmax-cloud/hypercloud-console5.0'
         sh """
         git branch
-        git pull origin ${BRANCH}:${BRANCH}
+        git pull origin ${BRANCH}
         """
          script {
             PATCH_VER = sh(script: 'cat ./CHANGELOG/tag.txt | head -2 | tail -1 | cut --delimiter="." --fields=3', returnStdout: true).trim()
