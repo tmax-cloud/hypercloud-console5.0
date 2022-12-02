@@ -245,7 +245,7 @@ const ServicesDetailsPage = props => (
       details(Details),
       editResource(),
       pods(),
-      {
+      !isSingleClusterPerspective() && {
         href: 'trace',
         name: 'COMMON:MSG_DETAILS_TABTRACE_1',
         component: TraceTab,
