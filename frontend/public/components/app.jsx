@@ -165,6 +165,8 @@ keycloak
     setIdToken(keycloak.idToken);
     setAccessToken(keycloak.token);
     setId(keycloak.idTokenParsed.preferred_username);
+    sessionStorage.setItem('show-alert-in-singlecluster-nodepage', 'true');
+    sessionStorage.setItem('show-alert-in-singlecluster-podpage', 'true');
 
     // k8s 버전별 i18n 리소스 적용
     await getI18nResources();
