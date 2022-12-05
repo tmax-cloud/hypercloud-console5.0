@@ -2,8 +2,7 @@
 
 set -exuo pipefail
 
-# myIP=$(hostname -I | awk '{print $1}')
-myIP='192.168.8.106'
+myIP=$(hostname -I | awk '{print $1}')
 #myIP=$(ipconfig getifaddr en0)
 # myIP=localhost
 ## Default K8S Endpoint is public POC environment
