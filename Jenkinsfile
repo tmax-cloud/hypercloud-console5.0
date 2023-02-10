@@ -2,13 +2,13 @@ pipeline {
   parameters {
     choice(name: 'BUILD_MODE', choices:['PATCH','HOTFIX','IMAGE'], description: 'Select the mode you want to act')
   }
-  triggers {
-    // ref https://plugins.jenkins.io/parameterized-scheduler/
-    // trigger at 9:00 every Thursday
-    parameterizedCron('''
-    H 9 * * 4 %BUILD_MODE=PATCH
-    ''')
-  }
+//   triggers {
+//     // ref https://plugins.jenkins.io/parameterized-scheduler/
+//     // trigger at 9:00 every Thursday
+//     parameterizedCron('''
+//     H 9 * * 4 %BUILD_MODE=PATCH
+//     ''')
+//   }
   agent {
     kubernetes {
       yaml '''
