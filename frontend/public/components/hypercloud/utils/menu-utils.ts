@@ -16,7 +16,7 @@ const en = i18next.getFixedT('en');
 const INGRESS_LABEL_VALUES = [
   { labelValue: 'hyperregistry', menuKey: CustomMenusMap.Harbor.kind },
   { labelValue: 'argocd', menuKey: CustomMenusMap.ArgoCD.kind },
-  { labelValue: 'gitlab', menuKey: CustomMenusMap.Git.kind },
+  { labelValue: 'gitea', menuKey: CustomMenusMap.Git.kind },
   { labelValue: 'grafana', menuKey: CustomMenusMap.Grafana.kind },
   { labelValue: 'kiali', menuKey: CustomMenusMap.Kiali.kind },
   { labelValue: 'opensearch-dashboards', menuKey: CustomMenusMap.OpenSearch.kind },
