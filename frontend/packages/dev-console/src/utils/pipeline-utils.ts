@@ -1,33 +1,11 @@
 import * as _ from 'lodash';
 import { formatDuration } from '@console/internal/components/utils/datetime';
-import {
-  ContainerStatus,
-  K8sResourceKind,
-  k8sUpdate,
-  k8sGet,
-  SecretKind,
-  K8sResourceCommon,
-} from '@console/internal/module/k8s';
-import {
-  LOG_SOURCE_RESTARTING,
-  LOG_SOURCE_WAITING,
-  LOG_SOURCE_RUNNING,
-  LOG_SOURCE_TERMINATED,
-} from '@console/internal/components/utils';
+import { ContainerStatus, K8sResourceKind, k8sUpdate, k8sGet, SecretKind, K8sResourceCommon } from '@console/internal/module/k8s';
+import { LOG_SOURCE_RESTARTING, LOG_SOURCE_WAITING, LOG_SOURCE_RUNNING, LOG_SOURCE_TERMINATED } from '@console/internal/components/utils';
 import { ServiceAccountModel } from '@console/internal/models';
 import { errorModal } from '@console/internal/components/modals/error-modal';
 import { PIPELINE_SERVICE_ACCOUNT, SecretAnnotationId } from '../components/pipelines/const';
-import {
-  getLatestRun,
-  Pipeline,
-  PipelineRun,
-  runStatus,
-  PipelineParam,
-  PipelineRunParam,
-  PipelineTaskRef,
-  PipelineWorkspace,
-  PipelineRunWorkspace,
-} from './pipeline-augment';
+import { getLatestRun, Pipeline, PipelineRun, runStatus, PipelineParam, PipelineRunParam, PipelineTaskRef, PipelineWorkspace, PipelineRunWorkspace } from './pipeline-augment';
 import { pipelineFilterReducer, pipelineRunStatus } from './pipeline-filter-reducer';
 
 interface Resources {
@@ -62,13 +40,8 @@ export const TaskStatusClassNameMap = {
 };
 
 export const conditions = {
-  hasFromDependency: (task: PipelineVisualizationTaskItem): boolean =>
-    task.resources &&
-    task.resources.inputs &&
-    task.resources.inputs.length > 0 &&
-    !!task.resources.inputs[0].from,
-  hasRunAfterDependency: (task: PipelineVisualizationTaskItem): boolean =>
-    task.runAfter && task.runAfter.length > 0,
+  hasFromDependency: (task: PipelineVisualizationTaskItem): boolean => task.resources && task.resources.inputs && task.resources.inputs.length > 0 && !!task.resources.inputs[0].from,
+  hasRunAfterDependency: (task: PipelineVisualizationTaskItem): boolean => task.runAfter && task.runAfter.length > 0,
 };
 
 export enum ListFilterId {
@@ -88,23 +61,27 @@ export const ListFilterLabels = {
 };
 
 // to be used by both Pipeline and Pipelinerun visualisation
-const sortTasksByRunAfterAndFrom = (
-  tasks: PipelineVisualizationTaskItem[],
-): PipelineVisualizationTaskItem[] => {
+const sortTasksByRunAfterAndFrom = (tasks: PipelineVisualizationTaskItem[]): PipelineVisualizationTaskItem[] => {
   // check and sort tasks by 'runAfter' and 'from' dependency
   const output = tasks;
   for (let i = 0; i < output.length; i++) {
     let flag = -1;
     if (conditions.hasRunAfterDependency(output[i])) {
       for (let j = 0; j < output.length; j++) {
-        if (i < j && output[j].taskRef.name === output[i].runAfter[output[i].runAfter.length - 1]) {
-          flag = j;
+        if (output[j].taskRef) {
+          const taskName = output[j].taskRef.name ? output[j].taskRef.name : output[j].name;
+          if (i < j && taskName === output[i].runAfter[output[i].runAfter.length - 1]) {
+            flag = j;
+          }
         }
       }
     } else if (conditions.hasFromDependency(output[i])) {
       for (let j = i + 1; j < output.length; j++) {
-        if (output[j].taskRef.name === output[i].resources.inputs[0].from[0]) {
-          flag = j;
+        if (output[j].taskRef) {
+          const taskName = output[j].taskRef.name ? output[j].taskRef.name : output[j].name;
+          if (taskName === output[i].resources.inputs[0].from[0]) {
+            flag = j;
+          }
         }
       }
     }
@@ -124,7 +101,7 @@ const sortTasksByRunAfterAndFrom = (
  * @param pipelineRun
  */
 const appendPipelineRunStatus = (pipeline, pipelineRun) => {
-  return _.map(pipeline.spec.tasks, (task) => {
+  return _.map(pipeline.spec.tasks, task => {
     if (!pipelineRun.status) {
       return task;
     }
@@ -136,9 +113,7 @@ const appendPipelineRunStatus = (pipeline, pipelineRun) => {
     });
     // append task duration
     if (mTask.status && mTask.status.completionTime && mTask.status.startTime) {
-      const date =
-        new Date(mTask.status.completionTime).getTime() -
-        new Date(mTask.status.startTime).getTime();
+      const date = new Date(mTask.status.completionTime).getTime() - new Date(mTask.status.startTime).getTime();
       mTask.status.duration = formatDuration(date);
     }
     // append task status
@@ -169,7 +144,7 @@ export const getPipelineTasks = (
   const tasks = sortTasksByRunAfterAndFrom(taskList);
 
   // Step 2: Push all nodes without any dependencies in different stages
-  tasks.forEach((task) => {
+  tasks.forEach(task => {
     if (!conditions.hasFromDependency(task) && !conditions.hasRunAfterDependency(task)) {
       if (out.length === 0) {
         out.push([]);
@@ -179,30 +154,21 @@ export const getPipelineTasks = (
   });
 
   // Step 3: Push nodes with 'from' dependency and stack similar tasks in a stage
-  tasks.forEach((task) => {
+  tasks.forEach(task => {
     if (!conditions.hasRunAfterDependency(task) && conditions.hasFromDependency(task)) {
       let flag = out.length - 1;
       for (let i = 0; i < out.length; i++) {
         for (const t of out[i]) {
-          if (
-            t.taskRef.name === task.resources.inputs[0].from[0] ||
-            t.name === task.resources.inputs[0].from[0]
-          ) {
-            flag = i;
+          if (t.taskRef) {
+            const taskName = t.taskRef.name ? t.taskRef.name : t.name;
+            if (taskName === task.resources.inputs[0].from[0] || t.name === task.resources.inputs[0].from[0]) {
+              flag = i;
+            }
           }
         }
       }
       const nextToFlag = out[flag + 1] ? out[flag + 1] : null;
-      if (
-        nextToFlag &&
-        nextToFlag[0] &&
-        nextToFlag[0].resources &&
-        nextToFlag[0].resources.inputs &&
-        nextToFlag[0].resources.inputs[0] &&
-        nextToFlag[0].resources.inputs[0].from &&
-        nextToFlag[0].resources.inputs[0].from[0] &&
-        nextToFlag[0].resources.inputs[0].from[0] === task.resources.inputs[0].from[0]
-      ) {
+      if (nextToFlag && nextToFlag[0] && nextToFlag[0].resources && nextToFlag[0].resources.inputs && nextToFlag[0].resources.inputs[0] && nextToFlag[0].resources.inputs[0].from && nextToFlag[0].resources.inputs[0].from[0] && nextToFlag[0].resources.inputs[0].from[0] === task.resources.inputs[0].from[0]) {
         nextToFlag.push(task);
       } else {
         out.splice(flag + 1, 0, [task]);
@@ -211,23 +177,21 @@ export const getPipelineTasks = (
   });
 
   // Step 4: Push nodes with 'runAfter' dependencies and stack similar tasks in a stage
-  tasks.forEach((task) => {
+  tasks.forEach(task => {
     if (conditions.hasRunAfterDependency(task)) {
       let flag = out.length - 1;
       for (let i = 0; i < out.length; i++) {
         for (const t of out[i]) {
-          if (t.taskRef.name === task.runAfter[0] || t.name === task.runAfter[0]) {
-            flag = i;
+          if (t.taskRef) {
+            const taskName = t.taskRef.name ? t.taskRef.name : t.name;
+            if (taskName === task.runAfter[0] || t.name === task.runAfter[0]) {
+              flag = i;
+            }
           }
         }
       }
       const nextToFlag = out[flag + 1] ? out[flag + 1] : null;
-      if (
-        nextToFlag &&
-        nextToFlag[0].runAfter &&
-        nextToFlag[0].runAfter[0] &&
-        nextToFlag[0].runAfter[0] === task.runAfter[0]
-      ) {
+      if (nextToFlag && nextToFlag[0].runAfter && nextToFlag[0].runAfter[0] && nextToFlag[0].runAfter[0] === task.runAfter[0]) {
         nextToFlag.push(task);
       } else {
         out.splice(flag + 1, 0, [task]);
@@ -262,10 +226,7 @@ type CurrentPipelineStatus = {
 /**
  * Takes a pipeline and a series of matching pipeline runs and produces a current pipeline state.
  */
-export const constructCurrentPipeline = (
-  pipeline: Pipeline,
-  pipelineRuns: PipelineRun[],
-): CurrentPipelineStatus => {
+export const constructCurrentPipeline = (pipeline: Pipeline, pipelineRuns: PipelineRun[]): CurrentPipelineStatus => {
   if (!pipeline || !pipelineRuns || pipelineRuns.length === 0) {
     // Not enough data to build the current state
     return null;
@@ -297,19 +258,17 @@ export const constructCurrentPipeline = (
 export const getPipelineRunParams = (pipelineParams: PipelineParam[]): PipelineRunParam[] => {
   return (
     pipelineParams &&
-    pipelineParams.map((param) => ({
+    pipelineParams.map(param => ({
       name: param.name,
       value: param.default,
     }))
   );
 };
 
-export const getPipelineRunWorkspaces = (
-  pipelineWorkspaces: PipelineWorkspace[],
-): PipelineRunWorkspace[] => {
+export const getPipelineRunWorkspaces = (pipelineWorkspaces: PipelineWorkspace[]): PipelineRunWorkspace[] => {
   return (
     pipelineWorkspaces &&
-    pipelineWorkspaces.map((workspace) => ({
+    pipelineWorkspaces.map(workspace => ({
       name: workspace.name,
       ...workspace.data,
     }))
@@ -351,10 +310,7 @@ export const pipelineRunDuration = (run: PipelineRun): string => {
   return calculateRelativeTime(startTime, completionTime);
 };
 
-export const updateServiceAccount = (
-  secretName: string,
-  originalServiceAccount: ServiceAccountType,
-): Promise<ServiceAccountType> => {
+export const updateServiceAccount = (secretName: string, originalServiceAccount: ServiceAccountType): Promise<ServiceAccountType> => {
   const updatedServiceAccount = _.cloneDeep(originalServiceAccount);
   updatedServiceAccount.secrets = [...updatedServiceAccount.secrets, { name: secretName }];
   return k8sUpdate(ServiceAccountModel, updatedServiceAccount);
@@ -362,12 +318,12 @@ export const updateServiceAccount = (
 
 export const associateServiceAccountToSecret = (secret: SecretKind, namespace: string) => {
   k8sGet(ServiceAccountModel, PIPELINE_SERVICE_ACCOUNT, namespace)
-    .then((serviceAccount) => {
-      if (_.find(serviceAccount.secrets, (s) => s.name === secret.metadata.name) === undefined) {
+    .then(serviceAccount => {
+      if (_.find(serviceAccount.secrets, s => s.name === secret.metadata.name) === undefined) {
         updateServiceAccount(secret.metadata.name, serviceAccount);
       }
     })
-    .catch((err) => {
+    .catch(err => {
       errorModal({ error: err.message });
     });
 };
