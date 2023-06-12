@@ -63,7 +63,7 @@ export const WorkflowVisualizationTask: React.FC<WorkflowVisualizationTaskProp> 
       {
         // kind: referenceForModel(TaskModel),
         kind: 'Task',
-        name: task.taskRef.name ? task.taskRef.name : task.name,
+        name: task.taskRef?.name ? task.taskRef.name : task.name,
         namespace,
         prop: 'task',
       },
