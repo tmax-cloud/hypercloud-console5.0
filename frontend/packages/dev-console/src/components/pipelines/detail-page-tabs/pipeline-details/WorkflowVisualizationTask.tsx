@@ -54,7 +54,7 @@ export const WorkflowVisualizationTask: React.FC<WorkflowVisualizationTaskProp> 
       {
         // kind: referenceForModel(ClusterTaskModel),
         kind: 'ClusterTask',
-        name: task.taskRef.name ? task.taskRef.name : task.name,
+        name: task.taskRef?.name ? task.taskRef.name : task.name,
         prop: 'task',
       },
     ];

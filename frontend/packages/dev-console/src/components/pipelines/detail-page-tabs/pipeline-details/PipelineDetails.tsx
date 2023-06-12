@@ -17,7 +17,7 @@ const PipelineDetails: React.FC<PipelineDetailsProps> = ({ obj: pipeline, custom
     .filter((pipelineTask: PipelineTask) => !!pipelineTask.taskRef)
     .map(task => ({
       model: getResourceModelFromTaskKind(task.taskRef.kind),
-      name: task.taskRef.name ? task.taskRef.name : task.name,
+      name: task.taskRef?.name ? task.taskRef.name : task.name,
       displayName: task.name,
     }));
   return (
