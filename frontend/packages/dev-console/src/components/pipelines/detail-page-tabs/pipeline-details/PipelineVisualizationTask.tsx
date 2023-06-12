@@ -68,7 +68,7 @@ export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> 
       resources = [
         {
           kind: referenceForModel(ClusterTaskModel),
-          name: task.taskRef.name ? task.taskRef.name : task.name,
+          name: task.taskRef?.name ? task.taskRef.name : task.name,
           prop: 'task',
         },
       ];
@@ -76,7 +76,7 @@ export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> 
       resources = [
         {
           kind: referenceForModel(TaskModel),
-          name: task.taskRef.name ? task.taskRef.name : task.name,
+          name: task.taskRef?.name ? task.taskRef.name : task.name,
           namespace,
           prop: 'task',
         },
@@ -86,7 +86,7 @@ export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> 
     resources = [
       {
         kind: referenceForModel(TaskModel),
-        name: task.taskRef.name ? task.taskRef.name : task.name,
+        name: task.taskRef?.name ? task.taskRef.name : task.name,
         namespace,
         prop: 'task',
       },
