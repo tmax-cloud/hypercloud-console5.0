@@ -158,7 +158,7 @@ export const IntegrationConfigReducer = (integrationConfig: any): string => {
       }
     });
   }
-  return !!integrationConfig.status ? phase : NO_STATUS;
+  return integrationConfig.status ? phase : NO_STATUS;
 };
 
 export const InferenceServiceReducer = (inferenceService: any): string => {
@@ -237,22 +237,17 @@ export const HelmReleaseStatusReducer = (hr: any): string => {
 export const ServiceBindingStatusReducer = (sb: any): string => {
   if (sb.status) {
     for (const c of sb.status.conditions) {
-      if (c.type=="Ready") {
-        if (c.status=="True") {
-          return "Succeeded"
-        }
-        else if (c.status=="False") {
-          return "Failed"
-        }
-        else {
-          return "Unknown"
+      if (c.type == 'Ready') {
+        if (c.status == 'True') {
+          return 'Succeeded';
+        } else if (c.status == 'False') {
+          return 'Failed';
+        } else {
+          return 'Unknown';
         }
       }
     }
+  } else {
+    return 'Unknown';
   }
-  else {
-    return "Unknown"
-  }
-
-
-}
+};

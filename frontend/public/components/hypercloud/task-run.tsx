@@ -3,10 +3,10 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import { sortable } from '@patternfly/react-table';
 
-import { K8sResourceKind } from '../../module/k8s';
+import { K8sResourceKind, referenceForModel } from '../../module/k8s';
 import { DetailsPage, ListPage, Table, TableRow, TableData, RowFunction } from '../factory';
 import { Kebab, KebabAction, detailsPage, Timestamp, navFactory, ResourceKebab, ResourceLink, ResourceSummary, SectionHeading, viewYamlComponent } from '../utils';
-import { TaskRunModel } from '../../models';
+import { TaskRunModel, SecretModel } from '../../models';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { ResourceLabel } from '../../models/hypercloud/resource-plural';
@@ -67,7 +67,11 @@ const TaskRunTableRow: RowFunction<K8sResourceKind> = ({ obj: taskRun, index, ke
 
 const TaskRunDetails: React.FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
   const { t } = useTranslation();
-
+  const secretObj = taskRun.spec?.workspaces?.map(function(data) {
+    if (data.secret) {
+      return data;
+    }
+  });
   return (
     <>
       <div className="co-m-pane__body">
@@ -75,6 +79,16 @@ const TaskRunDetails: React.FC<TaskRunDetailsProps> = ({ obj: taskRun }) => {
         <div className="row">
           <div className="col-lg-6">
             <ResourceSummary resource={taskRun} />
+          </div>
+          <div className="col-lg-6">
+            {secretObj && secretObj[0] && (
+              <dl>
+                <dt>{ResourceLabel(SecretModel, t)}</dt>
+                <dd>
+                  <ResourceLink kind={referenceForModel(SecretModel)} name={secretObj[0].secret.secretName} namespace={taskRun.metadata.namespace} />
+                </dd>
+              </dl>
+            )}
           </div>
         </div>
       </div>

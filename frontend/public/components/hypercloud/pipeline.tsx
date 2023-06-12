@@ -81,10 +81,10 @@ export const getResourceModelFromTaskKind = (kind: string): K8sKind => (kind ===
 
 export const PipelineDetailsList: React.FC<PipelineDetailsListProps> = ({ ds: pipeline }) => {
   const taskLinks = pipeline.spec.tasks
-    .filter((pipelineTask: PipelineTask) => !!pipelineTask.taskRef)
+    ?.filter((pipelineTask: PipelineTask) => !!pipelineTask.taskRef)
     .map(task => ({
       model: getResourceModelFromTaskKind(task.taskRef.kind),
-      name: task.taskRef.name,
+      name: task.taskRef.name ? task.taskRef.name : task.name,
       displayName: task.name,
     }));
 

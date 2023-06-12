@@ -45,59 +45,48 @@ interface PipelineVisualizationTaskProp {
   selected?: boolean;
 }
 
-export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> = ({
-  pipelineRunName,
-  task,
-  namespace,
-  pipelineRunStatus,
-  disableTooltip,
-  selected,
-}) => {
+export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> = ({ pipelineRunName, task, namespace, pipelineRunStatus, disableTooltip, selected }) => {
   const taskStatus = task.status || {
     duration: '',
     reason: runStatus.Idle,
   };
   if (pipelineRunStatus === runStatus.Failed || pipelineRunStatus === runStatus.Cancelled) {
-    if (
-      task.status &&
-      task.status.reason !== runStatus.Succeeded &&
-      task.status.reason !== runStatus.Completed &&
-      task.status.reason !== runStatus.Failed
-    ) {
+    if (task.status && task.status.reason !== runStatus.Succeeded && task.status.reason !== runStatus.Completed && task.status.reason !== runStatus.Failed) {
       taskStatus.reason = runStatus.Cancelled;
     }
   }
 
-  const taskComponent = (
-    <TaskComponent
-      pipelineRunName={pipelineRunName}
-      name={task.name || ''}
-      namespace={namespace}
-      status={taskStatus}
-      isPipelineRun={!!pipelineRunStatus}
-      disableTooltip={disableTooltip}
-      selected={selected}
-    />
-  );
+  const taskComponent = <TaskComponent pipelineRunName={pipelineRunName} name={task.name || ''} namespace={namespace} status={taskStatus} isPipelineRun={!!pipelineRunStatus} disableTooltip={disableTooltip} selected={selected} />;
 
   if (disableTooltip) {
     return taskComponent;
   }
 
-  let resources;
-  if (task.taskRef.kind === ClusterTaskModel.kind) {
-    resources = [
-      {
-        kind: referenceForModel(ClusterTaskModel),
-        name: task.taskRef.name,
-        prop: 'task',
-      },
-    ];
+  let resources = [];
+  if (task.taskRef) {
+    if (task.taskRef.kind === ClusterTaskModel.kind) {
+      resources = [
+        {
+          kind: referenceForModel(ClusterTaskModel),
+          name: task.taskRef.name ? task.taskRef.name : task.name,
+          prop: 'task',
+        },
+      ];
+    } else {
+      resources = [
+        {
+          kind: referenceForModel(TaskModel),
+          name: task.taskRef.name ? task.taskRef.name : task.name,
+          namespace,
+          prop: 'task',
+        },
+      ];
+    }
   } else {
     resources = [
       {
         kind: referenceForModel(TaskModel),
-        name: task.taskRef.name,
+        name: task.taskRef.name ? task.taskRef.name : task.name,
         namespace,
         prop: 'task',
       },
@@ -105,23 +94,12 @@ export const PipelineVisualizationTask: React.FC<PipelineVisualizationTaskProp> 
   }
   return <Firehose resources={resources}>{taskComponent}</Firehose>;
 };
-const TaskComponent: React.FC<TaskProps> = ({
-  pipelineRunName,
-  namespace,
-  task,
-  status,
-  name,
-  isPipelineRun,
-  disableTooltip,
-  selected,
-}) => {
+const TaskComponent: React.FC<TaskProps> = ({ pipelineRunName, namespace, task, status, name, isPipelineRun, disableTooltip, selected }) => {
   const stepList = _.get(task, ['data', 'spec', 'steps'], _.get(status, ['steps'], []));
-  const stepStatusList: StepStatus[] = stepList.map((step) => createStepStatus(step, status));
+  const stepStatusList: StepStatus[] = stepList.map(step => createStepStatus(step, status));
   const showStatusState: boolean = isPipelineRun && !!status && !!status.reason;
   const visualName = name || _.get(task, ['metadata', 'name'], '');
-  const path = pipelineRunName
-    ? `${resourcePathFromModel(PipelineRunModel, pipelineRunName, namespace)}/logs/${name}`
-    : undefined;
+  const path = pipelineRunName ? `${resourcePathFromModel(PipelineRunModel, pipelineRunName, namespace)}/logs/${name}` : undefined;
 
   let taskPill = (
     <div className={cx('odc-pipeline-vis-task__content', { 'is-selected': selected })}>
@@ -133,26 +111,12 @@ const TaskComponent: React.FC<TaskProps> = ({
         <div className="odc-pipeline-vis-task__title">{visualName}</div>
         {showStatusState && <TaskComponentTaskStatus steps={stepStatusList} />}
       </div>
-      {isPipelineRun && (
-        <div className="odc-pipeline-vis-task__status">
-          {showStatusState && <ColoredStatusIcon status={status.reason} height={18} width={18} />}
-        </div>
-      )}
+      {isPipelineRun && <div className="odc-pipeline-vis-task__status">{showStatusState && <ColoredStatusIcon status={status.reason} height={18} width={18} />}</div>}
     </div>
   );
   if (!disableTooltip) {
     taskPill = (
-      <Tooltip
-        position="bottom"
-        enableFlip={false}
-        content={
-          <PipelineVisualizationStepList
-            isSpecOverview={!isPipelineRun}
-            taskName={visualName}
-            steps={stepStatusList}
-          />
-        }
-      >
+      <Tooltip position="bottom" enableFlip={false} content={<PipelineVisualizationStepList isSpecOverview={!isPipelineRun} taskName={visualName} steps={stepStatusList} />}>
         {taskPill}
       </Tooltip>
     );
@@ -164,7 +128,5 @@ const TaskComponent: React.FC<TaskProps> = ({
       {taskPill}
     </>
   );
-  return (
-    <div className="odc-pipeline-vis-task">{path ? <Link to={path}>{visTask}</Link> : visTask}</div>
-  );
+  return <div className="odc-pipeline-vis-task">{path ? <Link to={path}>{visTask}</Link> : visTask}</div>;
 };
