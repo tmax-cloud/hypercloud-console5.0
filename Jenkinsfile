@@ -49,9 +49,9 @@ spec:
 
     GUIDE_URL = "https://github.com/tmax-cloud/install-console/blob/5.0/README.md"
 
-    USER_TOKEN = "jinsoo-access-token"
-    USER_NAME = "jinsoo-youn"
-    USER_EMAIL = "jinsoo_youn@tmax.co.kr"
+    USER_TOKEN = "hyowook-access-token"
+    USER_NAME = "hyowook-park"
+    USER_EMAIL = "hyowook_park@tmax.co.kr"
   }
   stages {
     // When using SCM, the checkout stage can be completely omitted 
@@ -173,7 +173,7 @@ spec:
     success {
       sh "echo SUCCESSFUL"
       emailext (
-        to: "jinsoo_youn@tmax.co.kr",
+        to: "hyowook_park@tmax.co.kr",
         subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
         body:  """<p>SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
             <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
@@ -183,7 +183,7 @@ spec:
     failure {
       sh "echo FAILED"
       emailext (
-        to: "jinsoo_youn@tmax.co.kr",
+        to: "hyowook_park@tmax.co.kr",
         subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
         body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
           <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
